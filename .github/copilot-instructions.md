@@ -97,6 +97,14 @@ The following are only written when `persistData === true`:
 - Shift notes (`shiftCompanion_shiftNotes`)
 - Handover notes (`shiftCompanion_handoverNotes`)
 - Lone-worker safety check-in timestamp (`shiftCompanion_lastCheckIn`)
+- Night Log entries for the current shift (`shiftCompanion_nightLogEntries`)
+- Checklist tick state (`shiftCompanion_checklistState`)
+- Night Audit step state (`shiftCompanion_auditState`)
+- Daily Info Board data (`shiftCompanion_boardData`)
+
+All tool data uses the unified `shiftCompanion_` namespace. No tool may use its own
+independent localStorage key (e.g. the standalone `dailyBoardData` key from `board.html`
+must not be used in the unified app).
 
 #### Sidebar "Persist Data" toggle
 - Rendered in the sidebar below the nav as a pill toggle (`.save-toggle` / `.toggle`).
@@ -110,7 +118,7 @@ The following are only written when `persistData === true`:
 - A **End Shift** button triggers a confirmation modal before:
   1. Saving the shift summary to history (always).
   2. Clearing all session-data keys from `localStorage`.
-  3. Resetting all in-memory state (notes, checklist ticks, audit state). Night Log entries are managed within the Night Log section and are cleared separately via its own end-shift flow.
+  3. Resetting all in-memory state (notes, checklist ticks, audit state, Night Log entries, board data).
 - Shift history and profile data are NOT cleared.
 
 ### Accessibility
@@ -217,8 +225,8 @@ migrate into each section.
 | Section slug | Display title | Source section | Key features to preserve |
 |---|---|---|---|
 | `dashboard` | Night Dashboard | `§ section-dashboard` | Live date/time clock (topbar), stat cards (checklist %, incidents, streak), quick-action cards, lone-worker safety check-in button, incoming handover banner |
-| `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | Pre/During/Post tabs, all checklist items (merged & deduplicated), progress bar, `required-before-continue` highlights, handover-sheet print view |
-| `nightaudit` | Night Audit | `§ section-nightaudit` | Step-by-step audit tracker, checkbox per step, progress bar, notes per step, reset button |
+| `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | Pre/During/Post tabs; Pre-Shift items from `nightsTicklist.htm` `preAuditTasks`; Post-Shift items from `nightsTicklist.htm` `rawTasks`; items from `§ section-checklist` merged and deduplicated; progress bar; `required-before-continue` highlights; day-of-week / last-night-of-month badges; handover-sheet print view. See § 7 for full merge guide. |
+| `nightaudit` | Night Audit | `§ section-nightaudit` | Step-by-step audit tracker (procedure steps only — not checklist items); checkbox per step; progress bar; notes per step; reset button. Source: `hotelcompanion_enhanced.html § section-nightaudit`. |
 | `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel. **Do not add a separate incident log here.** All incident logging — including quick in-shift entries — is handled exclusively by the Night Log tool (see Tools section below). The incident mini-log that exists in `hotelcompanion_enhanced.html § section-notes` is a duplicate of Night Log and must not be carried forward. |
 | `motivation` | Motivation | `§ section-motivation` | Quote carousel (8 quotes, "Next Quote" button), excellence tips grid |
 | `ai` | AI Coach | `§ section-ai` | Dual-mode AI chat (see § 8), suggestion chips, API key prompt/connect flow, clear chat button |
@@ -232,11 +240,11 @@ items by a divider and a `TOOLS` label in `var(--muted)` / `DM Mono`).
 
 | Section slug | Display title | Source file | Key features to preserve |
 |---|---|---|---|
-| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete, JSON export, end-shift flow. **This is the sole incident logger for the entire app.** *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
+| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete, JSON export. **This is the sole incident logger for the entire app.** Its entries are session data cleared by the main End Shift flow (no separate end-shift button inside this section). *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
 | `reports` | Monthly Report | `NightLogMonthlyReport.html` | Multi-file JSON drop/import, stat grid, bar charts (by category/floor/severity/all-clear coverage), shift summary table, filterable all-entries table. **Nice-to-have — only implement if Night Log JSON exports are available in the chosen delivery version; mark as optional in the build.** |
 | `checkin` | Group Check-in | `groupcheckinlist.html` | Logo upload, date field, group name, guest list with add/remove rows, bulk name import modal, portrait/landscape toggle, print |
 | `signs` | Sign Generator | `signGenerator.html` | A4/A3 size selector, portrait/landscape toggle, background colour palette + custom image + overlay slider, logo upload, body text + colour, sub-body text + colour, live preview, print |
-| `board` | Daily Info Board | `board.html` | Date selector (auto-populates 7-day rolling column headers), 7-day stats grid (rooms sold, guests in house, occupancy %, room revenue, total revenue, ADR, RevPAR, arrivals, departures, F&B covers), VIP guests list, special notes/info panel, reset button, auto-save to `localStorage` (`dailyBoardData`), print (landscape A3-style, hides UI chrome) |
+| `board` | Daily Info Board | `board.html` | Date selector (auto-populates 7-day rolling column headers), 7-day stats grid (rooms sold, guests in house, occupancy %, room revenue, total revenue, ADR, RevPAR, arrivals, departures, F&B covers), VIP guests list, special notes/info panel, reset button, print (landscape A3-style, hides UI chrome). Board data is saved under `shiftCompanion_boardData` via the unified persist toggle — the standalone `dailyBoardData` key must not be used. |
 
 ### Persistent UI (not sections)
 
@@ -320,8 +328,31 @@ create policy "Authenticated users can upload images"
 `nightsTicklist.htm` and `hotelcompanion_enhanced.html § section-checklist` overlap.
 When merging:
 
-1. **Deduplicate** items that are semantically identical.
-2. **Categorise** all items into the three tabs: Pre-Shift / During Shift / Post-Shift.
+### Understanding `nightsTicklist.htm` structure
+
+`nightsTicklist.htm` contains **two distinct JavaScript arrays** that map to different
+sections of the unified app:
+
+| Array in `nightsTicklist.htm` | Count | Maps to |
+|---|---|---|
+| `preAuditTasks` | 17 items | **Pre-Shift / During-Shift Checklist** — tasks performed on arrival and up to (but not including) running the night audit. The final task ("Run Night Audit at 0301") is the handoff point to the Night Audit Tracker. |
+| `rawTasks` | 38 items | **Post-Shift Checklist** — tasks performed after the audit has run (reports, banking, handover, etc.). |
+
+The **Night Audit Tracker** section (`§ section-nightaudit` in `hotelcompanion_enhanced.html`)
+is the step-by-step audit *procedure* (post room charges, reconcile payments, print
+reports, etc.). These are **not** from `nightsTicklist.htm` — they come from the
+existing `§ section-nightaudit` step list. Do not mix audit procedure steps into the
+checklist, and do not mix checklist items into the audit tracker.
+
+The "Run Night Audit" item at the end of `preAuditTasks` should appear in the
+Pre-Shift checklist as a highlight card or call-to-action that navigates the user to
+the Night Audit Tracker section — not as a plain checkbox.
+
+### Merge rules
+
+1. **Deduplicate** items that are semantically identical across both source files.
+2. **Categorise** all items into the three tabs: Pre-Shift / During Shift / Post-Shift,
+   following the mapping above.
 3. Keep the `required-before-continue` (yellow highlight) behaviour for critical items
    from `nightsTicklist.htm`.
 4. Keep the handover-sheet print view from `nightsTicklist.htm` (the
@@ -331,6 +362,9 @@ When merging:
    unified feature.
 5. Apply the design system (§ 2) — replace Bootstrap classes with custom CSS that
    matches the dark-gold theme.
+6. Day-of-week filtering (Mon-only, Sat-only, etc.) and "last night of month" flags
+   from `nightsTicklist.htm` must be preserved. Items that don't apply today should
+   be visually greyed out (not hidden), with the day restriction shown as a badge.
 
 ---
 
@@ -445,6 +479,8 @@ the lone-worker reality — escalating to a duty manager is always valid.
 Before considering the build complete, verify all of the following:
 
 - [ ] All seven source files' features are represented in the output.
+- [ ] All tool data uses the `shiftCompanion_` localStorage namespace — no tool has its own independent key (e.g. no `dailyBoardData`).
+- [ ] No tool has its own standalone "end shift" or "clear data" flow — all session data is cleared by the single main End Shift action.
 - [ ] `localStorage` persist toggle defaults to **OFF**; session data is not saved unless toggled on.
 - [ ] Toggling persistence ON immediately saves current session data.
 - [ ] Profile (name/role/shift) and API key are always saved regardless of toggle state.
@@ -457,6 +493,7 @@ Before considering the build complete, verify all of the following:
 - [ ] AI system prompt includes live shift context (staff name, incidents, checklist %).
 - [ ] Night Log is the sole incident logger; no separate incident list exists in the Notes section.
 - [ ] Night Log JSON export produces a valid file. *(If Monthly Report is implemented, verify it can re-import the same JSON schema; otherwise skip.)*
+- [ ] *(Version A only)* `hotelcompanion_items.js` loads correctly and populates both the Checklist and Night Audit Tracker; editing the file's arrays changes the displayed items without touching the main HTML.
 - [ ] The Sign Generator prints correctly at A4 and A3.
 - [ ] The Group Check-in list prints correctly in portrait and landscape.
 - [ ] Tools section in sidebar is visually separated from core nav items.
@@ -474,6 +511,13 @@ Before considering the build complete, verify all of the following:
 ### Version A
 - [ ] `hotelcompanion_suite.html` — single self-contained file with all core sections
       plus Tools group (Night Log, Monthly Report *(nice-to-have)*, Group Check-in, Sign Generator, Daily Info Board)
+- [ ] `hotelcompanion_items.js` — **editable configuration file** containing the
+      Pre-Shift checklist items, Post-Shift checklist items, and Night Audit Tracker
+      steps as plain JavaScript arrays. The main HTML file loads this via `<script src="hotelcompanion_items.js">`.
+      Staff can customise checklist and audit content by editing only this file —
+      no changes to the main HTML are required. A `hotelcompanion_items.example.js`
+      (committed to the repo) shows the default arrays; the working `hotelcompanion_items.js`
+      is added to `.gitignore` so property-specific content is not committed.
 
 ### Version B
 - [ ] `index.html` — dashboard / home
