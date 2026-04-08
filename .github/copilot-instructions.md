@@ -22,11 +22,12 @@ and to ship a production-ready result in one of the two delivery formats describ
 | File | Current purpose |
 |------|-----------------|
 | `hotelcompanion_enhanced.html` | **Main shell.** Dashboard, Shift Checklist (Pre/During/Post), Night Audit Tracker, Notes & Shift Handover, Incident Log, AI Coach chat (keyword-driven), Motivation/Tips, Shift History. This is the design and UX reference. |
-| `NightLog.html` | Detailed incident/issue logger with floor-walk tracking, image capture, category/severity tagging, JSON export/import, WhatsApp & email share. |
-| `NightLogMonthlyReport.html` | Monthly analytics — loads multiple JSON shift exports, renders bar charts, shift summary table, filterable entry list. |
+| `NightLog.html` | Detailed incident/issue logger with floor-walk tracking, image capture, category/severity tagging, JSON export. |
+| `NightLogMonthlyReport.html` | **Nice-to-have.** Monthly analytics — loads multiple JSON shift exports, renders bar charts, shift summary table, filterable entry list. Only relevant if JSON exports from Night Log are available; treat as optional/lower-priority. |
 | `groupcheckinlist.html` | Print-ready group check-in list — logo upload, bulk name import, portrait/landscape toggle. |
 | `signGenerator.html` | ISO sign generator — A4/A3, portrait/landscape, background image/colour, logo, body/sub-body text, print. |
 | `nightsTicklist.htm` | Bootstrap-based front-office nights checklist with validation, handover sheet, auto-save to `localStorage`. |
+| `board.html` | Print-ready Daily Information Board — 7-day rolling occupancy stats grid (rooms sold, guests in house, occupancy %, room revenue, total revenue, ADR, RevPAR, arrivals, departures, F&B covers), VIP guests list, special notes panel, auto-saves to `localStorage` (`dailyBoardData`), landscape A3-style layout, print button. |
 
 ---
 
@@ -219,7 +220,7 @@ migrate into each section.
 | `dashboard` | Night Dashboard | `§ section-dashboard` | Live date/time clock (topbar), stat cards (checklist %, incidents, streak), quick-action cards, lone-worker safety check-in button, incoming handover banner |
 | `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | Pre/During/Post tabs, all checklist items (merged & deduplicated), progress bar, `required-before-continue` highlights, handover-sheet print view |
 | `nightaudit` | Night Audit | `§ section-nightaudit` | Step-by-step audit tracker, checkbox per step, progress bar, notes per step, reset button |
-| `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel, incident mini-log (guest/room, type, description, status, timestamp) |
+| `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel, incident mini-log (guest/room, type, description, status, timestamp). **Important:** this incident log is the lightweight quick in-shift log — no floor, severity, or image fields. It complements the full Night Log tool (see Tools section below) rather than replacing it. Do not treat them as duplicates or merge them into one. |
 | `motivation` | Motivation | `§ section-motivation` | Quote carousel (8 quotes, "Next Quote" button), excellence tips grid |
 | `ai` | AI Coach | `§ section-ai` | Dual-mode AI chat (see § 8), suggestion chips, API key prompt/connect flow, clear chat button |
 | `history` | Shift History | `§ section-history` | Expandable shift entries, aggregate stats (shifts completed, avg checklist %, total incidents, most common incident type), clear history, load handover from history |
@@ -232,10 +233,11 @@ items by a divider and a `TOOLS` label in `var(--muted)` / `DM Mono`).
 
 | Section slug | Display title | Source file | Key features to preserve |
 |---|---|---|---|
-| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name, JSON import), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete/share, JSON export/import, WhatsApp & email share, end-shift flow |
-| `reports` | Monthly Report | `NightLogMonthlyReport.html` | Multi-file JSON drop/import, stat grid, bar charts (by category/floor/severity/all-clear coverage), shift summary table, filterable all-entries table |
+| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete, JSON export, end-shift flow. **This is the full operational incident logger — distinct from the lightweight incident mini-log in the Notes section. Do not merge or remove either.** *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
+| `reports` | Monthly Report | `NightLogMonthlyReport.html` | Multi-file JSON drop/import, stat grid, bar charts (by category/floor/severity/all-clear coverage), shift summary table, filterable all-entries table. **Nice-to-have — only implement if Night Log JSON exports are available in the chosen delivery version; mark as optional in the build.** |
 | `checkin` | Group Check-in | `groupcheckinlist.html` | Logo upload, date field, group name, guest list with add/remove rows, bulk name import modal, portrait/landscape toggle, print |
 | `signs` | Sign Generator | `signGenerator.html` | A4/A3 size selector, portrait/landscape toggle, background colour palette + custom image + overlay slider, logo upload, body text + colour, sub-body text + colour, live preview, print |
+| `board` | Daily Info Board | `board.html` | Date selector (auto-populates 7-day rolling column headers), 7-day stats grid (rooms sold, guests in house, occupancy %, room revenue, total revenue, ADR, RevPAR, arrivals, departures, F&B covers), VIP guests list, special notes/info panel, reset button, auto-save to `localStorage` (`dailyBoardData`), print (landscape A3-style, hides UI chrome) |
 
 ### Persistent UI (not sections)
 
@@ -337,7 +339,10 @@ When merging:
 3. Keep the `required-before-continue` (yellow highlight) behaviour for critical items
    from `nightsTicklist.htm`.
 4. Keep the handover-sheet print view from `nightsTicklist.htm` (the
-   `.handover-page` layout).
+   `.handover-page` layout) — this maps to the handover section of
+   `hotelcompanion_enhanced.html` (`§ section-notes` handover panel). Merge them
+   so the printed handover sheet and the on-screen handover notes textarea are one
+   unified feature.
 5. Apply the design system (§ 2) — replace Bootstrap classes with custom CSS that
    matches the dark-gold theme.
 
@@ -453,7 +458,7 @@ the lone-worker reality — escalating to a duty manager is always valid.
 
 Before considering the build complete, verify all of the following:
 
-- [ ] All six source files' features are represented in the output.
+- [ ] All seven source files' features are represented in the output.
 - [ ] `localStorage` persist toggle defaults to **OFF**; session data is not saved unless toggled on.
 - [ ] Toggling persistence ON immediately saves current session data.
 - [ ] Profile (name/role/shift) and API key are always saved regardless of toggle state.
@@ -464,8 +469,8 @@ Before considering the build complete, verify all of the following:
 - [ ] AI Coach Smart Defaults mode works with no API key (keyword match, 900 ms delay).
 - [ ] AI Coach Live mode works when a valid Anthropic API key is entered.
 - [ ] AI system prompt includes live shift context (staff name, incidents, checklist %).
-- [ ] The Night Log JSON export produces a valid file that can be re-imported by the
-      Monthly Report tool (same JSON schema as `NightLog.html`).
+- [ ] Night Log section and Notes section incident log coexist as separate, complementary features — Night Log is the full operational logger; Notes incident log is the lightweight quick in-shift log. Neither has been removed or merged into the other.
+- [ ] Night Log JSON export produces a valid file. *(If Monthly Report is implemented, verify it can re-import the same JSON schema; otherwise skip.)*
 - [ ] The Sign Generator prints correctly at A4 and A3.
 - [ ] The Group Check-in list prints correctly in portrait and landscape.
 - [ ] Tools section in sidebar is visually separated from core nav items.
@@ -482,7 +487,7 @@ Before considering the build complete, verify all of the following:
 
 ### Version A
 - [ ] `hotelcompanion_suite.html` — single self-contained file with all core sections
-      plus Tools group (Night Log, Monthly Report, Group Check-in, Sign Generator)
+      plus Tools group (Night Log, Monthly Report *(nice-to-have)*, Group Check-in, Sign Generator, Daily Info Board)
 
 ### Version B
 - [ ] `index.html` — dashboard / home
@@ -493,9 +498,10 @@ Before considering the build complete, verify all of the following:
 - [ ] `ai.html` — AI Coach / Aria (separate from motivation)
 - [ ] `history.html` — shift history
 - [ ] `nightlog.html` — night log (NightLog.html revamp) — Tools group
-- [ ] `reports.html` — monthly report (NightLogMonthlyReport.html revamp) — Tools group
+- [ ] `reports.html` — monthly report (NightLogMonthlyReport.html revamp) — Tools group *(nice-to-have; only include if Night Log exports JSON)*
 - [ ] `checkin.html` — group check-in (groupcheckinlist.html revamp) — Tools group
 - [ ] `signs.html` — sign generator (signGenerator.html revamp) — Tools group
+- [ ] `board.html` — daily information board (board.html revamp) — Tools group
 - [ ] `login.html` — magic-link auth page
 - [ ] `config.example.js` — Supabase config template
 - [ ] `js/nav.js` — shared sidebar renderer (core nav + tools divider)
@@ -611,5 +617,6 @@ const sectionTitles = {
   reports:     'MONTHLY REPORT',
   checkin:     'GROUP CHECK-IN',
   signs:       'SIGN GENERATOR',
+  board:       'DAILY INFO BOARD',
 };
 ```
