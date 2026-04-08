@@ -8,6 +8,25 @@
 
 ---
 
+## 0. Confirmed Build Decisions
+
+> These decisions were confirmed through agent–user discussion on 8 April 2026.
+> They supersede any **[AGENT DECISION]** placeholders in the sections below.
+
+| Decision | Choice | Rationale |
+|---|---|---|
+| **Delivery Version** | **Version A** — Single self-contained HTML file | Tool runs from OneDrive sync folder via `file://` on company PCs; no server or hosting required |
+| **Deployment** | OneDrive shared folder, opened locally (`file://` protocol) | Multiple company systems on a network; OneDrive keeps the file in sync centrally |
+| **AI Coach mode** | **Smart Defaults only** — no external API calls | `file://` blocks CORS for external APIs; offline-first requirement; scripted responses are more reliable and accurate for hospitality scenarios than a small LLM |
+| **Knowledge source** | PDF night operations manual → build-time extraction via `hotelcompanion_editor.html` | Manual is a digital Word-exported PDF (text-selectable, has TOC, embedded screenshots) — pdf.js can extract all procedural text cleanly |
+| **AI scripts file** | External `hotelcompanion_scripts.js` (gitignored) loaded from the same OneDrive folder | Allows non-technical managers to update AI Coach scripts without touching app code |
+| **Editor scope** | `hotelcompanion_editor.html` expanded to **4 tabs**: Pre-Audit, Post-Audit, Night Audit Steps, AI Scripts | Keeps all content editing in one file; AI Scripts tab includes PDF import via pdf.js |
+| **Authentication** | Anonymous — Windows/system login acts as gatekeeper | No per-user accounts needed at this stage |
+| **localStorage** | Per-device only (no cross-device sync) | Each company PC manages its own session; shared terminal model |
+| **Hardware target** | Dell / Intel Core i5-14500 (14 cores / 16 GB RAM) | Modern hotel terminals; JavaScript-heavy features are viable |
+
+---
+
 ## 1. Project Overview
 
 The **Night Receptionist Companion Suite** is a set of browser-based tools for hotel
@@ -22,7 +41,7 @@ and to ship a production-ready result in one of the two delivery formats describ
 | File | Current purpose |
 |------|-----------------|
 | `hotelcompanion_enhanced.html` | **Main shell.** Dashboard, Shift Checklist (Pre/During/Post), Night Audit Tracker, Notes & Shift Handover, Incident Log, AI Coach chat (keyword-driven), Motivation/Tips, Shift History. This is the design and UX reference. |
-| `NightLog.html` | Detailed incident/issue logger with floor-walk tracking, image capture, category/severity tagging, JSON export. |
+| `NightLog.html` | Detailed incident/issue logger with floor-walk tracking, photo attachment (file picker), category/severity tagging, JSON export. |
 | `NightLogMonthlyReport.html` | **Nice-to-have.** Monthly analytics — loads multiple JSON shift exports, renders bar charts, shift summary table, filterable entry list. Only relevant if JSON exports from Night Log are available; treat as optional/lower-priority. |
 | `groupcheckinlist.html` | Print-ready group check-in list — logo upload, bulk name import, portrait/landscape toggle. |
 | `signGenerator.html` | ISO sign generator — A4/A3, portrait/landscape, background image/colour, logo, body/sub-body text, print. |
@@ -86,7 +105,6 @@ Saving shift data to `localStorage` is **opt-in and off by default**.
 The following are written to `localStorage` unconditionally because they are needed
 across sessions and page reloads:
 - Staff profile — name, role, shift type (`shiftCompanion_staffName`, `…staffRole`, `…staffShift`)
-- Anthropic API key (`shiftCompanion_apiKey`)
 - Persist-toggle state itself (`shiftCompanion_persist`)
 - Shift history log (`shiftCompanion_history`) — needed for the History section
 - Incoming handover text (`shiftCompanion_pendingHandover`) — passed between shifts
@@ -134,8 +152,7 @@ must not be used in the unified app).
 - Load Google Fonts via `<link rel="preconnect">` + `<link rel="stylesheet">`.
 - Hotel logo: use `hotelLogo.jpg` / `hotelLogo.ico` (already in repo root). Provide
   a fallback `onerror` handler that hides the `<img>` gracefully.
-- No other external CDN dependencies except Google Fonts and (for the hosted version
-  only) the chosen backend SDK.
+- No other external CDN dependencies except Google Fonts. No external API calls are made from the main app (`hotelcompanion_suite.html`). The editor (`hotelcompanion_editor.html`) may reference pdf.js via CDN for the PDF import feature — this is acceptable as the editor is a manager tool, not a shift-time tool.
 
 ### Printing
 - Each tool that has print functionality (`groupcheckinlist`, `signGenerator`,
@@ -144,27 +161,24 @@ must not be used in the unified app).
 
 ---
 
-## 4. Delivery Versions — [AGENT DECISION]
+## 4. Delivery Versions
 
-**Before writing any code, choose one of the two versions below.** Record your decision
-and brief rationale in a comment block at the top of every file you create, e.g.:
+**CONFIRMED DECISION: Version A.** See § 0 for rationale.
+
+Record this in a comment block at the top of every file you create:
 
 ```html
 <!--
-  DELIVERY VERSION: [A or B]
-  RATIONALE: <one sentence>
+  DELIVERY VERSION: A
+  RATIONALE: Single file distributed via OneDrive sync folder, opened via file:// on company PCs. Offline-first, no server required.
 -->
 ```
 
+Version B documentation is retained below for reference only. **Do not build Version B.**
+
 ---
 
-### Version A — Single Self-Contained HTML File
-
-**When to choose Version A:**
-- Simplicity is the priority.
-- The tool will be used offline or on a restricted network.
-- No backend or hosting budget is available.
-- The operator wants a zero-dependency, email-or-USB-distributable file.
+### Version A — Single Self-Contained HTML File ✅ CONFIRMED
 
 **Build rules:**
 1. Produce **one file**: `hotelcompanion_suite.html`.
@@ -179,7 +193,6 @@ and brief rationale in a comment block at the top of every file you create, e.g.
    via the sidebar "Persist Data" toggle (see § 3).
 7. Export/import must use the File System Access API (`showSaveFilePicker`) with a
    fallback `<a download>` for browsers that do not support it.
-8. Target file size: under 600 KB (HTML + inlined assets, excluding embedded user images).
 
 ---
 
@@ -231,11 +244,11 @@ migrate into each section.
 | Section slug | Display title | Source section | Key features to preserve |
 |---|---|---|---|
 | `dashboard` | Night Dashboard | `§ section-dashboard` | Live date/time clock (topbar), stat cards (checklist %, incidents, streak), quick-action cards, lone-worker safety check-in button, incoming handover banner |
-| `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | Pre/During/Post tabs; Pre-Shift items from `nightsTicklist.htm` `preAuditTasks`; Post-Shift items from `nightsTicklist.htm` `rawTasks`; items from `§ section-checklist` merged and deduplicated; progress bar; `required-before-continue` highlights; day-of-week / last-night-of-month badges; handover-sheet print view. See § 7 for full merge guide. |
+| `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | **Pre-Audit** and **Post-Audit** tabs (two tabs only — no "During Shift" tab); Pre-Audit items from `nightsTicklist.htm` `preAuditTasks`; Post-Audit items from `nightsTicklist.htm` `rawTasks`; items from `§ section-checklist` merged and deduplicated; progress bar; `required-before-continue` highlights; day-of-week / last-night-of-month badges; handover-sheet print view. See § 7 for full merge guide. |
 | `nightaudit` | Night Audit | `§ section-nightaudit` | Step-by-step audit tracker (procedure steps only — not checklist items); checkbox per step; progress bar; notes per step; reset button. Source: `hotelcompanion_enhanced.html § section-nightaudit`. |
 | `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel. **Do not add a separate incident log here.** All incident logging — including quick in-shift entries — is handled exclusively by the Night Log tool (see Tools section below). The incident mini-log that exists in `hotelcompanion_enhanced.html § section-notes` is a duplicate of Night Log and must not be carried forward. |
 | `motivation` | Motivation | `§ section-motivation` | Quote carousel (8 quotes, "Next Quote" button), excellence tips grid |
-| `ai` | AI Coach | `§ section-ai` | Dual-mode AI chat (see § 8), suggestion chips, API key prompt/connect flow, clear chat button |
+| `ai` | AI Coach | `§ section-ai` | Smart Defaults keyword chat (see § 8), suggestion chips, status badge (Property Scripts / Smart Defaults), clear chat button |
 | `history` | Shift History | `§ section-history` | Expandable shift entries, aggregate stats (shifts completed, avg checklist %, total incidents, most common incident type), clear history, load handover from history |
 
 ### Tools section (new — from standalone HTML files)
@@ -246,11 +259,11 @@ items by a divider and a `TOOLS` label in `var(--muted)` / `DM Mono`).
 
 | Section slug | Display title | Source file | Key features to preserve |
 |---|---|---|---|
-| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete, JSON export. **This is the sole incident logger for the entire app.** Its entries are session data cleared by the main End Shift flow (no separate end-shift button inside this section). *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
+| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, photo attachment via file picker), entry list with edit/delete, JSON export. **This is the sole incident logger for the entire app.** Its entries are session data cleared by the main End Shift flow (no separate end-shift button inside this section). *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
 | `reports` | Monthly Report | `NightLogMonthlyReport.html` | Multi-file JSON drop/import, stat grid, bar charts (by category/floor/severity/all-clear coverage), shift summary table, filterable all-entries table. **Nice-to-have — only implement if Night Log JSON exports are available in the chosen delivery version; mark as optional in the build.** |
 | `checkin` | Group Check-in | `groupcheckinlist.html` | Logo upload, date field, group name, guest list with add/remove rows, bulk name import modal, portrait/landscape toggle, print |
 | `signs` | Sign Generator | `signGenerator.html` | A4/A3 size selector, portrait/landscape toggle, background colour palette + custom image + overlay slider, logo upload, body text + colour, sub-body text + colour, live preview, print |
-| `board` | Daily Info Board | `board.html` | Date selector (auto-populates 7-day rolling column headers), 7-day stats grid (rooms sold, guests in house, occupancy %, room revenue, total revenue, ADR, RevPAR, arrivals, departures, F&B covers), VIP guests list, special notes/info panel, reset button, print (landscape A3-style, hides UI chrome). Board data is saved under `shiftCompanion_boardData` via the unified persist toggle — the standalone `dailyBoardData` key must not be used. |
+| `board` | Daily Info Board | `board.html` | Date selector (auto-populates 7-day rolling column headers), 7-day stats grid (rooms sold, guests in house, occupancy %, room revenue, total revenue, ADR, RevPAR, arrivals, departures, F&B covers), VIP guests list (10 rows: Name, Code, Room), staff assignments grid (Pool Responsible / Pool Tester / First Aider — AM / PM / Night), Principle of the Day widget (rotates by day of week: Be Caring, Be A Storyteller, Be Extraordinary, Be Open-Minded), special notes/info panel, reset button, print (landscape A3-style, hides UI chrome). The entire layout — including all columns, rows, and widget positions — must mirror the physical board exactly as it appears in `board.html`. Board data is saved under `shiftCompanion_boardData` via the unified persist toggle — the standalone `dailyBoardData` key must not be used. |
 
 ### Persistent UI (not sections)
 
@@ -341,8 +354,8 @@ sections of the unified app:
 
 | Array in `nightsTicklist.htm` | Count | Maps to |
 |---|---|---|
-| `preAuditTasks` | 17 items | **Pre-Shift / During-Shift Checklist** — tasks performed on arrival and up to (but not including) running the night audit. The final task ("Run Night Audit at 0301") is the handoff point to the Night Audit Tracker. |
-| `rawTasks` | 38 items | **Post-Shift Checklist** — tasks performed after the audit has run (reports, banking, handover, etc.). |
+| `preAuditTasks` | 17 items | **Pre-Audit Checklist** — tasks performed on arrival and up to (but not including) running the night audit. The final task ("Run Night Audit at 0301") is the handoff point to the Night Audit Tracker. |
+| `rawTasks` | 38 items | **Post-Audit Checklist** — tasks performed after the audit has run (reports, banking, handover, etc.). |
 
 The **Night Audit Tracker** section (`§ section-nightaudit` in `hotelcompanion_enhanced.html`)
 is the step-by-step audit *procedure* (post room charges, reconcile payments, print
@@ -351,13 +364,13 @@ existing `§ section-nightaudit` step list. Do not mix audit procedure steps int
 checklist, and do not mix checklist items into the audit tracker.
 
 The "Run Night Audit" item at the end of `preAuditTasks` should appear in the
-Pre-Shift checklist as a highlight card or call-to-action that navigates the user to
+Pre-Audit checklist as a highlight card or call-to-action that navigates the user to
 the Night Audit Tracker section — not as a plain checkbox.
 
 ### Merge rules
 
 1. **Deduplicate** items that are semantically identical across both source files.
-2. **Categorise** all items into the three tabs: Pre-Shift / During Shift / Post-Shift,
+2. **Categorise** all items into the two tabs: Pre-Audit / Post-Audit,
    following the mapping above.
 3. Keep the `required-before-continue` (yellow highlight) behaviour for critical items
    from `nightsTicklist.htm`.
@@ -374,19 +387,130 @@ the Night Audit Tracker section — not as a plain checkbox.
 
 ---
 
-## 8. AI Coach — Dual-Mode (Smart Defaults + Live Anthropic API)
+## 7.5. Night Log JSON Export Schema
 
-The AI Coach is the `§ section-ai` section. It has two operating modes which are
-selected automatically based on whether an API key has been provided:
+The Night Log section exports shift data as a JSON file. The Monthly Report tool
+imports these files. Both must use this exact schema to ensure compatibility.
 
-### Mode 1 — Smart Defaults (always available, no API key required)
+```json
+{
+  "schemaVersion": 1,
+  "shiftId": "2026-04-08T22:00:00.000Z",
+  "shiftLeader": "Staff Name",
+  "exportedAt": "2026-04-09T06:15:00.000Z",
+  "entries": [
+    {
+      "id": "entry_1712620800000_a3f2",
+      "type": "issue",
+      "timestamp": "2026-04-08T23:14:00.000Z",
+      "floor": "Second",
+      "category": "Noise Complaint",
+      "severity": "medium",
+      "title": "Loud music from room 214",
+      "description": "Guest called to complain about music from the room above.",
+      "reporter": "Jane Smith",
+      "imageBase64": null,
+      "rectified": true
+    },
+    {
+      "id": "entry_1712624400000_b7c1",
+      "type": "floor_walk",
+      "timestamp": "2026-04-09T00:20:00.000Z",
+      "floor": "Ground",
+      "allClear": true,
+      "notes": ""
+    }
+  ]
+}
+```
 
-A built-in `SMART_REPLIES` keyword map provides instant, high-quality responses to
-common hospitality scenarios. The lookup is case-insensitive substring match on the
-user's message.
+**Field definitions:**
 
-**Required keywords to implement** (carry over all existing entries from
-`hotelcompanion_enhanced.html` verbatim):
+| Field | Type | Notes |
+|---|---|---|
+| `schemaVersion` | number | Always `1` — used for forward-compat checks |
+| `shiftId` | string (ISO 8601) | ISO timestamp of shift start — acts as unique shift identifier |
+| `shiftLeader` | string | Name entered at shift start |
+| `exportedAt` | string (ISO 8601) | Timestamp of export action |
+| `entries[]` | array | Mixed `issue` and `floor_walk` entries in chronological order |
+| `id` | string | `"entry_" + Date.now() + "_" + 4-char random hex` — unique, stable |
+| `type` | `"issue"` \| `"floor_walk"` | Determines which fields are present |
+| `timestamp` | string (ISO 8601) | When the entry was logged |
+| `floor` | string | Floor name (e.g. "Ground", "First", "Second", "Third", "Roof") |
+| `category` | string | Issue type (issue entries only) |
+| `severity` | `"low"` \| `"medium"` \| `"high"` | Issue entries only |
+| `title` | string | Short summary (issue entries only) |
+| `description` | string | Full detail (issue entries only) |
+| `reporter` | string | Name of reporting staff (issue entries only) |
+| `imageBase64` | string \| null | Base64-encoded JPEG, or `null` if no image (issue entries only) |
+| `rectified` | boolean | Whether the issue has been resolved (issue entries only) |
+| `allClear` | boolean | Whether floor was clear (floor_walk entries only) |
+| `notes` | string | Optional notes for floor walk (floor_walk entries only) |
+
+**Implementation notes:**
+- `id` must be generated at entry creation time and never changed — used for deduplication on import.
+- Photo attachment uses a file picker (`<input type="file" accept="image/*">`). The selected image is resized to max 800 px and compressed to JPEG (quality 0.7) via Canvas API before base64 encoding. Images over 500 KB after encoding should show a warning.
+- `file://` protocol blocks `getUserMedia()` — no live camera capture. File picker only.
+- The Monthly Report deduplicates entries across multiple imported files using `entry.id`.
+
+---
+
+## 8. AI Coach — Smart Defaults + PDF Knowledge Base
+
+The AI Coach (`§ section-ai`) operates in **Smart Defaults mode only**. There is no
+live external API. All responses are served from a built-in keyword map or from the
+property-specific `hotelcompanion_scripts.js` file if present.
+
+**This decision is final for Version A.** External API calls are blocked by CORS on
+`file://` protocol and are incompatible with the offline-first deployment model.
+
+### Knowledge sources (priority order)
+
+1. **`hotelcompanion_scripts.js`** (property-specific, optional) — loaded alongside the
+   main app from the same OneDrive folder. Populated via the AI Scripts tab in
+   `hotelcompanion_editor.html` using PDF import. If absent or invalid, falls back
+   gracefully to built-in defaults without error.
+2. **Built-in `SMART_REPLIES`** — generic hospitality keyword map (see below). Always
+   available; used when no property scripts file is loaded or when a query matches
+   no property script.
+
+### `hotelcompanion_scripts.js` schema
+
+The file is loaded via `<script src="hotelcompanion_scripts.js">` (explicit exception
+to Version A single-file rule — same pattern as `hotelcompanion_items.js`). It must
+define:
+
+```js
+window.HOTELCOMPANION_SCRIPTS = {
+  version: 1,
+  scripts: [
+    {
+      id: "script_001",
+      keywords: ["keyword phrase", "alternative phrase"],
+      title: "Display Title",
+      category: "Category Name",
+      response: "### Heading\n\n**Script:**\nFull response text..."
+    }
+  ]
+};
+```
+
+- `id`: stable unique string, generated at creation, never changed.
+- `keywords`: array of lowercase strings — any substring match triggers this script.
+- `title`: shown as the script card heading in the editor and in chat.
+- `category`: used for grouping in the editor (e.g. "Payments", "Security").
+- `response`: full response text; supports `**bold**` and `\n` newlines.
+
+If the file is absent, unreadable, or fails schema validation, the app silently falls
+back to the built-in `SMART_REPLIES` map without error.
+
+### Built-in `SMART_REPLIES` (always available)
+
+A built-in keyword map provides instant, high-quality responses to common hospitality
+scenarios. The lookup is case-insensitive substring match on the user's message.
+Property scripts (above) are checked first; built-in scripts are the fallback.
+
+**All existing entries from `hotelcompanion_enhanced.html` carried over verbatim:**
 - `guest wants to pay cash` — card-only policy + firm-but-warm scripts
 - `card declined at check-in` — step-by-step decline handling
 - `noise complaint script` — escalation scripts (call → in-person → duty manager)
@@ -402,8 +526,7 @@ user's message.
 - `how to give local recommendations` — structure for confident recommendations
 - `phone greeting script` — standard greeting + transfer + message scripts
 
-**Extend with at least 10 additional keywords** drawn from the checklist items and
-NightLog categories in the project. Suggested additions:
+**Extended keywords (minimum 12 additional):**
 - `fire alarm` — evacuation procedure, assembly point, do-not-use-lift reminders
 - `maintenance fault` — logging, severity, who to call out-of-hours
 - `early check-in request` — room availability check, holding area, luggage storage
@@ -417,68 +540,50 @@ NightLog categories in the project. Suggested additions:
 - `guest refuses to leave` — trespass process, police call threshold
 - `power cut` — emergency lighting, generator check, inform guests
 
-### Mode 2 — Live AI via Anthropic Claude API (optional, key stored locally)
-
-When an Anthropic API key is present (`apiKey !== ''`), messages are sent to the
-Anthropic Messages API instead of using the keyword map.
-
-**API details:**
-- Endpoint: `https://api.anthropic.com/v1/messages`
-- Model: `claude-sonnet-4-20250514`
-- `max_tokens`: 1000
-- Method: `POST` with `Content-Type: application/json`
-- Auth header: `x-api-key: <apiKey>`, `anthropic-version: 2023-06-01`
-- **Important:** calls are made client-side (browser `fetch`). The API key is stored
-  in `localStorage` only. Never proxy or log the key.
-
-**System prompt** — inject current shift context dynamically:
-```
-You are Aria, an expert AI Night Shift Hospitality Coach embedded in a Night
-Receptionist shift companion app. You are coaching {staffName}, who works as a
-{staffRole} at {hotelName} on the {shiftLabel}.
-
-CRITICAL PROPERTY POLICY — CARD PAYMENTS ONLY:
-This property accepts card payments only. No cash is accepted under any
-circumstances. Always reflect this in payment advice.
-
-Current shift context:
-- Checklist completion: {checklistPct}
-- Incidents this shift: {incidentSummary}
-[- Shift notes: {shiftNotes} — only include if non-empty]
-
-You specialise in night shift hospitality: late check-ins, lone worker safety,
-noise complaints, intoxicated guests, unauthorised visitors, night audit processes,
-card payment scripts, security protocols. Keep responses practical, warm, and
-actionable. Use bold headers and specific scripts where relevant. Always factor in
-the lone-worker reality — escalating to a duty manager is always valid.
-```
-
-> **Implementation note:** `{incidentSummary}` is sourced from the Night Log entries array for the current shift. Only the summary text is injected into the prompt — no raw entry objects.
-
-**Chat history:** send the last 10 messages from `chatHistory` (alternating
-`user`/`assistant` roles) as the `messages` array.
-
 ### AI Coach UI requirements
-- On first load: show the API key prompt section (`#apiKeySection`) unless a key is
-  already saved — then skip straight to the chat container.
-- Buttons: **Connect AI Coach** (saves key) and **Use Smart Defaults Only** (hides
-  the prompt, shows fallback message in chat).
-- Chat header shows: avatar 🤖, name "Aria — AI Hospitality Coach",
-  status indicator ("Online & Ready" / "Aria is thinking..."), Clear Chat button,
-  🔑 API Key button.
+
+- On load: show chat container directly — no API key prompt.
+- Chat header: avatar 🤖, name "Aria — AI Hospitality Coach",
+  status badge — "Property Scripts Loaded" (green, when `hotelcompanion_scripts.js`
+  is present and valid) or "Smart Defaults Active" (gold, fallback), Clear Chat button.
 - Suggestion chips (always shown below messages, above input):
   "Guest wants to pay cash", "Card declined at check-in", "Noise complaint script",
   "Intoxicated guest at desk", "Late arrival — no booking found",
   "Guest locked out at 3am", "Handle a guest complaint",
   "Night audit error — what to do", "Suspicious person in lobby",
   "Pre-auth / billing query script"
-- Typing indicator (three animated dots) shown while awaiting API response.
+- **900 ms simulated delay** before rendering any reply (makes it feel considered).
 - Markdown inline renderer: `**text**` → `<strong>text</strong>`, `\n` → `<br>`.
   No external markdown library.
 - `Enter` submits, `Shift+Enter` adds a newline. Textarea auto-resizes.
-- Smart Defaults mode: 900 ms simulated delay before rendering reply (makes it feel
-  considered, not instant).
-- API error: display the error message inline in a chat bubble.
+- When no keyword matches (neither property scripts nor built-in): return a helpful
+  fallback message — *"I don't have a specific script for that. Consider: (1) Contact
+  your Duty Manager. (2) Check the night manual. (3) Log the incident in the Night Log."*
+
+### PDF Knowledge Base — Editor integration
+
+The AI Scripts tab in `hotelcompanion_editor.html` includes an **"Import from PDF"**
+button that:
+
+1. Opens a file picker for the property's night operations PDF (Word-exported, text-based).
+2. Uses **pdf.js** (loaded via CDN in the editor only) to extract all text.
+3. Uses the PDF's Table of Contents (TOC) to segment text by section heading.
+4. Presents each section as a draft script card with:
+   - `title` pre-filled from the TOC heading.
+   - `keywords` auto-suggested from heading text (lowercased, trimmed).
+   - `category` auto-detected from heading hierarchy.
+   - `response` pre-filled with the extracted section body text.
+5. Manager reviews, edits, merges, and deletes draft cards before saving.
+6. "Export & Save" downloads `hotelcompanion_scripts.js`.
+
+**pdf.js details:**
+- CDN: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs`
+- The editor is a **separate file** — bundling pdf.js there does not affect main app size.
+- Scanned/image PDFs produce no extractable text — show a clear error:
+  *"No text could be extracted. Your PDF may be a scanned image. Please share the PDF
+  with your developer to process it manually."*
+- Table content may have scrambled cell order — warn the manager to review table sections
+  carefully after import.
 
 ---
 
@@ -491,17 +596,21 @@ Before considering the build complete, verify all of the following:
 - [ ] No tool has its own standalone "end shift" or "clear data" flow — all session data is cleared by the single main End Shift action.
 - [ ] `localStorage` persist toggle defaults to **OFF**; session data is not saved unless toggled on.
 - [ ] Toggling persistence ON immediately saves current session data.
-- [ ] Profile (name/role/shift) and API key are always saved regardless of toggle state.
+- [ ] Profile (name/role/shift) is always saved regardless of toggle state. No API key is stored.
 - [ ] Shift history persists across sessions and is not cleared by End Shift.
 - [ ] The print stylesheet hides all navigation and renders cleanly.
 - [ ] The sidebar staff card shows the name entered at shift start.
 - [ ] End Shift saves to history, shows confirmation modal, then clears session data.
-- [ ] AI Coach Smart Defaults mode works with no API key (keyword match, 900 ms delay).
-- [ ] AI Coach Live mode works when a valid Anthropic API key is entered.
-- [ ] AI system prompt includes live shift context (staff name, incidents, checklist %).
+- [ ] AI Coach shows "Property Scripts Loaded" (green) when `hotelcompanion_scripts.js` is present and valid.
+- [ ] AI Coach shows "Smart Defaults Active" (gold) when `hotelcompanion_scripts.js` is absent or invalid.
+- [ ] AI Coach Smart Defaults keyword match works with 900 ms simulated delay.
+- [ ] When no keyword matches, AI Coach returns the helpful three-point fallback message.
 - [ ] Night Log is the sole incident logger; no separate incident list exists in the Notes section.
 - [ ] Night Log JSON export produces a valid file. *(If Monthly Report is implemented, verify it can re-import the same JSON schema; otherwise skip.)*
-- [ ] *(Version A only)* `hotelcompanion_editor.html` opens without errors, all three tabs (Pre-Shift, Post-Shift, Night Audit Steps) are editable, items can be added/deleted/reordered, and Export & Save downloads a valid `hotelcompanion_items.js`. Placing that file alongside `hotelcompanion_suite.html` and reloading the app replaces the default content with the exported content. Import and Reset to Defaults both work correctly.
+- [ ] *(Version A only)* `hotelcompanion_editor.html` opens without errors, all four tabs (Pre-Audit, Post-Audit, Night Audit Steps, AI Scripts) are functional.
+- [ ] *(Version A only)* Checklist/audit items can be added/deleted/reordered, Export & Save downloads valid `hotelcompanion_items.js`. Placing it alongside `hotelcompanion_suite.html` and reloading replaces default content. Import and Reset to Defaults both work correctly.
+- [ ] *(Version A only)* AI Scripts tab shows existing scripts, allows add/edit/delete/reorder, Export & Save downloads valid `hotelcompanion_scripts.js`.
+- [ ] *(Version A only)* PDF import in editor extracts text from a text-based PDF, creates draft script entries segmented by TOC headings, and shows a clear error for image-only PDFs.
 - [ ] The Sign Generator prints correctly at A4 and A3.
 - [ ] The Group Check-in list prints correctly in portrait and landscape.
 - [ ] Tools section in sidebar is visually separated from core nav items.
@@ -521,12 +630,12 @@ Before considering the build complete, verify all of the following:
       plus Tools group (Night Log, Monthly Report *(nice-to-have)*, Group Check-in, Sign Generator, Daily Info Board)
 - [ ] `hotelcompanion_editor.html` — **standalone GUI content editor** (no coding required).
       Opens in any browser as a separate file alongside `hotelcompanion_suite.html`.
-      Allows non-technical staff / managers to customise checklist and audit content
-      through a point-and-click interface — no code editing, no developer knowledge needed.
+      Allows non-technical staff / managers to customise checklist, audit content, and
+      AI scripts through a point-and-click interface — no code editing, no developer knowledge needed.
 
       **Editor must include:**
-      - Three tabs / accordion sections: **Pre-Shift Items**, **Post-Shift Items**,
-        **Night Audit Steps**.
+      - Four tabs / accordion sections: **Pre-Audit Items**, **Post-Audit Items**,
+        **Night Audit Steps**, **AI Scripts**.
       - Each item displayed as an editable row with:
         - A drag handle (↕) for reordering.
         - A text input for the item label.
@@ -605,6 +714,19 @@ Before considering the build complete, verify all of the following:
       default arrays as a reference / starter file. The working
       `hotelcompanion_items.js` is added to `.gitignore` so property-specific
       content is never committed.
+
+      **`hotelcompanion_scripts.js`** runtime loading works identically — loaded via
+      `<script src="hotelcompanion_scripts.js">`. Falls back to built-in `SMART_REPLIES`
+      silently if absent or invalid.
+
+      **`hotelcompanion_scripts.example.js`** (committed to the repo) provides the
+      default generic hospitality scripts as a reference / starter file. The working
+      `hotelcompanion_scripts.js` is added to `.gitignore` so property-specific
+      scripts are never committed.
+
+- [ ] `hotelcompanion_items.example.js` — default checklist and audit content (committed)
+- [ ] `hotelcompanion_scripts.example.js` — default generic hospitality scripts (committed)
+- [ ] `.gitignore` — must include `hotelcompanion_items.js` and `hotelcompanion_scripts.js`
 
 ### Version B
 - [ ] `index.html` — dashboard / home
