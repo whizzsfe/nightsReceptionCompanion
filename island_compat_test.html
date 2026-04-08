@@ -44,8 +44,8 @@
       throw new Error('Protocol is ' + window.location.protocol + ' — must be openend as a local file');
   });
 
-  // 2. Inline <script> executed (this very script proves it)
-  test('Inline <script> execution allowed', () => true);
+  // 2. Inline script executed (this very script proves it)
+  test('Inline &lt;script&gt; execution allowed', () => true);
 
   // 3. localStorage read/write
   test('localStorage read/write', () => {
