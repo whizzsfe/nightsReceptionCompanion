@@ -654,11 +654,11 @@ Before considering the build complete, verify all of the following:
         ```js
         window.HOTELCOMPANION_ITEMS = {
           version: 1,
-          preShift: [
+          preAudit: [
             { id: "pre_001", label: "Item label", required: false, dayRestriction: "every" },
             // ...
           ],
-          postShift: [
+          postAudit: [
             { id: "post_001", label: "Item label", required: false, dayRestriction: "every" },
             // ...
           ],
@@ -727,6 +727,20 @@ Before considering the build complete, verify all of the following:
 - [ ] `hotelcompanion_items.example.js` — default checklist and audit content (committed)
 - [ ] `hotelcompanion_scripts.example.js` — default generic hospitality scripts (committed)
 - [ ] `.gitignore` — must include `hotelcompanion_items.js` and `hotelcompanion_scripts.js`
+
+### Version A — Recommended build order
+
+Build in this sequence to avoid circular dependencies and allow incremental testing:
+
+1. **`hotelcompanion_items.example.js`** — define default `preAudit`, `postAudit`, and `auditSteps` arrays first; all other files depend on this schema.
+2. **`hotelcompanion_scripts.example.js`** — define default `SMART_REPLIES` keyword map; AI Coach depends on this.
+3. **`.gitignore`** — exclude `hotelcompanion_items.js` and `hotelcompanion_scripts.js` before any live files are generated.
+4. **`hotelcompanion_suite.html`** — main app. Build sections in this order:
+   - Shell: sidebar, topbar, section routing, modals (Profile, Brand, Quick Log), persist toggle
+   - Core sections: Dashboard → Checklist → Night Audit → Notes → Motivation → AI Coach → History
+   - Tools sections: Night Log → Monthly Report → Group Check-in → Sign Generator → Daily Info Board
+   - Print stylesheet last (requires all sections to exist)
+5. **`hotelcompanion_editor.html`** — content editor. Build tabs in order: Pre-Audit → Post-Audit → Night Audit Steps → AI Scripts (PDF import last, depends on pdf.js CDN).
 
 ### Version B
 - [ ] `index.html` — dashboard / home
