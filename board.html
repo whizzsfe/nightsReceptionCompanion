@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     <link rel="icon" type="image/x-icon" href="Helpers/hotelLogo.ico">
+    <title>Daily Information Board</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-variant: small-caps;
+            background-color: #f5f5f5;
+            padding: 10px;
+        }
+
+	/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+input[type=percentage] {
+    -moz-appearance: textfield;
+}
+.btn-reset {
+    padding: 6px 15px;
+    background-color:#dd0000;
+    color:white;
+    border:none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+        .container-fluid {
+            background-color: white;
+            padding: 15px;
+            margin: 0 auto;
+            max-width: 297mm;
+            max-height: 210mm;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 8px;
+        }
+
+        .header img {
+            max-height: 60px;
+            width: auto;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .header-right {
+            max-height: 40px;
+        }
+
+        /* Main layout */
+        .main-content {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Date input */
+        .date-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .date-input-label {
+            font-weight: bold;
+            font-size: 12px;
+            min-width: 100px;
+        }
+
+        #todayDate {
+            padding: 4px;
+            border: 1px solid #999;
+            border-radius: 3px;
+            font-size: 12px;
+            width: 150px;
+        }
+
+        /* Data grid */
+        .data-grid {
+            width: 100%;
+            margin-bottom: 10px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .data-grid th,
+        .data-grid td {
+            border: 1px solid #999;
+            padding: 3px;
+            text-align: center;
+        }
+
+        .data-grid th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .data-grid td {
+            height: 20px;
+            vertical-align: middle;
+            padding: 2px;
+        }
+
+        .row-header {
+            text-align: left;
+            font-weight: 500;
+            background-color: #f9f9f9;
+            width: 90px;
+            min-width: 90px;
+            font-size: 10px;
+        }
+
+        .day-header {
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 1px;
+            text-align: center;
+            font-size: 12px;
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-variant: small-caps;
+        }
+
+        .input-field:focus {
+            outline: 2px solid #007bff;
+            background-color: #fffacd;
+        }
+
+        .percent-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 9px;
+        }
+
+        .input-field-percent {
+            width: 70%;
+            height: 100%;
+            border: none;
+            padding: 1px;
+            text-align: center;
+            font-size: 11px;
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-variant: small-caps;
+        }
+
+        .input-field-percent:focus {
+            outline: 2px solid #007bff;
+            background-color: #fffacd;
+        }
+
+        .percent-symbol {
+            font-size: 9px;
+            margin-left: 2px;
+            font-weight: bold;
+        }
+
+        /* Daily info section */
+        .daily-info-section {
+            margin-bottom: 8px;
+        }
+
+        .daily-info-grid {
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        .daily-info-grid td {
+            border: 1px solid #999;
+            padding: 3px;
+        }
+
+        .daily-info-header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            min-width: 90px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .daily-info-input {
+            width: 100%;
+            border: none;
+            padding: 2px;
+            font-size: 12px;
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-variant: small-caps;
+        }
+
+        .daily-info-input:focus {
+            outline: 2px solid #007bff;
+            background-color: #fffacd;
+        }
+
+        /* Right section */
+        .right-section-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 6px;
+            background-color: #e8e8e8;
+            padding: 3px;
+            border-left: 3px solid #007bff;
+        }
+
+        .vip-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-bottom: 8px;
+        }
+
+        .vip-table th,
+        .vip-table td {
+            border: 1px solid #999;
+            padding: 2px;
+            text-align: left;
+        }
+
+        .vip-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 12px;
+            height: 20px;
+        }
+
+        .vip-table td {
+            height: 18px;
+        }
+
+        .vip-input {
+            width: 100%;
+            border: none;
+            padding: 1px;
+            font-size: 12px;
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-variant: small-caps;
+        }
+
+        .vip-input:focus {
+            outline: 2px solid #007bff;
+            background-color: #fffacd;
+        }
+
+        .theme-textarea {
+            width: 100%;
+            height: 50px;
+            border: 1px solid #999;
+            border-radius: 3px;
+            padding: 3px;
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-size: 10px;
+            font-variant: small-caps;
+            resize: vertical;
+            margin-bottom: 6px;
+        }
+
+        .theme-textarea:focus {
+            outline: 2px solid #007bff;
+            background-color: #fffacd;
+        }
+
+        .disabled-input {
+            width: 100%;
+            padding: 3px;
+            border: 1px solid #999;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: Candara, Calibri, Verdana, sans-serif;
+            font-variant: small-caps;
+        }
+
+        .disabled-input:focus {
+            outline: 2px solid #007bff;
+            background-color: #fffacd;
+        }
+
+        .print-button {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .btn-print {
+            padding: 6px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-print:hover {
+            background-color: #0056b3;
+        }
+	.today input{
+		color:mediumpurple;
+	}
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+	    .today input{color:black;}
+
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
+            .container-fluid {
+                box-shadow: none;
+                max-width: 100%;
+                max-height: 100%;
+                padding: 8px;
+                margin: 0;
+            }
+
+            .print-button {
+                display: none;
+            }
+
+            .input-field:focus,
+            .input-field-percent:focus,
+            .daily-info-input:focus,
+            .vip-input:focus,
+            .theme-textarea:focus,
+            .disabled-input:focus {
+                outline: none;
+                background-color: white;
+            }
+
+            .data-grid {
+                page-break-inside: avoid;
+            }
+	   
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="header">
+            <img src="hotelLogo.jpg" alt="Marriott Logo">
+            <div class="header-title">Daily Information</div>
+            <img src="marriott.png" alt="Lingfield Park Resort" class="header-right">
+        </div>
+
+        <!-- Date Input -->
+        <div class="date-input-row">
+            <label for="todayDate" class="date-input-label">TODAY'S DATE:</label>
+            <input type="date" tabindex="-1" id="todayDate">
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- LEFT SECTION -->
+            <div class="left-section">
+                <!-- Main Data Grid -->
+                <table class="data-grid">
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;"></th>
+                            <th class="day-header"><span id="dayLabel0">TODAY</span><br><span id="dateDisplay0" style="font-size: 10px;">08/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel1">MONDAY</span><br><span id="dateDisplay1" style="font-size: 10px;">09/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel2">TUESDAY</span><br><span id="dateDisplay2" style="font-size: 10px;">10/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel3">WEDNESDAY</span><br><span id="dateDisplay3" style="font-size: 10px;">11/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel4">THURSDAY</span><br><span id="dateDisplay4" style="font-size: 10px;">12/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel5">FRIDAY</span><br><span id="dateDisplay5" style="font-size: 10px;">13/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel6">SATURDAY</span><br><span id="dateDisplay6" style="font-size: 10px;">14/02/2026</span></th>
+                            <th class="day-header"><span id="dayLabel7">SUNDAY</span><br><span id="dateDisplay7" style="font-size: 10px;">15/02/2026</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-header">ROOMS SOLD</td>
+                            <td class="today"><input type="number" tabindex="1" class="input-field" id="roomsSoldToday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldMonday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldTuesday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldWednesday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldThursday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldFriday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldSaturday" min="0" max="116" step="1"></td>
+                            <td><input type="number" class="input-field" id="roomsSoldSunday" min="0" max="116" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td class="row-header">GUESTS IN HOUSE</td>
+                            <td class="today"><input type="number" class="input-field" tabindex="3" id="guestsInHouseToday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseMonday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseTuesday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseWednesday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseThursday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseFriday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseSaturday" min="0" step="1"></td>
+                            <td><input type="number" class="input-field" id="guestsInHouseSunday" min="0" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td class="row-header">OCCUPANCY %</td>
+                            <td><div class="percent-wrapper today"><input type="number" tabindex="3" class="input-field-percent" id="occupancyToday" min="0.00" max="100.00" step="0.01" size="5"><span class="percent-symbol">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancyMonday" min="0.00" max="100.00" step="0.01"><span class="percent-symbol">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancyTuesday" min="0.00" max="100.00" step="0.01" size="5"><span class="percent-symbol">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancyWednesday" min="0.00" max="100.00" step="0.01" size="5"><span class="percent-symbol">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancyThursday" min="0.00" max="100.00" step="0.01" size="5"><span class="percent-symbol">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancyFriday" min="0.00" max="100.00" step="0.01" size="5"><span class=".5">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancySaturday" min="0.00" max="100.00" step="0.01" size="5"><span class="percent-symbol">%</span></div></td>
+                            <td><div class="percent-wrapper"><input type="number" class="input-field-percent" id="occupancySunday" min="0.00" max="100.00" step="0.01" size="5"><span class="percent-symbol">%</span></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Daily Information Section -->
+                <div class="daily-info-section d-flex">
+                    <table class="daily-info-grid col-3">
+                        <tbody>
+                            <tr>
+                                <td class="daily-info-header">ARRIVALS</td>
+                                <td class="today"><input type="number" tabindex="4" class="daily-info-input" id="arrivals"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">DEPARTURES</td>
+                                <td class="today"><input type="number" tabindex="5" class="daily-info-input" id="departures"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">ROOM REVENUE £</td>
+                                <td class="today"><input type="currency" tabindex="6" class="daily-info-input" id="roomRevenue"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">AVG ROOM RATE £</td>
+                                <td class="today"><input type="text" tabindex="7" class="daily-info-input" id="avgRoomRate"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">OOO/OOS</td>
+                                <td class="today"><input type="number" tabindex="8" class="daily-info-input" id="oooOos"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">BB'S</td>
+                                <td class="today"><input type="number" tabindex="9" class="daily-info-input" id="bbs"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">DBB'S</td>
+                                <td class="today"><input type="number" tabindex="10" class="daily-info-input" id="dbbs"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">GROUPS</td>
+                                <td class="today"><input type="text" tabindex="11" class="daily-info-input" id="groups"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">EARLY DM</td>
+                                <td class="today"><input type="text" tabindex="12" class="daily-info-input" id="earlyDm"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">LATE DM</td>
+                                <td class="today"><input type="text" tabindex="13" class="daily-info-input" id="lateDm"></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header">DISABLED GUEST(S)</td>
+                                <td class="today"><input type="text" tabindex="14" class="daily-info-input" id="disabledGuests"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+<div class="col-2"></div><div class="col-7 p-0"><div class="right-section-title">VIP GUESTS</div>
+<table class="vip-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60%;text-align:center;">NAME</th>
+                            <th style="width: 10%;text-align:center;">CODE</th>
+                            <th style="width: 10%;text-align:center;">ROOMS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vipTableBody">
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName0"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode0"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms0"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName1"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode1"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms1"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName2"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode2"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms2"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName3"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode3"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms3"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName4"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode4"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms4"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName5"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode5"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms5"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName6"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode6"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms6"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName7"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode7"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms7"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName8"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode8"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms8"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="vip-input" id="vipName9"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipCode9"></td>
+                            <td><input style="text-align: center;" type="text" class="vip-input" id="vipRooms9"></td>
+                        </tr>
+                        
+                        
+                    </tbody>
+                </table></div>
+                </div>
+
+                <!-- Pool & Staff Section -->
+                <div class="daily-info-section d-flex">
+                    <table class="daily-info-grid col">
+                        <tbody>
+                            <tr>
+                                <td class="daily-info-header flex-row">POOL RESP.</td>
+                                <td><input type="text" class="daily-info-input" id="poolRespAm" placeholder="AM"></td>
+                                <td><input type="text" class="daily-info-input" id="poolRespPm" placeholder="PM"></td>
+                                <td><input type="text" class="daily-info-input" id="poolRespNight" placeholder=""></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header flex-row">POOL TESTER</td>
+                                <td><input type="text" class="daily-info-input" id="poolTesterAm" placeholder="AM"></td>
+                                <td><input type="text" class="daily-info-input" id="poolTesterPm" placeholder="PM"></td>
+                                <td><input type="text" class="daily-info-input" id="poolTesterNight" placeholder=""></td>
+                            </tr>
+                            <tr>
+                                <td class="daily-info-header flex-row">FIRST AIDER</td>
+                                <td><input type="text" class="daily-info-input" id="firstAiderAm" placeholder="AM"></td>
+                                <td><input type="text" class="daily-info-input" id="firstAiderPm" placeholder="PM"></td>
+                                <td><input type="text" class="daily-info-input" id="firstAiderNight" placeholder=""></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                <div class="col-1"></div>
+<div class="col"><div class="right-section-title">Principle of Wonderful</div>
+    
+    <div id="principlesWonderful" style="padding: 8px; border: 1px solid #c5c5c5; flex: 1; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; text-align: center;">Be Open-Minded</div>
+</div></div>
+            </div>
+
+            <!-- RIGHT SECTION -->
+            <div class="right-section d-none">
+                
+                
+                
+
+                
+                
+                
+
+                
+                <div id="principlesWonderful" style="padding: 8px; border: 1px solid #c5c5c5; flex: 1; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; text-align: center;">Be Open-Minded</div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="print-button">
+	    <button id="reset" name="reset" type="reset" class="btn-reset" onClick="clearForm()"><i class="fas fa-eraser"></i> Clear</button>
+            <button class="btn-print" onclick="printForm()">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <script>
+	const rms = document.querySelectorAll('input[type="number"]')
+	rms.forEach(rm => {rm.addEventListener('keydown', function(event) {
+	  const arrowKeys = ['ArrowUp', 'ArrowDown'];
+  
+	  // Prevent default for Up/Down arrow keys
+	  if (arrowKeys.includes(event.key)) {
+	    event.preventDefault();
+	  }
+	});
+});
+        // Format date as DD/MM/YYYY
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Get principles text based on day of week
+        function getPrinciplesForDay(date) {
+            const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            
+            switch(dayOfWeek) {
+                case 1: // Monday
+                case 2: // Tuesday
+                    return 'Be Caring';
+                case 3: // Wednesday
+                case 4: // Thursday
+                    return 'Be A Storyteller';
+                case 5: // Friday
+                case 6: // Saturday
+                    return 'Be Extraordinary';
+                case 0: // Sunday
+                    return 'Be Open-Minded';
+                default:
+                    return '';
+            }
+        }
+
+        // Update principles based on today's date
+        function updatePrinciples() {
+            const todayInput = document.getElementById('todayDate');
+            
+            if (!todayInput.value) {
+                return;
+            }
+
+            const todayDate = new Date(todayInput.value);
+            const principlesText = getPrinciplesForDay(todayDate);
+            
+            const principlesField = document.getElementById('principlesWonderful');
+            if (principlesField) {
+                principlesField.textContent = principlesText;
+            }
+        }
+
+        // Update all dates - TODAY column + next occurrence of each day (Mon-Sun)
+        function updateDates() {
+            const todayInput = document.getElementById('todayDate');
+            
+            if (!todayInput.value) {
+                return;
+            }
+
+            const todayDate = new Date(todayInput.value);
+            
+            // Days of week names - fixed order for column headers
+            const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+            const dayIndices = [1, 2, 3, 4, 5, 6, 0]; // 0=Sunday, 1=Monday, etc.
+            
+            // TODAY column (index 0)
+            const todayLabel = document.getElementById('dayLabel0');
+            const todayDisplay = document.getElementById('dateDisplay0');
+            if (todayLabel) {
+                todayLabel.textContent = 'TODAY';
+            }
+            if (todayDisplay) {
+                todayDisplay.textContent = formatDate(todayDate);
+            }
+            
+            // Monday through Sunday columns - find next occurrence of each day
+            for (let i = 0; i < 7; i++) {
+                const targetDayOfWeek = dayIndices[i];
+                const nextDate = new Date(todayDate);
+                nextDate.setDate(todayDate.getDate() + 1); // Start from tomorrow
+                
+                // Find next occurrence of target day
+                while (nextDate.getDay() !== targetDayOfWeek) {
+                    nextDate.setDate(nextDate.getDate() + 1);
+                }
+                
+                const dayLabel = document.getElementById(`dayLabel${i + 1}`);
+                const dateDisplay = document.getElementById(`dateDisplay${i + 1}`);
+                
+                if (dayLabel) {
+                    dayLabel.textContent = dayNames[i];
+                }
+                
+                if (dateDisplay) {
+                    dateDisplay.textContent = formatDate(nextDate);
+                }
+            }
+        }
+
+        // Initialize form with today's date
+        function initializeDateField() {
+            const todayInput = document.getElementById('todayDate');
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            todayInput.value = dateString;
+            updateDates();
+        }
+
+        // Print function
+        function printForm() {
+            window.print();
+        }
+
+	//Clear Function
+	function clearForm(){
+	    const formData = {};
+            const inputs = document.querySelectorAll('input[type="number"], input[type="currency"], input[type="text"], textarea');
+            
+            inputs.forEach(input => {
+                input.value ="";
+            });
+	 }
+
+        // Save form data to localStorage
+        function saveFormData() {
+            const formData = {};
+            const inputs = document.querySelectorAll('input[type="number"], input[type="currency"], input[type="text"], textarea');
+            
+            inputs.forEach(input => {
+                formData[input.id] = input.value;
+            });
+            
+            formData['todayDate'] = document.getElementById('todayDate').value;
+            
+            localStorage.setItem('dailyBoardData', JSON.stringify(formData));
+        }
+
+        // Load form data from localStorage
+        function loadFormData() {
+            const savedData = localStorage.getItem('dailyBoardData');
+            
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                
+                Object.keys(formData).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.value = formData[id];
+                    }
+                });
+            }
+        }
+
+        // Auto-save on input
+        document.addEventListener('change', function() {
+            saveFormData();
+            updateDates();
+            updatePrinciples();
+        });
+        document.addEventListener('blur', function() {
+            saveFormData();
+        }, true);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFormData();
+            initializeDateField();
+            updatePrinciples();
+        });
+
+        // Update dates when today date input changes
+        document.getElementById('todayDate').addEventListener('change', function() {
+            updateDates();
+            updatePrinciples();
+        });
+    </script>
+
+
+</body></html>
