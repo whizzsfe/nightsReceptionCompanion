@@ -1,0 +1,4 @@
+# hotelcompanion_items.js is the working property-specific config.
+# Copy hotelcompanion_items.example.js to hotelcompanion_items.js and edit to suit your property.
+# It is gitignored so property-specific content (names, report codes, etc.) is never committed.
+hotelcompanion_items.js
