@@ -532,9 +532,21 @@ Before considering the build complete, verify all of the following:
         `hotelcompanion_items.js` file and triggers a browser download. The
         downloaded file must be placed in the same folder as
         `hotelcompanion_suite.html` to take effect.
+      - The exported `hotelcompanion_items.js` must be a **data-only** file in a
+        deterministic format so it can be safely reloaded by the editor without
+        executing the file's contents.
       - An **"Import / Load existing"** button that reads a previously saved
-        `hotelcompanion_items.js` (or `hotelcompanion_items.example.js`) back
-        into the editor so the user can continue editing.
+        `hotelcompanion_items.js` (or `hotelcompanion_items.example.js`) **as plain
+        text only** and parses the serialised data back into the editor so the user
+        can continue editing.
+      - **Do not** load the selected file by injecting `<script>`, using `eval`,
+        `new Function`, dynamic `import()`, or any other mechanism that executes the
+        file. The import flow must use text parsing plus strict validation of the
+        expected schema only.
+      - Validate the imported structure before accepting it: the file must decode to
+        an object containing only the expected checklist/audit arrays, and every item
+        must have the expected field names, types, and allowed values. Reject any
+        file that does not match the schema and show a helpful error message.
       - A **"Reset to Defaults"** button that reloads the built-in default arrays.
       - Clear on-screen instructions (no assumed technical knowledge):
         *"Edit your checklist and audit items below, then click Export & Save.
