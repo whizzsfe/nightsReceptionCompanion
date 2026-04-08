@@ -1,0 +1,1578 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Front Office Nights Checklist</title>
+	<link rel="icon" id="logoFavicon" href="NightsLogo.ico"/>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+		integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+		crossorigin="anonymous" />
+	<!-- PDF library will be loaded on demand -->
+	<style>
+		body {
+			font-family: candara, verdana, sans-serif;
+			padding: 20px;
+		}
+
+		.checklist-item {
+			margin-bottom: 10px;
+			padding: 10px;
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			background-color: #f9f9f9;
+		}
+
+
+		.required-before-continue {
+			background-color: #fff3cd;
+			border-color: #ffeeba;
+		}
+
+		.completed {
+			text-decoration: line-through;
+			color: #777;
+		}
+
+		.disabled {
+			opacity: 0.5;
+			pointer-events: none;
+		}
+
+		.subtitle {
+			font-size: 0.8em;
+			color: #AAA;
+		}
+
+		.logo {
+			width: 150px;
+			height: auto;
+			vertical-align: middle;
+			margin-right: 10px;
+		}
+
+		.header-task {
+			font-weight: bold;
+			font-size: 1.2em;
+			margin-bottom: 5px;
+			padding: 5px;
+			border-bottom: 2px solid #eee;
+		}
+
+		/* Validation Styles */
+		.is-invalid {
+			border-color: #dc3545 !important;
+			box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+		}
+
+		.save-indicator {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			background: #28a745;
+			color: white;
+			padding: 8px 16px;
+			border-radius: 4px;
+			font-size: 14px;
+			z-index: 1000;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+
+		.save-indicator.show {
+			opacity: 1;
+		}
+
+		.save-indicator.saving {
+			background: #ffc107;
+			color: #212529;
+		}
+
+		/* Mobile Responsiveness */
+		@media (max-width: 768px) {
+			body {
+				padding: 10px;
+			}
+
+			.container {
+				padding: 15px;
+			}
+
+			.btn {
+				padding: 12px 20px;
+				font-size: 16px;
+				margin-bottom: 10px;
+				width: 100%;
+			}
+
+			.form-control {
+				font-size: 16px;
+				padding: 12px;
+			}
+
+			.checklist-item {
+				padding: 15px;
+				margin-bottom: 15px;
+			}
+
+			.logo {
+				width: 150px;
+				margin-right: 8px;
+			}
+
+			h1 {
+				font-size: 1.5rem;
+				margin-bottom: 20px;
+			}
+
+			.header-task {
+				font-size: 1.1em;
+				padding: 8px;
+			}
+		}
+
+		.handover-page {
+			box-sizing: border-box;
+			width: 100%;
+			max-width: 8.5in;
+			min-height: 9.5in;
+			margin: 40px auto 0;
+			padding: 0.35in 0.35in 0.3in;
+			border: 1px solid #ddd;
+			border-radius: 6px;
+			background: #fff;
+			color: inherit;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.handover-header {
+			display: grid;
+			grid-template-columns: 120px 1fr auto;
+			align-items: center;
+			gap: 12px;
+			padding-bottom: 6px;
+			border-bottom: 2px solid #eee;
+		}
+
+		.handover-logo {
+			width: 110px;
+			height: auto;
+		}
+
+		.handover-title {
+			font-size: 1.25rem;
+			font-weight: 700;
+			letter-spacing: 0.2px;
+			text-transform: none;
+			text-align: center;
+		}
+
+		.handover-date {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 0.9rem;
+			font-weight: 600;
+		}
+
+		.handover-date-value {
+			display: inline-flex;
+			align-items: center;
+			min-width: 140px;
+			padding: 4px 8px;
+			border: 0px solid #ddd;
+			border-radius: 4px;
+			background: #fff;
+			color: inherit;
+			font-size: 0.9rem;
+            font-weight: 500;
+		}
+
+		.handover-staff-value {
+			display: inline-flex;
+			align-items: center;
+			min-width: 160px;
+			padding: 4px 8px;
+			border: 0px solid #ddd;
+			border-radius: 4px;
+			background: #fff;
+			color: inherit;
+			font-size: 0.9rem;
+            font-weight: 500;
+		}
+
+		.handover-section {
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			padding: 8px;
+			gap: 6px;
+			background-color: #f9f9f9;
+		}
+
+		.handover-section-title {
+			font-weight: 700;
+			font-size: 0.95rem;
+			text-align: center;
+			text-transform: none;
+		}
+
+		.handover-section textarea {
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			resize: none;
+			padding: 8px;
+			font-size: 0.9rem;
+			font-family: inherit;
+			line-height: 1.4;
+			width: 100%;
+			flex: 1;
+			background: #fff;
+			color: inherit;
+		}
+
+		.handover-actions , .ticklist-actions{
+			display: flex;
+			gap: 12px;
+			justify-content: flex-end;
+			flex-wrap: wrap;
+		}
+
+		.handover-notes {
+			flex: 1 1 auto;
+			min-height: 3.8in;
+		}
+
+		.handover-breakfast {
+			min-height: 1in;
+		}
+
+		.handover-taxis {
+			min-height: 0.9in;
+		}
+
+		.handover-wakeup {
+			min-height: 1in;
+		}
+
+		@media print {
+			.handover-page {
+				page-break-before: always;
+				margin: 0 auto;
+				min-height: 9.5in;
+				max-height: 9.5in;
+				overflow: hidden;
+			}
+		}
+
+		@media (max-width: 480px) {
+			body {
+				padding: 5px;
+			}
+
+			.container {
+				padding: 10px;
+			}
+
+			h1 {
+				font-size: 1.3rem;
+			}
+
+			.checklist-item {
+				padding: 12px;
+			}
+		}
+
+		body {
+			background-color: #fff;
+			color: #000;
+		}
+
+		.checklist-item {
+			border-color: #ddd;
+			background-color: #f9f9f9;
+		}
+
+		@media (prefers-color-scheme: dark) {
+			body {
+				background-color: #333;
+				color: #fff;
+			}
+
+			.checklist-item {
+				border-color: #555;
+				background-color: #444;
+				color: #eee;
+			}
+
+
+			.required-before-continue {
+				background-color: #665533;
+				border-color: #776644;
+				color: #fff;
+			}
+
+			.handover-page {
+				border-color: #444;
+				background-color: #333;
+			}
+
+			.handover-header {
+				border-bottom-color: #555;
+			}
+
+			.handover-section {
+				border-color: #444;
+				background-color: #444;
+			}
+
+			.handover-section textarea,
+			.handover-date-value,
+			.handover-staff-value {
+				border-color: #555;
+				background-color: #333;
+				color: #eee;
+			}
+		}
+
+		@media print {
+			body {
+				font-family: candara, Arial, sans-serif;
+				padding: 0;
+				margin: 0;
+				color: #000;
+				background: #fff;
+				font-size: 12pt;
+				line-height: 1.2;
+			}
+
+			body > *:not(.container) {
+				display: none !important;
+			}
+
+			body.print-handover > * {
+				display: none !important;
+			}
+
+			body.print-handover .handover-page {
+				display: block !important;
+				visibility: visible !important;
+				margin: 0 auto;
+				max-width: 100%;
+			}
+
+			body.print-handover .handover-actions {
+				display: none !important;
+			}
+
+			.container {
+				position: relative;
+				padding: 5px;
+				margin: 0;
+				border: none;
+				width: auto;
+				max-width: 100%;
+				visibility: visible !important;
+				margin-top: 0px;
+				padding-top: 0px;
+			}
+
+			#progressSection,
+			#generatePdfButton,
+			#clearDataButton,
+			#saveIndicator,
+			.btn,
+			button {
+				display: none !important;
+			}
+
+			h1 {
+				font-size: 18pt;
+				margin-bottom: 15px;
+				text-align: center;
+				border-bottom: 2px solid #000;
+				padding-bottom: 10px;
+			}
+
+			.logo {
+				width: 150px;
+				height: auto;
+			}
+
+			.mb-3 {
+				margin-bottom: 8px;
+				display: block;
+				visibility: visible !important;
+				page-break-inside: avoid;
+			}
+
+			.form-label {
+				display: inline-block;
+				font-weight: bold;
+				margin-bottom: 2px;
+				margin-right: 10px;
+				min-width: 120px;
+				visibility: visible !important;
+			}
+
+			.form-label:after {
+				content: attr(data-print-value);
+				font-weight: normal;
+				font-style: italic;
+				margin-left: 5px;
+			}
+
+			.form-control,
+			input[type="text"],
+			input[type="date"],
+			input[type="checkbox"] {
+				display: none !important;
+			}
+
+			#checklist {
+				margin-top: 5px;
+				page-break-inside: auto;
+			}
+
+			.checklist-item {
+				border: 1px solid #000;
+				background-color: #fff;
+				color: #000;
+				padding: 8px;
+				margin-bottom: 3px;
+				page-break-inside: avoid;
+				visibility: visible !important;
+				position: relative;
+				font-size: smaller;
+			}
+
+			.checklist-item.completed {
+				background-color: #f8f9fa !important;
+				border-left: 4px solid #28a745 !important;
+				text-decoration: none !important;
+				color: #000 !important;
+			}
+
+			.checklist-item.completed label:before {
+				content: "✓ ";
+				font-weight: bold;
+				color: #28a745;
+				margin-right: 5px;
+				display: inline;
+			}
+
+			.checklist-item label {
+				text-decoration: none !important;
+				color: #000 !important;
+				display: block !important;
+				font-weight: normal;
+				margin: 0;
+				padding: 0;
+				cursor: default;
+			}
+
+			.subtitle {
+				display: none;
+				font-size: 10pt;
+				color: #666;
+				font-style: italic;
+				margin-top: 2px;
+				visibility: none !important;
+			}
+
+			.required-before-continue {
+				border-left: 4px solid #ff6b35;
+				background-color: #fff8f0;
+			}
+
+			.header-task {
+				page-break-after: avoid;
+				font-size: 14pt;
+				border-bottom: 1px solid #000;
+				margin-bottom: 5px;
+				margin-top: 5px;
+				padding-bottom: 3px;
+				font-weight: bold;
+				visibility: visible !important;
+				background-color: #f5f5f5;
+				text-align: center;
+			}
+
+			.header-task:first-of-type {
+				margin-top: 0;
+			}
+
+			@page {
+				margin: 0.75in;
+				size: a4;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1><img id="logoImage" src="" alt="Logo" class="logo">Front Office Nights Checklist</h1>
+		<div class="form-group d-flex gap-3 w-100 justify-content-between row">
+			<div class="mb-3 col-3">
+				<label for="shiftDate" class="form-label fw-semibold">Date:</label>
+				<input type="date" class="form-control" id="shiftDate" required>
+			</div>
+			<div class="mb-3 col-8">
+				<label for="staffName" class="form-label fw-semibold">Staff:</label>
+				<input type="text" class="form-control" id="staffName" placeholder="Enter staff names" required>
+			</div>
+		</div>
+
+        <!--<div class="ticklist-actions" style="justify-content: space-around;">
+			<button id="generatePdfButton" class="btn btn-primary">Generate PDF</button>
+            <button id="printButton" class="btn btn-info">Print Checklist</button>
+            <button id="clearDataButton" class="btn btn-secondary">Clear Data</button>
+		</div>-->
+
+		<!-- Progress Indicator -->
+		<div class="mb-3" id="progressSection" style="display: none;">
+			<label class="form-label fw-semibold">Progress:</label>
+			<div class="progress mb-2">
+				<div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%"></div>
+			</div>
+			<small class="text-white-50" id="progressText">0 of 0 tasks completed</small>
+		</div>
+
+		<div id="checklist"></div>
+		<div class="ticklist-actions" style="justify-content: space-around;">
+			<button id="generatePdfButton" class="btn btn-primary">Generate PDF</button>
+            <button id="printButton" class="btn btn-info">Print Checklist</button>
+            <button id="clearDataButton" class="btn btn-secondary">Clear Data</button>
+		</div>
+	</div>
+
+	<section class="handover-page"  class="container" aria-labelledby="handoverTitle">
+		<div class="handover-header">
+			<img id="handoverLogo" class="handover-logo" alt="Lingfield Park logo">
+			<div id="handoverTitle" class="handover-title">Front Office Nights Handover</div>
+			<div class="handover-date">
+				<div class="d-flex flex-column gap-1">
+					<div class="d-flex align-items-center gap-2">
+						<span>Date:</span>
+						<span id="handoverDateDisplay" class="handover-date-value" aria-live="polite"></span>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<span>Staff:</span>
+						<span id="handoverStaffDisplay" class="handover-staff-value" aria-live="polite"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="handover-section handover-notes">
+			<div class="handover-section-title">Handover Notes</div>
+			<label for="handoverNotes" class="visually-hidden">Handover Notes</label>
+			<textarea id="handoverNotes" name="handoverNotes" aria-label="Handover notes"></textarea>
+		</div>
+
+		<div class="handover-section handover-breakfast">
+			<div class="handover-section-title">Breakfast Bags</div>
+			<label for="breakfastBags" class="visually-hidden">Breakfast Bags</label>
+			<textarea id="breakfastBags" name="breakfastBags" aria-label="Breakfast bags"></textarea>
+		</div>
+
+		<div class="handover-section handover-taxis">
+			<div class="handover-section-title">Taxis</div>
+			<label for="taxis" class="visually-hidden">Taxis</label>
+			<textarea id="taxis" name="taxis" aria-label="Taxis"></textarea>
+		</div>
+
+		<div class="handover-section handover-wakeup">
+			<div class="handover-section-title">Wake-up Calls</div>
+			<label for="wakeUpCalls" class="visually-hidden">Wake-up Calls</label>
+			<textarea id="wakeUpCalls" name="wakeUpCalls" aria-label="Wake-up calls"></textarea>
+		</div>
+
+		<div class="handover-actions">
+			<button id="handoverPdfButton" class="btn btn-primary">Generate PDF</button>
+			<button id="handoverPrintButton" class="btn btn-info">Print Handover</button>
+			<button id="handoverClearButton" class="btn btn-secondary">Clear Handover</button>
+		</div>
+	</section>
+
+	<!-- Save Indicator -->
+	<div id="saveIndicator" class="save-indicator">Saved ✓</div>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		// ===== CONFIGURATION & DATA =====
+		const TASK_TYPES = {
+			HEADER: 'header',
+			REQUIRED: 'required',
+			REQUIRED_BEFORE_CONTINUE: 'required-before-continue',
+			OPTIONAL: 'optional'
+		};
+
+		const COLORS = {
+			COMPLETED: [0, 128, 0],
+			INCOMPLETE: [0, 0, 0],
+			REQUIRED_INCOMPLETE: [200, 0, 0],
+			SUBTITLE: [100, 100, 100]
+		};
+
+		// Manually set required status by task id (true = required, false = optional)
+		const REQUIRED_OVERRIDES = {
+			// Example: 1001: false
+            4: true,
+            5: true,
+            6: true,
+            7: true,
+            10: true,
+            13: true,
+            15: true,
+            20: true,
+            23: true,
+            33: true,
+            35: true,
+            37: true,
+            1002: true,
+            1003: true,
+            1005: true,
+            1006: true,
+            1007: true,
+            1008: true,
+            1013: true,
+            1014: true,
+            1015: true,
+            1016: true
+        };
+
+		const LOGO_DATA_URI = 'data:image/png;base64,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';
+
+        // POST AUDIT TASKS RAW LIST
+		const rawTasks = [
+			"Send EMEA reports to Marriott.\n• D114 \n • F116",
+			"Deposits \n• Collect deposits for all prepaid reservations \n‘created on’ the audit date, as well as yesterday’s date. \nDO NOT DO THIS BEFORE 04:00",
+			"Sort reg cards \nsort them into daily folder or into black box \nmaking sure to staple dockets to them",
+			"Save D156 / Recs \nOpen the D156 as delimited data. Copy and paste the figurers into the spreadsheet (P Drive-Operations Team Folder-Hotel-Financial Reporting- 2026 – RECS – select correct month)",
+			"Fill out Hotel Flash \nOpen and Complete Weekly Hotel Flash \n(P Drive -> 3. Operations Team Folder -> 14. Hotel -> Financial Reporting -> 2026 –> Weekly Hotel Forecast –> select correct month)",
+			"Complete the Early Bird Report.",
+			"City Ledgers \nGo through ALL CHECK OUTS and follow the City Ledger process for that ledger, check all routing while you are at it.\nIf you have any discrepancies with the CL’s ensure this is on the handover",
+			"Update One Yield",
+			"Complete the Daily Times",
+			"Fill out the STR",
+			"Open and monitor the cases on GXP",
+			"Board \nUpdate the back-office whiteboard with relevant information for the day making sure it is correct before leaving at the end of shift",
+			"Check Comments\nCheck comments for all rooms in house to ensure breakfast reports look correct",
+			"Print Breakfast Reports \nsingle sided ONLY\nD999 (New), R118, R118 detailed, A891 (VIP 10 + 11), B202, A150 \nPrint Opentable Reservations for the kitchen",
+			"Send One Yield and F100 \nto Michelle Boden, Yaas, Ella, Aymen",
+			"Review Departures \ncheck out and reinstate all routed rooms - making sure to check backups for city ledgers",
+			"Traces \ngo through arrivals and assign rooms to all members and any arrivals with traces",
+			"Housekeeping Reports \nsend A136, A192, T116 reports by email to housekeeping, aymen, ella, yaas and mays. Inlucde information about pickup rooms in the email",
+			"Yard Gate \nOpen Service yard gate \npadlock code 1991 &amp; 4AM",
+			"Post room service cheques to opera\n4AM",
+			"Kitchen Tidy\nTurn off pizza oven and clean area\n4AM",
+			"Print final numbers from FreedomPay for Mary\n4AM",
+			"SATURDAY - \nOpen Folios\nUpdate and send the ‘Open Folio and Open PM’ list",
+			"Tidy Bar\nCheck and tidy the bar from last remaining guests",
+			"Tidy Front Desk",
+			"Clean and hoover back office",
+			"Restart all computers",
+			"SUNDAY - Signs\nput out puddle duck signs",
+			"MONDAY - Signs\nput out puddle duck signs",
+			"TUESDAY - Signs\nput out fire alarm test signs",
+			"Function Signs\nput out function signs outside appropriate meeting rooms",
+			"LAST NIGHT OF MONTH Send management bill spreadsheet to Didier",
+			"Scan Sheets\nSend scan of Safety checklist and spa signin to Didier",
+			"Retrieve Pool Robot\n• Pull Robot out and make sure it is off\n• Put Robot away and ensure cabling is tidy\n• clean filter",
+			"Pool Test\nPool test to be done and turn Jacuzzi back on if it is working (trained staff only)",
+			"Night Reports\nSend out to the management team in one email : - Daily Times / DM Report /Early Bird",
+			"Handover\nPerform a handover with early shift team",
+			"Banking\nDo a D100 end of shift and sign it. (match to freedompay)"
+		];
+
+		const DAY_INDEX = {
+			monday: 1,
+			tuesday: 2,
+			wednesday: 3,
+			thursday: 4,
+			friday: 5,
+			saturday: 6,
+			sunday: 0
+		};
+
+		const DAY_LABEL = {
+			0: 'Sun',
+			1: 'Mon',
+			2: 'Tue',
+			3: 'Wed',
+			4: 'Thu',
+			5: 'Fri',
+			6: 'Sat'
+		};
+
+		function normalizeDay(dayName) {
+			if (!dayName) return null;
+			const key = dayName.toLowerCase();
+			return Object.prototype.hasOwnProperty.call(DAY_INDEX, key) ? DAY_INDEX[key] : null;
+		}
+
+		function parseDaysAndCleanText(taskText) {
+			let cleaned = taskText.trim();
+			let days = [];
+			let lastNightOfMonth = false;
+
+			const lastNightMatch = cleaned.match(/\blast\s+night\s+of\s+month\b/i);
+			if (lastNightMatch) {
+				lastNightOfMonth = true;
+				cleaned = cleaned.replace(lastNightMatch[0], '').replace(/\s{2,}/g, ' ').trim();
+			}
+
+			const dualPrefix = cleaned.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s*(?:&|\/|and)\s*(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s*[-–—]\s*/i);
+			if (dualPrefix) {
+				const dayA = normalizeDay(dualPrefix[1]);
+				const dayB = normalizeDay(dualPrefix[2]);
+				if (dayA !== null) days.push(dayA);
+				if (dayB !== null) days.push(dayB);
+				cleaned = cleaned.replace(dualPrefix[0], '').trim();
+			}
+
+			const nightPrefix = cleaned.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+night\s*[-–—]*\s*/i);
+			if (nightPrefix) {
+				const day = normalizeDay(nightPrefix[1]);
+				if (day !== null) days.push(day);
+				cleaned = cleaned.replace(nightPrefix[0], '').trim();
+			}
+
+			const singlePrefix = cleaned.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s*[-–—]\s*/i);
+			if (singlePrefix) {
+				const day = normalizeDay(singlePrefix[1]);
+				if (day !== null) days.push(day);
+				cleaned = cleaned.replace(singlePrefix[0], '').trim();
+			}
+
+			const parenOnlyMatches = [...cleaned.matchAll(/\((mon|tue|wed|thu|fri|sat|sun)[a-z]*\s+only\)/ig)];
+			if (parenOnlyMatches.length) {
+				parenOnlyMatches.forEach(match => {
+					const dayName = match[1];
+					const day = normalizeDay(dayName
+						.replace(/^mon$/i, 'monday')
+						.replace(/^tue$/i, 'tuesday')
+						.replace(/^wed$/i, 'wednesday')
+						.replace(/^thu$/i, 'thursday')
+						.replace(/^fri$/i, 'friday')
+						.replace(/^sat$/i, 'saturday')
+						.replace(/^sun$/i, 'sunday'));
+					if (day !== null) days.push(day);
+				});
+				cleaned = cleaned.replace(/\((mon|tue|wed|thu|fri|sat|sun)[a-z]*\s+only\)/ig, '').replace(/\s{2,}/g, ' ').trim();
+			}
+
+			days = [...new Set(days)];
+			return { cleaned, days, lastNightOfMonth };
+		}
+
+		const preAuditTasks = [
+			"Turn off Jacuzzi Pump and Steam room lights",
+			"Receive Handover from Day Team:\n• Familiarise yourself with house status and groups/functions for this evening. Including Conferences, Parties\n• Ask if there are any Wake-up Calls, Breakfast Bags or booked Taxis",
+			"Start Pool Robot \n• Get out pool cleaning robot and place in pool.\n• Start it.\n• Ensure cable will not tangle or snag on anything",
+			"Floor walk 2230 \n• check for room service trays outside of guest’s rooms and recover as necessary. \n• Ensure that fire exit routes are clear, the link bridge is secured and that the golf lounge internal & external door is secured. \n• Turn off any un-needed lights as you go around.",
+			"RevPar\n• Work out the RevPar Figure for the day \n• update any IN HOUSE or ARRIVAL reservations with the market code BMR",
+			"Collect all dockets from the bar and restaurant\n• be sure to check the office desk for dockets that have been left by earlier shifts.\n• For all dockets cashed off with card or cash – ensure these are filed later with the night audit.",
+			"Rebate\n• Rebate charges on the management accounts\n• If there are charges without a signed docket extend the account and ensure these are communicated to restaurant, Marty, Dody, Didier, Debbie H, Aymen, Yaas and Ella for follow up.",
+			"PMs\n• Check out all PMs after bar has closed\n• Extend PM accounts that are due out with balances",
+			"Fill out the management bills report\n• 9000\n• 9001\n• 9066",
+			"D140\n• Look at the D140 (negative postings only) for all cashiersn\n• File in Nights Folder on P Drive.",
+			"NAR1\n• Look at night audit reports (NAR1) on email",
+			"A142\n• Look at the A142 Report and check rates and source codes\n• File in Nights Folder on P Drive",
+			"No Shows\n• DO NOT check in any remaining arrivals unless they are members. Remove room numbers and put them in a comment",
+			"Balance Banking\n• Check banking and fill out Balance Sheet\n• If it is does NOT balance email to Aymen, Yaas, Mary and Harriet",
+			"D100\n• All night staff - print a D100 and match to Freedompay total - INVESTIGATE IF NOT BALANCED",
+			"DM Report\n• Fill in DM Report with Daily figures (PM Actual)",
+			"Run Night Audit\n• Run the Night Audit AT 0301"
+		];
+
+		const tasks = [
+			{ id: 1000, text: "Pre-Audit", type: TASK_TYPES.HEADER, days: [] },
+			...preAuditTasks.map((task, index) => {
+				const { cleaned, days, lastNightOfMonth } = parseDaysAndCleanText(task);
+				const parts = cleaned.split(/\n+/).map(part => part.trim()).filter(Boolean);
+				const text = parts.shift() || '';
+				let subtitle = parts.length ? parts.join('\n') : undefined;
+				if (days.length) {
+					const dayLabel = `Only: ${days.map(day => DAY_LABEL[day]).join('/')}`;
+					subtitle = subtitle ? `${subtitle}\n${dayLabel}` : dayLabel;
+				}
+				if (lastNightOfMonth) {
+					const lastNightLabel = 'Only: Last night of month';
+					subtitle = subtitle ? `${subtitle}\n${lastNightLabel}` : lastNightLabel;
+				}
+				return {
+					id: 1001 + index,
+					text,
+					subtitle,
+					days,
+					lastNightOfMonth,
+					type: TASK_TYPES.REQUIRED
+				};
+			}),
+			{ id: 1, text: "Post-Audit", type: TASK_TYPES.HEADER, days: [] },
+			...rawTasks.map((task, index) => {
+				const { cleaned, days, lastNightOfMonth } = parseDaysAndCleanText(task);
+				const parts = cleaned.split(/\n+/).map(part => part.trim()).filter(Boolean);
+				const text = parts.shift() || '';
+				let subtitle = parts.length ? parts.join('\n') : undefined;
+				if (days.length) {
+					const dayLabel = `Only: ${days.map(day => DAY_LABEL[day]).join('/')}`;
+					subtitle = subtitle ? `${subtitle}\n${dayLabel}` : dayLabel;
+				}
+				if (lastNightOfMonth) {
+					const lastNightLabel = 'Only: Last night of month';
+					subtitle = subtitle ? `${subtitle}\n${lastNightLabel}` : lastNightLabel;
+				}
+				return {
+					id: index + 2,
+					text,
+					subtitle,
+					days,
+					lastNightOfMonth,
+					type: TASK_TYPES.REQUIRED
+				};
+			})
+		];
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const logoImage = document.getElementById('logoImage');
+			if (logoImage) {
+				logoImage.src = LOGO_DATA_URI;
+			}
+			const handoverLogo = document.getElementById('handoverLogo');
+			if (handoverLogo) {
+				handoverLogo.src = LOGO_DATA_URI;
+			}
+			const logoFavicon = document.getElementById('logoFavicon');
+			if (logoFavicon) {
+				logoFavicon.href = LOGO_DATA_URI;
+			}
+
+			const shiftDateInput = document.getElementById('shiftDate');
+			const staffNameInput = document.getElementById('staffName');
+			const handoverDateDisplay = document.getElementById('handoverDateDisplay');
+			const handoverStaffDisplay = document.getElementById('handoverStaffDisplay');
+			if (shiftDateInput && handoverDateDisplay) {
+				const formatDate = (date) => {
+					const year = date.getFullYear();
+					const month = String(date.getMonth() + 1).padStart(2, '0');
+					const day = String(date.getDate()).padStart(2, '0');
+					const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' });
+					return `${weekday} ${day}/${month}/${year}`;
+				};
+
+				const syncHandoverDate = () => {
+					if (!shiftDateInput.value) {
+						handoverDateDisplay.textContent = '';
+						return;
+					}
+					const baseDate = new Date(`${shiftDateInput.value}T00:00:00`);
+					if (Number.isNaN(baseDate.getTime())) {
+						handoverDateDisplay.textContent = '';
+						return;
+					}
+					baseDate.setDate(baseDate.getDate() + 1);
+					handoverDateDisplay.textContent = formatDate(baseDate);
+				};
+
+				syncHandoverDate();
+				shiftDateInput.addEventListener('input', syncHandoverDate);
+			}
+
+			if (staffNameInput && handoverStaffDisplay) {
+				const syncHandoverStaff = () => {
+					handoverStaffDisplay.textContent = staffNameInput.value || '';
+				};
+				syncHandoverStaff();
+				staffNameInput.addEventListener('input', syncHandoverStaff);
+			}
+
+			const checklistDiv = document.getElementById('checklist');
+			let completedTasks = {};
+			let currentTasks = [];
+
+			const handoverPrintHandler = () => {
+				document.body.classList.add('print-handover');
+				window.print();
+			};
+			window.addEventListener('afterprint', () => {
+				document.body.classList.remove('print-handover');
+			});
+
+			function createChecklistItem(item) {
+				const div = document.createElement('div');
+				div.classList.add('checklist-item');
+
+				if (item.type === TASK_TYPES.HEADER) {
+					div.classList.add('header-task');
+					div.textContent = item.text;
+				} else {
+					if (item.type === TASK_TYPES.REQUIRED_BEFORE_CONTINUE) {
+						div.classList.add('required-before-continue');
+					}
+
+					let labelHTML = `<input type="checkbox" id="task-${item.id}" value="${item.id}"> ${item.text}`;
+					if (item.subtitle) {
+						const subtitleHtml = item.subtitle.replace(/\n+/g, '<br>');
+						labelHTML += `<div class="subtitle">${subtitleHtml}</div>`;
+					}
+
+					const label = document.createElement('label');
+					label.innerHTML = labelHTML;
+					div.appendChild(label);
+
+					const checkbox = div.querySelector('input[type="checkbox"]');
+					checkbox.addEventListener('change', function () {
+						completedTasks[item.id] = this.checked;
+						updateItemStyle(item.id, this.checked);
+						updateProgress();
+						saveData();
+					});
+				}
+
+				checklistDiv.appendChild(div);
+				return div;
+			}
+
+			function updateItemStyle(itemId, isChecked) {
+				const checkbox = checklistDiv.querySelector(`#task-${itemId}`);
+				if (!checkbox) return;
+				const div = checkbox.closest('.checklist-item');
+				if (isChecked) {
+					div.classList.add('completed');
+				} else {
+					div.classList.remove('completed');
+				}
+			}
+
+			function updateProgress() {
+				const nonHeaderTasks = currentTasks.filter(task => task.type !== TASK_TYPES.HEADER);
+				const totalTasks = nonHeaderTasks.length;
+				const completedCount = nonHeaderTasks.filter(task => completedTasks[task.id]).length;
+
+				if (totalTasks > 0) {
+					const percentage = Math.round((completedCount / totalTasks) * 100);
+
+					const progressBar = document.getElementById('progressBar');
+					const progressText = document.getElementById('progressText');
+					const progressSection = document.getElementById('progressSection');
+
+					progressBar.style.width = percentage + '%';
+					progressBar.setAttribute('aria-valuenow', percentage);
+					progressBar.textContent = `${percentage}%`;
+					progressText.textContent = `${completedCount} of ${totalTasks} tasks completed (${percentage}%)`;
+
+					progressSection.style.display = 'block';
+
+					progressBar.className = 'progress-bar';
+					if (percentage === 100) {
+						progressBar.classList.add('bg-success');
+					} else if (percentage >= 50) {
+						progressBar.classList.add('bg-info');
+					} else {
+						progressBar.classList.add('bg-warning');
+					}
+				} else {
+					document.getElementById('progressSection').style.display = 'none';
+				}
+			}
+
+			function saveData() {
+				try {
+					const saveIndicator = document.getElementById('saveIndicator');
+
+					saveIndicator.textContent = 'Saving...';
+					saveIndicator.classList.add('saving', 'show');
+
+					localStorage.setItem('nightsChecklistData', JSON.stringify({
+						completedTasks: completedTasks,
+						staffName: document.getElementById('staffName').value,
+						shiftDate: document.getElementById('shiftDate').value,
+						lastSaved: new Date().toISOString()
+					}));
+
+					setTimeout(() => {
+						const now = new Date();
+						const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+						saveIndicator.textContent = `Saved ✓ ${timeStr}`;
+						saveIndicator.classList.remove('saving');
+
+						setTimeout(() => {
+							saveIndicator.classList.remove('show');
+						}, 3000);
+					}, 300);
+
+				} catch (e) {
+					console.error('Error saving to localStorage', e);
+					const saveIndicator = document.getElementById('saveIndicator');
+					saveIndicator.textContent = 'Save Error ✗';
+					saveIndicator.classList.remove('saving');
+					saveIndicator.style.background = '#dc3545';
+					saveIndicator.classList.add('show');
+
+					setTimeout(() => {
+						saveIndicator.classList.remove('show');
+						saveIndicator.style.background = '';
+					}, 3000);
+				}
+			}
+
+			function saveHandoverData() {
+				try {
+					localStorage.setItem('nightsHandoverData', JSON.stringify({
+						handoverNotes: document.getElementById('handoverNotes')?.value || '',
+						breakfastBags: document.getElementById('breakfastBags')?.value || '',
+						taxis: document.getElementById('taxis')?.value || '',
+						wakeUpCalls: document.getElementById('wakeUpCalls')?.value || ''
+					}));
+				} catch (e) {
+					console.error('Error saving handover to localStorage', e);
+				}
+			}
+
+			function updatePrintValues() {
+				const fields = [
+					{ id: 'shiftDate', label: 'Date' },
+					{ id: 'staffName', label: 'Staff' }
+				];
+
+				fields.forEach(field => {
+					const element = document.getElementById(field.id);
+					const label = document.querySelector(`label[for="${field.id}"]`);
+
+					if (element && label) {
+						let value = element.value || 'Not specified';
+						if (field.id === 'shiftDate' && element.value) {
+							const date = new Date(element.value);
+							value = date.toLocaleDateString();
+						}
+						label.setAttribute('data-print-value', value);
+					}
+				});
+			}
+
+			function validateRequiredFields() {
+				const staffName = document.getElementById('staffName').value.trim();
+				const shiftDate = document.getElementById('shiftDate').value;
+
+				const errors = [];
+
+				if (!staffName) {
+					errors.push('Staff is required');
+					document.getElementById('staffName').classList.add('is-invalid');
+				} else {
+					document.getElementById('staffName').classList.remove('is-invalid');
+				}
+
+				if (!shiftDate) {
+					errors.push('Date is required');
+					document.getElementById('shiftDate').classList.add('is-invalid');
+				} else {
+					document.getElementById('shiftDate').classList.remove('is-invalid');
+				}
+
+				if (errors.length > 0) {
+					alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
+					return false;
+				}
+
+				return true;
+			}
+
+			function validateTaskCompletion() {
+				const requiredTasks = currentTasks.filter(task => task.type === TASK_TYPES.REQUIRED || task.type === TASK_TYPES.REQUIRED_BEFORE_CONTINUE);
+				const incompleteRequired = requiredTasks.filter(task => !completedTasks[task.id]);
+
+				if (incompleteRequired.length > 0) {
+					const taskNames = incompleteRequired.map(task => task.text).join('\n• ');
+					const proceed = confirm(
+						`Warning: The following required tasks are not completed:\n\n• ${taskNames}\n\nDo you want to generate the PDF anyway?`
+					);
+					return proceed;
+				}
+
+				return true;
+			}
+
+			// ===== PDF LIBRARY LAZY LOADING =====
+			let pdfLibraryLoaded = false;
+
+			async function loadPDFLibrary() {
+				if (pdfLibraryLoaded || window.jspdf) {
+					return true;
+				}
+
+				try {
+					const script = document.createElement('script');
+					script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+
+					return new Promise((resolve, reject) => {
+						script.onload = () => {
+							pdfLibraryLoaded = true;
+							resolve(true);
+						};
+						script.onerror = () => reject(new Error('Failed to load PDF library'));
+						document.head.appendChild(script);
+					});
+				} catch (error) {
+					console.error('Error loading PDF library:', error);
+					return false;
+				}
+			}
+
+			document.getElementById('generatePdfButton').addEventListener('click', async function () {
+				const button = this;
+				const originalText = button.textContent;
+
+				try {
+					if (!validateRequiredFields()) {
+						return;
+					}
+
+					if (!validateTaskCompletion()) {
+						return;
+					}
+
+					button.disabled = true;
+					button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading PDF Library...';
+
+					const loaded = await loadPDFLibrary();
+					if (!loaded) {
+						throw new Error('Failed to load PDF library');
+					}
+
+					button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+
+					const { jsPDF } = window.jspdf;
+					const pdf = new jsPDF();
+
+					pdf.setFont('helvetica', 'bold');
+					pdf.setFontSize(18);
+					pdf.setTextColor(0, 0, 0);
+					pdf.text('Front Office Nights Checklist', 105, 20, { align: 'center' });
+					pdf.setLineWidth(0.5);
+					pdf.line(20, 25, 190, 25);
+
+					let yOffset = 35;
+
+					pdf.setFont('helvetica', 'bold');
+					pdf.setFontSize(11);
+
+					const fields = [
+						{ label: 'Date', id: 'shiftDate' },
+						{ label: 'Staff', id: 'staffName' }
+					];
+
+					fields.forEach(field => {
+						const element = document.getElementById(field.id);
+						let value = element.value;
+						let cssClasses = element.classList
+
+						if (field.id === 'shiftDate' && value) {
+							const date = new Date(value);
+							value = date.toLocaleDateString();
+						}
+						if(cssClasses.contains('subtitle')){
+						} else{							
+						pdf.setFont('helvetica', 'bold');
+						pdf.text(`${field.label}:`, 20, yOffset);
+						pdf.setFont('helvetica', 'italic');
+						pdf.text(value || 'Not specified', 60, yOffset);
+						yOffset += 7;
+						}
+					});
+
+					pdf.setLineWidth(0.3);
+					pdf.line(20, yOffset, 190, yOffset);
+					yOffset += 6;
+
+					pdf.setFontSize(10);
+					const boxX = 20;
+					const boxWidth = 170;
+					const textX = 26;
+					const textMaxWidth = boxWidth - (textX - boxX) - 6;
+
+					const wrapText = (input, maxWidth) => {
+						const words = input.split(/\s+/).filter(Boolean);
+						const lines = [];
+						let current = '';
+
+						const pushCurrent = () => {
+							if (current) {
+								lines.push(current);
+								current = '';
+							}
+						};
+
+						words.forEach(word => {
+							const test = current ? `${current} ${word}` : word;
+							if (pdf.getTextWidth(test) <= maxWidth) {
+								current = test;
+								return;
+							}
+
+							pushCurrent();
+							if (pdf.getTextWidth(word) <= maxWidth) {
+								current = word;
+								return;
+							}
+
+							let chunk = '';
+							for (const ch of word) {
+								const testChunk = chunk + ch;
+								if (pdf.getTextWidth(testChunk) <= maxWidth) {
+									chunk = testChunk;
+								} else {
+									lines.push(chunk);
+									chunk = ch;
+								}
+							}
+							current = chunk;
+						});
+
+						pushCurrent();
+						return lines.length ? lines : [''];
+					};
+
+					const checklistItems = document.querySelectorAll('.checklist-item');
+
+					checklistItems.forEach(item => {
+						let text = '';
+						const isHeader = item.classList.contains('header-task');
+						const isCompleted = item.classList.contains('completed');
+						const isRequired = item.classList.contains('required-before-continue');
+
+						if (isHeader) {
+							if (yOffset > 270) {
+								pdf.addPage();
+								yOffset = 20;
+							}
+
+							pdf.setFont('helvetica', 'bold');
+							pdf.setFontSize(12);
+							pdf.setTextColor(0, 0, 0);
+							text = item.textContent.trim();
+							pdf.setFillColor(245, 245, 245);
+							pdf.rect(20, yOffset - 5, 170, 8, 'F');
+							pdf.text(text, 105, yOffset, { align: 'center' });
+							yOffset += 8;
+							pdf.setLineWidth(0.2);
+							pdf.line(20, yOffset - 2, 190, yOffset - 2);
+							yOffset += 4;
+							return;
+						}
+
+						pdf.setFont('helvetica', 'normal');
+						pdf.setFontSize(10);
+
+						const label = item.querySelector('label');
+						if (label) {
+							let textContent = '';
+							for (let node of label.childNodes) {
+								if (node.nodeType === Node.TEXT_NODE) {
+									textContent += node.textContent;
+								}
+							}
+							text = textContent.trim();
+						}
+
+						//const subtitle = item.querySelector('.subtitle');
+						const subtitle = "";
+						const lineHeight = 5;
+						//const subtitleLineHeight = 4;
+						const subtitleLineHeight = 0;
+						const paddingTop = 4;
+						const paddingBottom = 4;
+
+						pdf.setFont('helvetica', 'normal');
+						pdf.setFontSize(10);
+						const lines = wrapText(text, textMaxWidth);
+
+						pdf.setFont('helvetica', 'italic');
+						pdf.setFontSize(9);
+						/*const subtitleLines = subtitle
+							? wrapText(subtitle.textContent.trim(), textMaxWidth)
+							: [];*/
+						const subtitleLines = [];
+						const textHeight = lines.length * lineHeight;
+						//const subtitleHeight = subtitleLines.length ? (subtitleLines.length * subtitleLineHeight + 2) : 0;
+						const subtitleHeight = 0;
+						const boxHeight = paddingTop + textHeight + subtitleHeight + paddingBottom;
+						const pageTop = 20;
+						const pageBottom = 270;
+						let boxTop = yOffset;
+						if (boxTop + boxHeight > pageBottom) {
+							pdf.addPage();
+							boxTop = pageTop;
+							yOffset = pageTop;
+						}
+						const textStartY = boxTop + paddingTop;
+
+						pdf.setDrawColor(0, 0, 0);
+						pdf.setLineWidth(0.3);
+						pdf.rect(boxX, boxTop, boxWidth, boxHeight);
+
+						if (isCompleted) {
+							pdf.setFillColor(40, 167, 69);
+							pdf.rect(boxX, boxTop, 3, boxHeight, 'F');
+						} else if (isRequired) {
+							pdf.setFillColor(255, 107, 53);
+							pdf.rect(boxX, boxTop, 3, boxHeight, 'F');
+						}
+
+						if (isCompleted) {
+							pdf.setFont('helvetica', 'bold');
+							pdf.setFontSize(11);
+							pdf.setTextColor(40, 167, 69);
+							pdf.text('✓', boxX + boxWidth - 5, textStartY + 2);
+						}
+
+						pdf.setFont('helvetica', 'normal');
+						pdf.setFontSize(10);
+						pdf.setTextColor(0, 0, 0);
+						lines.forEach((line, index) => {
+							pdf.text(line, textX, textStartY + index * lineHeight);
+						});
+
+						if (subtitleLines.length) {
+							pdf.setFont('helvetica', 'italic');
+							pdf.setFontSize(9);
+							pdf.setTextColor(100, 100, 100);
+							subtitleLines.forEach((line, index) => {
+								pdf.text(line, textX, textStartY + textHeight + 2 + index * subtitleLineHeight);
+							});
+						}
+
+						yOffset = boxTop + boxHeight + 4;
+					});
+
+					const pageCount = pdf.internal.getNumberOfPages();
+					for (let i = 1; i <= pageCount; i++) {
+						pdf.setPage(i);
+						pdf.setFont('helvetica', 'normal');
+						pdf.setFontSize(8);
+						pdf.setTextColor(128, 128, 128);
+
+						const now = new Date();
+						const footerText = `Generated: ${now.toLocaleString()} | Page ${i} of ${pageCount}`;
+						pdf.text(footerText, 105, 290, { align: 'center' });
+					}
+
+					const staffName = document.getElementById('staffName').value || 'Unknown';
+					const dateStr = new Date().toISOString().split('T')[0];
+					const filename = `Front-Office-Nights-Checklist_${staffName.replace(/[^a-zA-Z0-9]/g, '-')}_${dateStr}.pdf`;
+
+					pdf.save(filename);
+
+				} catch (error) {
+					console.error('Error generating PDF:', error);
+					alert('Error generating PDF: ' + error.message);
+				} finally {
+					button.disabled = false;
+					button.textContent = originalText;
+				}
+			});
+
+			document.getElementById('printButton').addEventListener('click', function () {
+				updatePrintValues();
+				window.print();
+			});
+
+			document.getElementById('handoverPrintButton').addEventListener('click', function () {
+				handoverPrintHandler();
+			});
+
+			document.getElementById('handoverClearButton').addEventListener('click', function () {
+				if (confirm('Clear all handover fields? This cannot be undone.')) {
+					['handoverNotes', 'breakfastBags', 'taxis', 'wakeUpCalls'].forEach((id) => {
+						const field = document.getElementById(id);
+						if (field) {
+							field.value = '';
+						}
+					});
+					localStorage.removeItem('nightsHandoverData');
+				}
+			});
+
+			document.getElementById('handoverPdfButton').addEventListener('click', async function () {
+				const button = this;
+				const originalText = button.textContent;
+
+				try {
+					button.disabled = true;
+					button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading PDF Library...';
+
+					const loaded = await loadPDFLibrary();
+					if (!loaded) {
+						throw new Error('Failed to load PDF library');
+					}
+
+					button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+
+					const { jsPDF } = window.jspdf;
+					const pdf = new jsPDF();
+
+					pdf.setFont('helvetica', 'bold');
+					pdf.setFontSize(18);
+					pdf.text('Front Office Nights Handover', 105, 20, { align: 'center' });
+					pdf.setLineWidth(0.5);
+					pdf.line(20, 25, 190, 25);
+
+					let y = 35;
+					pdf.setFontSize(11);
+					pdf.setFont('helvetica', 'bold');
+					pdf.text('Date:', 20, y);
+					pdf.setFont('helvetica', 'normal');
+					pdf.text((handoverDateDisplay.textContent || 'Not specified'), 45, y);
+					y += 10;
+
+					const sections = [
+						{ title: 'Handover Notes', id: 'handoverNotes' },
+						{ title: 'Breakfast Bags', id: 'breakfastBags' },
+						{ title: 'Taxis', id: 'taxis' },
+						{ title: 'Wake-up Calls', id: 'wakeUpCalls' }
+					];
+
+					sections.forEach((section) => {
+						pdf.setFont('helvetica', 'bold');
+						pdf.text(section.title, 20, y);
+						y += 6;
+
+						const value = document.getElementById(section.id)?.value?.trim() || '—';
+						pdf.setFont('helvetica', 'normal');
+						const lines = pdf.splitTextToSize(value, 170);
+						pdf.text(lines, 20, y);
+						y += lines.length * 6 + 6;
+						if (y > 270) {
+							pdf.addPage();
+							y = 20;
+						}
+					});
+
+					const dateStr = new Date().toISOString().split('T')[0];
+					const filename = `Front-Office-Nights-Handover_${dateStr}.pdf`;
+					pdf.save(filename);
+				} catch (error) {
+					console.error('Error generating handover PDF:', error);
+					alert('Error generating PDF: ' + error.message);
+				} finally {
+					button.disabled = false;
+					button.textContent = originalText;
+				}
+			});
+
+			document.getElementById('clearDataButton').addEventListener('click', function () {
+				if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+					localStorage.removeItem('nightsChecklistData');
+					location.reload();
+				}
+			});
+
+			document.getElementById('staffName').addEventListener('input', function () {
+				this.classList.remove('is-invalid');
+				updatePrintValues();
+				saveData();
+			});
+
+			['handoverNotes', 'breakfastBags', 'taxis', 'wakeUpCalls'].forEach((id) => {
+				const field = document.getElementById(id);
+				if (field) {
+					field.addEventListener('input', saveHandoverData);
+				}
+			});
+
+			document.getElementById('shiftDate').addEventListener('change', function () {
+				this.classList.remove('is-invalid');
+				updatePrintValues();
+				buildChecklist();
+				saveData();
+			});
+
+			function buildChecklist() {
+				checklistDiv.innerHTML = '';
+				const shiftDateValue = document.getElementById('shiftDate').value;
+				const selectedDate = shiftDateValue ? new Date(shiftDateValue) : null;
+				const selectedDay = selectedDate ? selectedDate.getDay() : null;
+				const isLastDayOfMonth = selectedDate
+					? selectedDate.getDate() === new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate()
+					: null;
+				const visibleTasks = tasks
+					.map(task => {
+						if (task.type === TASK_TYPES.HEADER) return task;
+						const isRequired = REQUIRED_OVERRIDES[task.id] === true;
+						return {
+							...task,
+							type: isRequired ? TASK_TYPES.REQUIRED : TASK_TYPES.OPTIONAL
+						};
+					})
+					.filter(task => {
+						if (task.type === TASK_TYPES.HEADER) return true;
+						if (task.lastNightOfMonth && selectedDate === null) return true;
+						if (task.lastNightOfMonth && !isLastDayOfMonth) return false;
+						if (!task.days || task.days.length === 0) return true;
+						if (selectedDay === null) return true;
+						return task.days.includes(selectedDay);
+					});
+				currentTasks = visibleTasks;
+				visibleTasks.forEach(task => {
+					const div = createChecklistItem(task);
+					if (task.type !== TASK_TYPES.HEADER) {
+						completedTasks[task.id] = completedTasks[task.id] || false;
+						const checkbox = div.querySelector(`#task-${task.id}`);
+						if (checkbox) {
+							checkbox.checked = completedTasks[task.id];
+						}
+						updateItemStyle(task.id, completedTasks[task.id]);
+					}
+				});
+				updateProgress();
+				updatePrintValues();
+			}
+
+			// Initialize
+			try {
+				const storedData = localStorage.getItem('nightsChecklistData');
+				if (storedData) {
+					const data = JSON.parse(storedData);
+					completedTasks = data.completedTasks || {};
+					const staffField = document.getElementById('staffName');
+					staffField.value = data.staffName || '';
+					staffField.dispatchEvent(new Event('input'));
+					const shiftDateField = document.getElementById('shiftDate');
+					shiftDateField.value = data.shiftDate || '';
+					shiftDateField.dispatchEvent(new Event('input'));
+				}
+
+				const storedHandover = localStorage.getItem('nightsHandoverData');
+				if (storedHandover) {
+					const handoverData = JSON.parse(storedHandover);
+					const handoverNotes = document.getElementById('handoverNotes');
+					const breakfastBags = document.getElementById('breakfastBags');
+					const taxis = document.getElementById('taxis');
+					const wakeUpCalls = document.getElementById('wakeUpCalls');
+					if (handoverNotes) handoverNotes.value = handoverData.handoverNotes || '';
+					if (breakfastBags) breakfastBags.value = handoverData.breakfastBags || '';
+					if (taxis) taxis.value = handoverData.taxis || '';
+					if (wakeUpCalls) wakeUpCalls.value = handoverData.wakeUpCalls || '';
+				}
+				buildChecklist();
+				updatePrintValues();
+			} catch (e) {
+				console.error('Error loading from localStorage', e);
+				completedTasks = {};
+				buildChecklist();
+				updatePrintValues();
+			}
+		});
+	</script>
+</body>
+
+</html>

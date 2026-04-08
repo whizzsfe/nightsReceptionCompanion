@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Check-in List</title>
+    <link rel="icon" id="logoFavicon" href="hotelLogo.ico"/>
+
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+        
+        body.landscape {
+            max-width: 297mm;
+        }
+        
+        body.landscape table {
+            font-size: 11px;
+        }
+        
+        @page :first {
+            size: A4 portrait;
+        }
+        
+        body.landscape @page {
+            size: A4 landscape;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 15mm;
+            background: white;
+        }
+        
+        .print-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 15px;
+            margin-right: 10px;
+        }
+        
+        .orientation-button {
+            background-color: #FF9800;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .orientation-button:hover {
+            background-color: #F57C00;
+        }
+        
+        .print-button:hover {
+            background-color: #45a049;
+        }
+        
+        .add-guest-button {
+            background-color: #2196F3;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        
+        .add-guest-button:hover {
+            background-color: #0b7dda;
+        }
+        
+        .bulk-import-button {
+            background-color: #9C27B0;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        
+        .bulk-import-button:hover {
+            background-color: #7B1FA2;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .modal-content h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .modal-content textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .modal-buttons {
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .modal-buttons button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .cancel-btn {
+            background-color: #999;
+            color: white;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #777;
+        }
+        
+        .import-btn {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .import-btn:hover {
+            background-color: #7B1FA2;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .header-row {
+            background-color: white;
+        }
+        
+        .title-cell {
+            border: none;
+            padding: 0 0 10px 0;
+        }
+        
+        .title-logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #333;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            flex: 1;
+        }
+        
+        .info-container {
+            display: flex;
+            gap: 30px;
+            font-size: 13px;
+            padding-bottom: 10px;
+        }
+        
+        .info-container > div:first-child {
+            flex: 1;
+        }
+        
+        #logoPreview {
+            width: 110px;
+            height: 70px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            background: #fafafa;
+        }
+        
+        #logoPreview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        thead {
+            display: table-header-group;
+        }
+        
+        .column-headers th {
+            background-color: #f0f0f0;
+            border: 2px solid #333;
+            padding: 8px 4px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        td {
+            border: 1px solid #666;
+            padding: 1px 4px;
+            height: 25.5px;
+            vertical-align: middle;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        
+        .signature-cell {
+            width: 100px;
+        }
+        
+        .room-cell {
+            width: 70px;
+        }
+        
+        .car-cell {
+            width: 80px;
+        }
+        
+        .name-cell {
+            width: 140px;
+        }
+        
+        .num-cell {
+            width: 30px;
+            text-align: center;
+        }
+        
+        .name-input, .room-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 12px;
+            padding: 4px 2px;
+            outline: none;
+            overflow: hidden;
+            white-space: nowrap;
+            font-weight: bold; /* Make names bold */
+        }
+        
+        .room-input {
+            text-align: center;
+            font-weight: normal; /* Keep room numbers normal weight */
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+                margin: 0 2px
+            }
+
+            body.landscape{
+                margin: 0 auto;
+            }
+            
+            .print-button,
+            .add-guest-button,
+            .bulk-import-button,
+            .orientation-button,
+            #logoUpload {
+                display: none !important;
+            }
+            
+            table {
+                page-break-inside: auto;
+            }
+            
+            thead {
+                display: table-header-group;
+            }
+            
+            tbody {
+                display: table-row-group;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            
+            input {
+                border: none !important;
+                outline: none !important;
+            }
+            
+            #logoPreview {
+                border: none !important;
+                background: none !important;
+            }
+        }
+    </style>
+    <script>
+        let guestCounter = 15;
+        let isLandscape = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const printBtn = document.getElementById('printBtn');
+            const addGuestBtn = document.getElementById('addGuestBtn');
+            const bulkImportBtn = document.getElementById('bulkImportBtn');
+            const orientationBtn = document.getElementById('orientationBtn');
+            const tableBody = document.querySelector('tbody');
+            const logoUpload = document.getElementById('logoUpload');
+            const logoPreview = document.getElementById('logoPreview');
+            const modal = document.getElementById('bulkImportModal');
+            const cancelBtn = document.getElementById('cancelImport');
+            const importBtn = document.getElementById('confirmImport');
+            const nameTextarea = document.getElementById('nameTextarea');
+            
+            // Logo upload functionality
+            logoUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        logoPreview.innerHTML = `<img src="${event.target.result}" alt="Logo">`;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Auto-resize font for inputs
+            function adjustFontSize(input) {
+                let fontSize = 12;
+                input.style.fontSize = fontSize + 'px';
+                
+                while (input.scrollWidth > input.clientWidth && fontSize > 8) {
+                    fontSize -= 0.5;
+                    input.style.fontSize = fontSize + 'px';
+                }
+            }
+            
+            // Apply font resizing to all inputs
+            function attachInputListeners() {
+                const nameInputs = document.querySelectorAll('.name-input');
+                const roomInputs = document.querySelectorAll('.room-input');
+                
+                nameInputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        adjustFontSize(this);
+                    });
+                });
+                
+                roomInputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        adjustFontSize(this);
+                    });
+                });
+            }
+            
+            attachInputListeners();
+            
+            // Add guest button
+            addGuestBtn.addEventListener('click', function() {
+                guestCounter++;
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td class="num-cell">${guestCounter}</td>
+                    <td><input type="text" class="name-input" /></td>
+                    <td><input type="text" class="room-input" /></td>
+                    <td style="font-size: 10px;"></td>
+                    <td></td>
+                    <td></td>
+                `;
+                tableBody.appendChild(newRow);
+                attachInputListeners();
+            });
+            
+            // Bulk import modal
+            bulkImportBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                nameTextarea.focus();
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                nameTextarea.value = '';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    nameTextarea.value = '';
+                }
+            });
+            
+            // Import names
+            importBtn.addEventListener('click', function() {
+                const namesText = nameTextarea.value.trim();
+                if (!namesText) {
+                    alert('Please enter some names first!');
+                    return;
+                }
+                
+                // Split by newlines and filter out empty lines
+                const names = namesText
+                    .split('\n')
+                    .map(name => name.trim())
+                    .filter(name => name.length > 0);
+                
+                if (names.length === 0) {
+                    alert('No valid names found!');
+                    return;
+                }
+                
+                // Sort names alphabetically (case-insensitive)
+                names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+                
+                // Clear existing rows
+                tableBody.innerHTML = '';
+                
+                // Add rows for each name
+                names.forEach((name, index) => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td class="num-cell">${index + 1}</td>
+                        <td><input type="text" class="name-input" value="${name}" /></td>
+                        <td><input type="text" class="room-input" /></td>
+                        <td style="font-size: 10px;"></td>
+                        <td></td>
+                        <td></td>
+                    `;
+                    tableBody.appendChild(newRow);
+                });
+                
+                // Update counter
+                guestCounter = names.length;
+                
+                // Reattach listeners
+                attachInputListeners();
+                
+                // Close modal
+                modal.style.display = 'none';
+                nameTextarea.value = '';
+            });
+            
+            // Orientation toggle
+            orientationBtn.addEventListener('click', function() {
+                isLandscape = !isLandscape;
+                if (isLandscape) {
+                    document.body.classList.add('landscape');
+                    orientationBtn.textContent = '📄 Switch to Portrait';
+                } else {
+                    document.body.classList.remove('landscape');
+                    orientationBtn.textContent = '📄 Switch to Landscape';
+                }
+            });
+            
+            // Print button
+            printBtn.addEventListener('click', function() {
+                // Create a style element for print
+                const style = document.createElement('style');
+                style.textContent = isLandscape ? '@page { size: A4 landscape; }' : '@page { size: A4 portrait; }';
+                document.head.appendChild(style);
+                
+                window.print();
+                
+                // Remove the style after printing
+                setTimeout(() => {
+                    document.head.removeChild(style);
+                }, 100);
+            });
+        });
+    </script>
+</head>
+<body>
+    <button id="printBtn" class="print-button">🖨️ Print Group List</button>
+    <button id="orientationBtn" class="orientation-button">📄 Switch to Landscape</button>
+    
+    <!-- Bulk Import Modal -->
+    <div id="bulkImportModal" class="modal">
+        <div class="modal-content">
+            <h2>📋 Import Names</h2>
+            <p>Paste or type one name per line. Names will be sorted alphabetically:</p>
+            <textarea id="nameTextarea" placeholder="John Smith&#10;Alice Johnson&#10;Bob Williams&#10;..."></textarea>
+            <div class="modal-buttons">
+                <button id="cancelImport" class="cancel-btn">Cancel</button>
+                <button id="confirmImport" class="import-btn">Import & Sort</button>
+            </div>
+        </div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr class="header-row">
+                <td colspan="6" class="title-cell">
+                    <div class="title-logo-container">
+                        <h1>GROUP CHECK-IN LIST</h1>
+                        <div style="text-align: right;">
+                            <div id="logoPreview">
+                                <img src="hotelLogo.jpg" alt="logo"/>
+                            </div>
+                            <input type="file" id="logoUpload" accept="image/*" style="font-size: 10px; width: 110px;" />
+                        </div>
+                    </div>
+                    <div class="info-container">
+                        <div>
+                            <strong>GROUP NAME:</strong> 
+                            <input type="text" id="groupName" style="border: none; border-bottom: 1px solid #333; min-width: 280px; margin-left: 10px; font-size: 13px; outline: none;" />
+                        </div>
+                        <div>
+                            <strong>DATE:</strong> 
+                            <input type="date" id="date" style="border: none; border-bottom: 1px solid #333; min-width: 130px; margin-left: 10px; font-size: 13px; outline: none;" />
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr class="column-headers">
+                <th class="num-cell">#</th>
+                <th class="name-cell">NAME</th>
+                <th class="room-cell">ROOM NUMBER</th>
+                <th>EMAIL ADDRESS</th>
+                <th class="car-cell">CAR REG</th>
+                <th class="signature-cell">SIGNATURE</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="num-cell">1</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">2</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">3</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">4</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">5</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">6</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">7</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">8</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">9</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">10</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">11</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">12</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">13</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">14</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="num-cell">15</td>
+                <td><input type="text" class="name-input" /></td>
+                <td><input type="text" class="room-input" /></td>
+                <td style="font-size: 10px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <button id="addGuestBtn" class="add-guest-button">+ Add More Guests</button>
+    <button id="bulkImportBtn" class="bulk-import-button">📋 Import Names</button>
+</body>
+</html>

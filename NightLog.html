@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NightLog</title>
+  <link rel="icon" id="logoFavicon" href="hotelLogo.ico"/>
+  <style>
+    /* ── Theme tokens ───────────────────────────────────────────── */
+    :root {
+      --bg:         #0f1720;
+      --surface:    #162032;
+      --surface2:   #1c2a3e;
+      --border:     #263650;
+      --text:       #dde6f0;
+      --muted:      #7a92aa;
+      --accent:     #3b82f6;
+      --accent-h:   #2563eb;
+      --green:      #22c55e;
+      --green-bg:   #052e16;
+      --amber:      #f59e0b;
+      --red:        #ef4444;
+      --radius:     8px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:         #f0f4f8;
+        --surface:    #ffffff;
+        --surface2:   #e8eef4;
+        --border:     #c8d6e5;
+        --text:       #1a2535;
+        --muted:      #5a7a94;
+        --accent:     #2563eb;
+        --accent-h:   #1d4ed8;
+        --green:      #16a34a;
+        --green-bg:   #dcfce7;
+        --amber:      #d97706;
+        --red:        #dc2626;
+      }
+    }
+
+    /* ── Reset & base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100dvh;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────── */
+    .page { max-width: 880px; margin: 0 auto; padding: 16px; }
+
+    /* ── Typography ─────────────────────────────────────────────── */
+    h1 { font-size: 1.4rem; font-weight: 700; }
+    h2 { font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-bottom: 4px; }
+
+    /* ── Controls ───────────────────────────────────────────────── */
+    input, select, textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 10px 12px;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    input[type="file"] { padding: 8px; }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 18px;
+      border: none; border-radius: var(--radius);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .btn:active { opacity: .8; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-h); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-danger  { background: var(--red); color: #fff; }
+    .btn-ghost   { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-sm      { padding: 7px 13px; font-size: 0.82rem; }
+    .btn-block   { width: 100%; }
+
+    /* ── Cards ───────────────────────────────────────────────────── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+
+    /* ── Form helpers ────────────────────────────────────────────── */
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; gap: 12px; }
+    @media (min-width: 600px) {
+      .form-row.col2 { grid-template-columns: 1fr 1fr; }
+      .form-row.col3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    /* ── App header ──────────────────────────────────────────────── */
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 20px; margin-bottom: 16px;
+    }
+    .shift-info { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Floor grid ──────────────────────────────────────────────── */
+    .floor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .floor-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-size: 0.85rem; font-weight: 600;
+      padding: 12px 8px; cursor: pointer; text-align: center;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .floor-btn:hover { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+    .floor-btn:active { opacity: .8; }
+
+    /* ── Badges ──────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px;
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+    .badge-teal   { background: #042f2e; color: #5eead4; border: 1px solid #14b8a6; }
+    .badge-blue   { background: #1e3a5f; color: #93c5fd; border: 1px solid #3b82f6; }
+    .badge-amber  { background: #451a03; color: #fcd34d; border: 1px solid #f59e0b; }
+    .badge-red    { background: #450a0a; color: #fca5a5; border: 1px solid #ef4444; }
+    .badge-grey   { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    @media (prefers-color-scheme: light) {
+      .badge-teal  { background: #ccfbf1; color: #0f766e; border-color: #14b8a6; }
+      .badge-blue  { background: #dbeafe; color: #1d4ed8; border-color: #3b82f6; }
+      .badge-amber { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+      .badge-red   { background: #fee2e2; color: #991b1b; border-color: #ef4444; }
+    }
+
+    /* ── Entry list ──────────────────────────────────────────────── */
+    .entry-list { display: flex; flex-direction: column; gap: 10px; }
+    .entry-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+    }
+    .entry-card.allclear  { border-left: 4px solid var(--green); }
+    .entry-card.issue      { border-left: 4px solid var(--accent); }
+    .entry-card.rectified  { opacity: .55; }
+    .entry-card.rectified .entry-title { text-decoration: line-through; }
+    .entry-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .entry-time  { font-size: 0.78rem; color: var(--muted); }
+    .entry-title { font-weight: 600; margin-bottom: 2px; }
+    .entry-desc  { font-size: 0.9rem; color: var(--muted); white-space: pre-wrap; }
+    .entry-img   { margin-top: 10px; }
+    .entry-img img { max-width: 200px; border-radius: 6px; border: 1px solid var(--border); }
+    .entry-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Image preview ───────────────────────────────────────────── */
+    #imgPreview { display: none; margin-top: 8px; }
+    #imgPreview img { max-width: 120px; border-radius: 6px; border: 1px solid var(--border); }
+    .img-warning { color: var(--amber); font-size: 0.8rem; margin-top: 4px; }
+
+    /* ── Toast ───────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 24px;
+      border-radius: 999px; font-size: 0.88rem; font-weight: 500;
+      box-shadow: 0 4px 24px rgba(0,0,0,.4);
+      transition: transform .3s ease; z-index: 1000; white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Modal ───────────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 500;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; max-width: 440px; width: 100%;
+    }
+    .modal h2 { margin-bottom: 10px; color: var(--text); text-transform: none; letter-spacing: 0; }
+    .modal p  { color: var(--muted); margin-bottom: 20px; font-size: 0.9rem; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+    /* ── Misc ────────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+    .empty-state { text-align: center; color: var(--muted); padding: 32px 16px; font-size: 0.9rem; }
+    .start-wrap { max-width: 400px; margin: 60px auto; }
+    .start-logo { font-size: 2.5rem; text-align: center; margin-bottom: 8px; }
+    .start-sub  { text-align: center; color: var(--muted); font-size: 0.88rem; margin-bottom: 24px; }
+
+    /* ── Import summary ──────────────────────────────────────────── */
+    .import-divider { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 16px 0 10px; }
+    .import-summary {
+      background: var(--green-bg); border: 1px solid var(--green);
+      color: var(--green); border-radius: var(--radius);
+      font-size: 0.85rem; padding: 10px 12px; margin-top: 8px;
+    }
+    .import-summary.err { background: #450a0a; border-color: var(--red); color: #fca5a5; }
+    @media (prefers-color-scheme: light) {
+      .import-summary     { background: #dcfce7; }
+      .import-summary.err { background: #fee2e2; color: #991b1b; }
+    }
+
+    /* ── Print ───────────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .app-header .header-actions, #floorWalkSection, #entryFormSection,
+      .entry-actions, #toast, .modal-overlay { display: none !important; }
+      .card, .entry-card { border: 1px solid #bbb !important; break-inside: avoid; margin-bottom: 10px; }
+      .entry-img img { max-width: 300px !important; }
+      .badge { border: 1px solid #999 !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- End Shift Modal -->
+<div id="endShiftModal" class="modal-overlay">
+  <div class="modal">
+    <h2>⚠ End Shift</h2>
+    <p id="endShiftMsg">Export downloaded. Clear all entries and start a new shift? This cannot be undone.</p>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmEndShift()">Clear &amp; End Shift</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Entry Modal -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal" style="max-width:560px">
+    <h2>✏ Edit Entry</h2>
+    <input type="hidden" id="editId">
+    <div class="form-row col2">
+      <div class="form-group">
+        <label for="eTimestamp">Timestamp</label>
+        <input type="datetime-local" id="eTimestamp">
+      </div>
+      <div class="form-group">
+        <label for="eFloor">Floor</label>
+        <select id="eFloor">
+          <option value="">— Select floor —</option>
+          <option>Ground Floor</option>
+          <option>First Floor</option>
+          <option>Second Floor</option>
+          <option>Third Floor</option>
+          <option>Roof</option>
+        </select>
+      </div>
+    </div>
+    <div id="editIssueOnlyFields">
+      <div class="form-row col2">
+        <div class="form-group">
+          <label for="eCategory">Category</label>
+          <select id="eCategory">
+            <option value="">— Select category —</option>
+            <option>Floor Walk</option>
+            <option>Maintenance</option>
+            <option>Complaint</option>
+            <option>Compensation</option>
+            <option>Security</option>
+            <option>Safety</option>
+            <option>Paperwork</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eSeverity">Severity</label>
+          <select id="eSeverity">
+            <option value="">— Optional —</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="eTitle">Title</label>
+        <input type="text" id="eTitle" placeholder="Brief one-line summary">
+      </div>
+      <div class="form-group">
+        <label for="eDescription">Description</label>
+        <textarea id="eDescription" placeholder="Detailed notes, action taken…"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="eReporter">Reporter (who found it)</label>
+        <input type="text" id="eReporter" placeholder="Name — optional">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── Start Shift screen ──────────────────────────────────────── -->
+  <div id="startScreen">
+    <div class="start-wrap">
+      <div class="start-logo">🌙</div>
+      <h1 style="text-align:center;margin-bottom:4px;">NightLog</h1>
+      <p class="start-sub">Night Shift Issue Log</p>
+      <div class="card">
+        <div class="form-group">
+          <label for="shiftLeaderInput">Shift Leader Name</label>
+          <input type="text" id="shiftLeaderInput" placeholder="Enter your name" autocomplete="name">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="startShift()">Start Shift →</button>
+        <div class="import-divider">— or continue an existing shift —</div>
+        <div class="form-group">
+          <label for="startImportInput">Load JSON from another device</label>
+          <input type="file" id="startImportInput" accept=".json,application/json">
+        </div>
+        <div id="importSummary" class="import-summary hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── App screen ─────────────────────────────────────────────── -->
+  <div id="appScreen" class="hidden">
+
+    <!-- Header -->
+    <div class="app-header">
+      <div>
+        <h1>🌙 NightLog</h1>
+        <div class="shift-info" id="shiftInfoText"></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('mergeImportInput').click()">⬆ Import JSON</button>
+        <input type="file" id="mergeImportInput" accept=".json,application/json" class="hidden">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
+        <button class="btn btn-danger  btn-sm" onclick="beginEndShift()">End Shift</button>
+      </div>
+    </div>
+
+    <!-- Floor Walk -->
+    <div id="floorWalkSection" class="card">
+      <h2>🚶 Floor Walk — All Clear</h2>
+      <div class="floor-grid" id="floorGrid"></div>
+    </div>
+
+    <!-- Entry Form -->
+    <div id="entryFormSection" class="card">
+      <h2>📋 Log an Issue</h2>
+      <div class="form-row col2">
+        <div class="form-group">
+          <label for="fTimestamp">Timestamp</label>
+          <input type="datetime-local" id="fTimestamp">
+        </div>
+        <div class="form-group">
+          <label for="fFloor">Floor</label>
+          <select id="fFloor">
+            <option value="">— Select floor —</option>
+            <option>Ground Floor</option>
+            <option>First Floor</option>
+            <option>Second Floor</option>
+            <option>Third Floor</option>
+            <option>Roof</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row col2">
+        <div class="form-group">
+          <label for="fCategory">Category</label>
+          <select id="fCategory">
+            <option value="">— Select category —</option>
+            <option>Floor Walk</option>
+            <option>Maintenance</option>
+            <option>Complaint</option>
+            <option>Compensation</option>
+            <option>Security</option>
+            <option>Safety</option>
+            <option>Paperwork</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fSeverity">Severity</label>
+          <select id="fSeverity">
+            <option value="">— Optional —</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fTitle">Title</label>
+        <input type="text" id="fTitle" placeholder="Brief one-line summary">
+      </div>
+      <div class="form-group">
+        <label for="fDescription">Description</label>
+        <textarea id="fDescription" placeholder="Detailed notes, action taken…"></textarea>
+      </div>
+      <div class="form-row col2">
+        <div class="form-group">
+          <label for="fReporter">Reporter (who found it)</label>
+          <input type="text" id="fReporter" placeholder="Name — optional">
+        </div>
+        <div class="form-group">
+          <label for="fImage">Photo</label>
+          <input type="file" id="fImage" accept="image/*" capture="environment">
+          <div id="imgPreview">
+            <img id="imgPreviewEl" src="" alt="Preview">
+            <div id="imgWarning" class="img-warning"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveEntry()">💾 Save Entry</button>
+    </div>
+
+    <!-- Entry List -->
+    <div class="card">
+      <h2>📒 Shift Log</h2>
+      <div id="entryList" class="entry-list"></div>
+    </div>
+
+  </div><!-- /appScreen -->
+</div><!-- /page -->
+
+<script>
+// ── Constants ────────────────────────────────────────────────────────
+const FLOORS = ['Ground Floor','First Floor','Second Floor','Third Floor','Roof'];
+const SEV_CLASS = { High:'badge-red', Medium:'badge-amber', Low:'badge-grey' };
+const K = {
+  entries:    'nightlog:entries',
+  shiftMeta:  'nightlog:shiftMeta',
+  lastDraft:  'nightlog:lastDraft',
+  exportMeta: 'nightlog:lastExportMeta',
+};
+const DRAFT_IDS = ['fTimestamp','fFloor','fCategory','fTitle','fDescription','fReporter','fSeverity'];
+
+// ── Boot ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const meta = getShiftMeta();
+  if (meta) {
+    showApp(meta);
+  } else {
+    show('startScreen');
+    document.getElementById('shiftLeaderInput').focus();
+  }
+  document.getElementById('fImage').addEventListener('change', handleImage);
+  document.getElementById('startImportInput').addEventListener('change', handleStartImport);
+  document.getElementById('mergeImportInput').addEventListener('change', importMerge);
+  DRAFT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', saveDraft);
+  });
+  // allow Enter on start screen
+  document.getElementById('shiftLeaderInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startShift();
+  });
+});
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function getEntries()   { try { return JSON.parse(localStorage.getItem(K.entries)   || '[]'); } catch { return []; } }
+function getShiftMeta() { try { return JSON.parse(localStorage.getItem(K.shiftMeta) || 'null'); } catch { return null; } }
+function saveEntries(e) { localStorage.setItem(K.entries, JSON.stringify(e)); }
+
+function show(id)  { document.getElementById(id).classList.remove('hidden'); }
+function hide(id)  { document.getElementById(id).classList.add('hidden'); }
+
+function shiftId(date) {
+  const p = n => String(n).padStart(2,'0');
+  return `${date.getFullYear()}${p(date.getMonth()+1)}${p(date.getDate())}-${p(date.getHours())}${p(date.getMinutes())}`;
+}
+
+function fmt24(date) {
+  return date.toLocaleString('en-GB', {
+    day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit', hour12: false,
+  });
+}
+
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Import: Start Screen ────────────────────────────────────────────
+let _importedData = null;
+
+function handleStartImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const el = document.getElementById('importSummary');
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const raw = JSON.parse(ev.target.result);
+      if (!Array.isArray(raw)) throw new Error('File is not a NightLog JSON array');
+      const valid = raw.filter(x => x && x.id && x.timestamp);
+      if (!valid.length) throw new Error('No valid entries found');
+      const sid = valid.find(x => x.shiftId)?.shiftId || null;
+      _importedData = { shiftId: sid, entries: valid };
+      el.className = 'import-summary';
+      el.textContent = `✓ ${valid.length} entr${valid.length === 1 ? 'y' : 'ies'} loaded` +
+        (sid ? ` · Shift ${sid}` : '') + '. Enter your name and click Start Shift to continue.';
+      el.classList.remove('hidden');
+    } catch (err) {
+      _importedData = null;
+      el.className = 'import-summary err';
+      el.textContent = `⚠ Could not read file: ${err.message}`;
+      el.classList.remove('hidden');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── Start Shift ──────────────────────────────────────────────────────
+function startShift() {
+  const leader = document.getElementById('shiftLeaderInput').value.trim();
+  if (!leader) { toast('Please enter a shift leader name.'); return; }
+  const now  = new Date();
+  const sid  = _importedData?.shiftId || shiftId(now);
+  const meta = { shiftId: sid, startTimestamp: now.toISOString(), shiftLeader: leader };
+  localStorage.setItem(K.shiftMeta, JSON.stringify(meta));
+  if (_importedData?.entries.length) {
+    saveEntries(_importedData.entries);
+    _importedData = null;
+  }
+  // reset start screen import UI
+  document.getElementById('startImportInput').value = '';
+  document.getElementById('importSummary').classList.add('hidden');
+  hide('startScreen');
+  showApp(meta);
+}
+
+function showApp(meta) {
+  show('appScreen');
+  hide('startScreen');
+  const start = new Date(meta.startTimestamp);
+  document.getElementById('shiftInfoText').textContent =
+    `Shift ${meta.shiftId} · ${meta.shiftLeader} · Started ${fmt24(start)}`;
+  buildFloorGrid();
+  setTimestampNow();
+  restoreDraft();
+  renderEntries();
+  // focus first empty required field
+  const firstEmpty = ['fFloor','fCategory','fTitle'].map(id => document.getElementById(id))
+    .find(el => !el.value);
+  if (firstEmpty) firstEmpty.focus();
+}
+
+// ── Floor Walk ───────────────────────────────────────────────────────
+function buildFloorGrid() {
+  const grid = document.getElementById('floorGrid');
+  grid.innerHTML = '';
+  FLOORS.forEach(floor => {
+    const btn = document.createElement('button');
+    btn.className = 'floor-btn';
+    btn.innerHTML = `✅ ${esc(floor)}`;
+    btn.onclick = () => saveAllClear(floor);
+    grid.appendChild(btn);
+  });
+}
+
+function saveAllClear(floor) {
+  const meta    = getShiftMeta();
+  const entries = getEntries();
+  const id      = `${meta.shiftId}-${String(entries.length + 1).padStart(3,'0')}`;
+  entries.push({ schemaVersion:1, id, type:'allclear', timestamp: new Date().toISOString(), floor, shiftId: meta.shiftId });
+  saveEntries(entries);
+  renderEntries();
+  toast(`✅ All Clear — ${floor}`);
+}
+
+// ── Save Issue ───────────────────────────────────────────────────────
+function saveEntry() {
+  const floor    = document.getElementById('fFloor').value;
+  const category = document.getElementById('fCategory').value;
+  const title    = document.getElementById('fTitle').value.trim();
+  const tsVal    = document.getElementById('fTimestamp').value;
+  if (!floor)    { toast('Please select a floor.');    return; }
+  if (!category) { toast('Please select a category.'); return; }
+  if (!title)    { toast('Please enter a title.');     return; }
+  if (!tsVal)    { toast('Please set a timestamp.');   return; }
+
+  const meta    = getShiftMeta();
+  const entries = getEntries();
+  const id      = `${meta.shiftId}-${String(entries.length + 1).padStart(3,'0')}`;
+  const entry   = {
+    schemaVersion: 1, id, type: 'issue',
+    timestamp:   new Date(tsVal).toISOString(),
+    floor, category, title, shiftId: meta.shiftId,
+  };
+  const desc     = document.getElementById('fDescription').value.trim();
+  const reporter = document.getElementById('fReporter').value.trim();
+  const severity = document.getElementById('fSeverity').value;
+  if (desc)     entry.description = desc;
+  if (reporter) entry.reporter    = reporter;
+  if (severity) entry.severity    = severity;
+
+  const imgEl  = document.getElementById('imgPreviewEl');
+  const imgFile = document.getElementById('fImage').files[0];
+  if (imgFile && imgEl.src && imgEl.src.startsWith('data:')) {
+    const imgExt  = imgFile.type.split('/')[1]?.replace('jpeg','jpg') || 'jpg';
+    const imgName = (imgFile.name && imgFile.name.includes('.')) ? imgFile.name : `photo.${imgExt}`;
+    entry.image = { name: imgName, type: imgFile.type, dataUrl: imgEl.src };
+  }
+
+  entries.push(entry);
+  saveEntries(entries);
+  clearDraft();
+  clearForm();
+  renderEntries();
+  toast('Entry saved.');
+}
+
+// ── Render ───────────────────────────────────────────────────────────
+function renderEntries() {
+  const list    = document.getElementById('entryList');
+  const entries = getEntries();
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty-state">No entries yet this shift.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  // oldest first — entries are appended in order, so just iterate normally
+  entries.forEach(e => {
+    const div = document.createElement('div');
+    div.className = `entry-card ${e.type === 'allclear' ? 'allclear' : 'issue'}${e.rectified ? ' rectified' : ''}`;
+    const ts = new Date(e.timestamp);
+    if (e.type === 'allclear') {
+      div.innerHTML = `
+        <div class="entry-meta">
+          <span class="badge badge-green">All Clear</span>
+          <span class="badge badge-grey">${esc(e.floor)}</span>
+          ${e.rectified ? '<span class="badge badge-teal">✓ Rectified</span>' : ''}
+          <span class="entry-time">${fmt24(ts)}</span>
+        </div>
+        <div class="entry-title">Floor Walk — ${esc(e.floor)}</div>
+        <div class="entry-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editEntry('${e.id}')">✏ Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteEntry('${e.id}')">🗑 Delete</button>
+        </div>`;
+    } else {
+      const sc = SEV_CLASS[e.severity] || 'badge-grey';
+      div.innerHTML = `
+        <div class="entry-meta">
+          <span class="badge badge-blue">${esc(e.category)}</span>
+          <span class="badge badge-grey">${esc(e.floor)}</span>
+          ${e.severity ? `<span class="badge ${sc}">${esc(e.severity)}</span>` : ''}
+          ${e.rectified ? '<span class="badge badge-teal">✓ Rectified</span>' : ''}
+          <span class="entry-time">${fmt24(ts)}</span>
+          ${e.reporter ? `<span class="entry-time">· ${esc(e.reporter)}</span>` : ''}
+        </div>
+        <div class="entry-title">${esc(e.title)}</div>
+        ${e.description ? `<div class="entry-desc">${esc(e.description)}</div>` : ''}
+        ${e.image ? `<div class="entry-img"><img src="${e.image.dataUrl}" alt="${esc(e.image.name)}"></div>` : ''}
+        <div class="entry-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleRectified('${e.id}')">${e.rectified ? '\u21ba Unmark' : '\u2713 Rectified'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareEntry('${e.id}')">\ud83d\udce4 Share</button>
+          <button class="btn btn-ghost btn-sm" onclick="emailEntry('${e.id}')">\u2709 Email</button>
+          <button class="btn btn-ghost btn-sm" onclick="editEntry('${e.id}')">\u270f Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteEntry('${e.id}')">\ud83d\uddd1 Delete</button>
+        </div>`;
+    }
+    list.appendChild(div);
+  });
+}
+// ── Edit Entry ────────────────────────────────────────────────────
+let _editType = null;
+
+function editEntry(id) {
+  const e = getEntries().find(x => x.id === id);
+  if (!e) return;
+  _editType = e.type;
+  document.getElementById('editId').value = id;
+  const toLocal = iso => {
+    const d = new Date(iso);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+  document.getElementById('eTimestamp').value = toLocal(e.timestamp);
+  document.getElementById('eFloor').value     = e.floor || '';
+  const issueFields = document.getElementById('editIssueOnlyFields');
+  if (e.type === 'allclear') {
+    issueFields.classList.add('hidden');
+  } else {
+    issueFields.classList.remove('hidden');
+    document.getElementById('eCategory').value    = e.category    || '';
+    document.getElementById('eSeverity').value    = e.severity    || '';
+    document.getElementById('eTitle').value       = e.title       || '';
+    document.getElementById('eDescription').value = e.description || '';
+    document.getElementById('eReporter').value    = e.reporter    || '';
+  }
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  _editType = null;
+}
+
+function saveEdit() {
+  const id      = document.getElementById('editId').value;
+  const entries = getEntries();
+  const idx     = entries.findIndex(x => x.id === id);
+  if (idx === -1) { closeEditModal(); return; }
+  const e    = entries[idx];
+  const tsVal = document.getElementById('eTimestamp').value;
+  const floor = document.getElementById('eFloor').value;
+  if (!floor) { toast('Please select a floor.');  return; }
+  if (!tsVal) { toast('Please set a timestamp.'); return; }
+  e.timestamp = new Date(tsVal).toISOString();
+  e.floor     = floor;
+  if (_editType !== 'allclear') {
+    const category = document.getElementById('eCategory').value;
+    const title    = document.getElementById('eTitle').value.trim();
+    if (!category) { toast('Please select a category.'); return; }
+    if (!title)    { toast('Please enter a title.');     return; }
+    e.category = category;
+    e.title    = title;
+    const severity = document.getElementById('eSeverity').value;
+    const desc     = document.getElementById('eDescription').value.trim();
+    const reporter = document.getElementById('eReporter').value.trim();
+    if (severity) e.severity = severity; else delete e.severity;
+    if (desc)     e.description = desc; else delete e.description;
+    if (reporter) e.reporter    = reporter; else delete e.reporter;
+  }
+  entries[idx] = e;
+  saveEntries(entries);
+  renderEntries();
+  closeEditModal();
+  toast('Entry updated.');
+}
+
+// ── Toggle Rectified ─────────────────────────────────────────────
+function toggleRectified(id) {
+  const entries = getEntries();
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  e.rectified = !e.rectified;
+  saveEntries(entries);
+  renderEntries();
+  toast(e.rectified ? '✓ Marked as rectified.' : '↺ Marked as unresolved.');
+}
+
+// ── Delete Entry ──────────────────────────────────────────────────
+function deleteEntry(id) {
+  if (!confirm('Delete this entry? This cannot be undone.')) return;
+  saveEntries(getEntries().filter(x => x.id !== id));
+  renderEntries();
+  toast('Entry deleted.');
+}
+// ── Share ────────────────────────────────────────────────────────────
+async function shareEntry(id) {
+  const e = getEntries().find(x => x.id === id);
+  if (!e) return;
+  const ts = new Date(e.timestamp);
+  const text = e.type === 'allclear'
+    ? `[NightLog] All Clear\n${e.floor} · ${fmt24(ts)}`
+    : [
+        `[NightLog] ${e.category} — ${e.title}`,
+        `Floor: ${e.floor}`,
+        `Time:  ${fmt24(ts)}`,
+        e.severity    ? `Severity: ${e.severity}`  : '',
+        e.reporter    ? `Reporter: ${e.reporter}`  : '',
+        e.description ? `\n${e.description}`       : '',
+      ].filter(Boolean).join('\n');
+
+  if (navigator.share) {
+    const shareData = { title: 'NightLog Entry', text };
+    // File sharing only works reliably on mobile (Android/iOS).
+    // Windows desktop share sheet rejects in-memory File objects for most targets.
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile && e.image?.dataUrl && navigator.canShare) {
+      try {
+        const file = await dataUrlToFile(e.image.dataUrl, e.image.name || 'photo.jpg');
+        const withFile = { ...shareData, files: [file] };
+        if (navigator.canShare(withFile)) {
+          navigator.share(withFile).catch(() => navigator.share(shareData).catch(() => waOpen(text)));
+          return;
+        }
+      } catch { /* fall through to text-only share */ }
+    }
+    navigator.share(shareData).catch(() => waOpen(text));
+  } else {
+    waOpen(text);
+  }
+}
+
+async function dataUrlToFile(dataUrl, filename) {
+  const res  = await fetch(dataUrl);
+  const blob = await res.blob();
+  const mime = blob.type || 'image/jpeg';
+  const ext  = mime.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+  const name = (filename && filename.trim() && filename.includes('.')) ? filename : `photo.${ext}`;
+  if (!blob.size) throw new Error('Empty image blob');
+  return new File([blob], name, { type: mime });
+}
+
+function waOpen(text) { window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); }
+
+// ── Email (EML download) ───────────────────────────────────────────
+function emailEntry(id) {
+  const e = getEntries().find(x => x.id === id);
+  if (!e) return;
+  const ts      = new Date(e.timestamp);
+  const subject = `[NightLog] ${e.category || 'Entry'} — ${e.title || e.floor}`;
+  const body    = [
+    `Category:  ${e.category  || '—'}`,
+    `Floor:     ${e.floor     || '—'}`,
+    `Time:      ${fmt24(ts)}`,
+    e.severity    ? `Severity:  ${e.severity}`  : '',
+    e.reporter    ? `Reporter:  ${e.reporter}`  : '',
+    e.description ? `\n${e.description}`         : '',
+    e.rectified   ? '\n[Rectified]'              : '',
+  ].filter(Boolean).join('\n');
+
+  const boundary = `NightLog_${Date.now()}`;
+  const dateStr  = ts.toUTCString();
+
+  let eml;
+  if (e.image?.dataUrl) {
+    const b64data   = e.image.dataUrl.split(',')[1] || '';
+    const mime      = (e.image.dataUrl.match(/:(.*?);/) || [])[1] || 'image/jpeg';
+    const imgName   = e.image.name || 'photo.jpg';
+    // MIME requires base64 wrapped at 76 chars per line
+    const b64wrapped = b64data.match(/.{1,76}/g)?.join('\r\n') || b64data;
+
+    eml = [
+      'MIME-Version: 1.0',
+      `Date: ${dateStr}`,
+      `Subject: ${subject}`,
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/plain; charset=UTF-8',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      body,
+      '',
+      `--${boundary}`,
+      `Content-Type: ${mime}; name="${imgName}"`,
+      'Content-Transfer-Encoding: base64',
+      `Content-Disposition: attachment; filename="${imgName}"`,
+      '',
+      b64wrapped,
+      '',
+      `--${boundary}--`,
+    ].join('\r\n');
+  } else {
+    eml = [
+      'MIME-Version: 1.0',
+      `Date: ${dateStr}`,
+      `Subject: ${subject}`,
+      'Content-Type: text/plain; charset=UTF-8',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      body,
+    ].join('\r\n');
+  }
+
+  const blob = new Blob([eml], { type: 'message/rfc822' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `nightlog-${id}.eml`,
+  });
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✉ Email draft downloaded — double-click to open in Outlook.');
+}
+
+// ── Export JSON ──────────────────────────────────────────────────────
+async function exportJSON(usePicker = false) {
+  const meta     = getShiftMeta();
+  const entries  = getEntries();
+  const filename = `nightlog-${meta ? meta.shiftId : 'export'}.json`;
+  const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+  if (usePicker && window.showSaveFilePicker) {
+    try {
+      const fh = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'NightLog JSON', accept: { 'application/json': ['.json'] } }],
+      });
+      const w = await fh.createWritable();
+      await w.write(blob);
+      await w.close();
+      toast(`💾 Saved ${filename}`);
+      return filename;
+    } catch (err) {
+      if (err.name !== 'AbortError') console.warn('showSaveFilePicker:', err);
+      // user cancelled or API error — fall through to download
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`⬇ Exported ${filename}`);
+  return filename;
+}
+
+// ── Import: Merge into active shift ────────────────────────────────
+function importMerge(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = ''; // allow re-selecting same file
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const raw = JSON.parse(ev.target.result);
+      if (!Array.isArray(raw)) throw new Error('Not a valid NightLog JSON array');
+      const valid = raw.filter(x => x && x.id && x.timestamp);
+      if (!valid.length) { toast('⚠ No valid entries found in file.'); return; }
+      const existing   = getEntries();
+      const existingIds = new Set(existing.map(x => x.id));
+      const newEntries  = valid.filter(x => !existingIds.has(x.id));
+      const dupes       = valid.length - newEntries.length;
+      const merged = [...existing, ...newEntries]
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      saveEntries(merged);
+      renderEntries();
+      toast(`⬆ Merged ${newEntries.length} new entr${newEntries.length === 1 ? 'y' : 'ies'}` +
+        (dupes ? ` · ${dupes} duplicate${dupes > 1 ? 's' : ''} skipped` : ''));
+    } catch (err) {
+      toast(`⚠ Import failed: ${err.message}`);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── End Shift ────────────────────────────────────────────────────────
+let _exportedFilename = null;
+
+function beginEndShift() {
+  const entries = getEntries();
+  if (!entries.length) {
+    if (confirm('No entries this shift. End and clear anyway?')) confirmEndShift();
+    return;
+  }
+  _exportedFilename = exportJSON();
+  const large = entries.some(e => e.image && e.image.dataUrl && e.image.dataUrl.length > 500000);
+  document.getElementById('endShiftMsg').textContent =
+    'Export downloaded.' +
+    (large ? ' ⚠ Some entries contain large images — verify the download.' : '') +
+    ' Clear all entries and start a new shift? This cannot be undone.';
+  document.getElementById('endShiftModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('endShiftModal').classList.remove('open'); }
+
+function confirmEndShift() {
+  const meta = getShiftMeta();
+  if (meta && _exportedFilename) {
+    localStorage.setItem(K.exportMeta, JSON.stringify({
+      shiftId: meta.shiftId, timestamp: new Date().toISOString(), filename: _exportedFilename,
+    }));
+  }
+  [K.entries, K.lastDraft, K.shiftMeta].forEach(k => localStorage.removeItem(k));
+  closeModal();
+  hide('appScreen');
+  show('startScreen');
+  document.getElementById('shiftLeaderInput').value = '';
+  document.getElementById('shiftLeaderInput').focus();
+  toast('Shift ended. Ready for next shift.');
+}
+
+// ── Image handling ───────────────────────────────────────────────────
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('imgPreviewEl').src = dataUrl;
+      document.getElementById('imgPreview').style.display = 'block';
+      const kb = Math.round(dataUrl.length / 1024);
+      document.getElementById('imgWarning').textContent = dataUrl.length > 512000
+        ? `⚠ Image is ${kb} KB — storage quota may be affected.` : '';
+      saveDraft();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Draft ────────────────────────────────────────────────────────────
+function saveDraft() {
+  const d = {};
+  DRAFT_IDS.forEach(id => { d[id] = document.getElementById(id)?.value ?? ''; });
+  const src = document.getElementById('imgPreviewEl').src;
+  if (src && src.startsWith('data:')) d._img = src;
+  localStorage.setItem(K.lastDraft, JSON.stringify(d));
+}
+
+function restoreDraft() {
+  try {
+    const d = JSON.parse(localStorage.getItem(K.lastDraft) || 'null');
+    if (!d) { setTimestampNow(); return; }
+    DRAFT_IDS.forEach(id => { const el = document.getElementById(id); if (el && d[id]) el.value = d[id]; });
+    if (d._img) {
+      document.getElementById('imgPreviewEl').src = d._img;
+      document.getElementById('imgPreview').style.display = 'block';
+    }
+  } catch { setTimestampNow(); }
+}
+
+function clearDraft() { localStorage.removeItem(K.lastDraft); }
+
+// ── Misc ─────────────────────────────────────────────────────────────
+function setTimestampNow() {
+  const now   = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+  document.getElementById('fTimestamp').value = local;
+}
+
+function clearForm() {
+  DRAFT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('fImage').value = '';
+  document.getElementById('imgPreviewEl').src = '';
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgWarning').textContent = '';
+  setTimestampNow();
+}
+
+let _toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
