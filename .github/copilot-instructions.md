@@ -493,7 +493,7 @@ Before considering the build complete, verify all of the following:
 - [ ] AI system prompt includes live shift context (staff name, incidents, checklist %).
 - [ ] Night Log is the sole incident logger; no separate incident list exists in the Notes section.
 - [ ] Night Log JSON export produces a valid file. *(If Monthly Report is implemented, verify it can re-import the same JSON schema; otherwise skip.)*
-- [ ] *(Version A only)* `hotelcompanion_items.js` loads correctly and populates both the Checklist and Night Audit Tracker; editing the file's arrays changes the displayed items without touching the main HTML.
+- [ ] *(Version A only)* `hotelcompanion_editor.html` opens without errors, all three tabs (Pre-Shift, Post-Shift, Night Audit Steps) are editable, items can be added/deleted/reordered, and Export & Save downloads a valid `hotelcompanion_items.js`. Placing that file alongside `hotelcompanion_suite.html` and reloading the app replaces the default content with the exported content. Import and Reset to Defaults both work correctly.
 - [ ] The Sign Generator prints correctly at A4 and A3.
 - [ ] The Group Check-in list prints correctly in portrait and landscape.
 - [ ] Tools section in sidebar is visually separated from core nav items.
@@ -511,13 +511,47 @@ Before considering the build complete, verify all of the following:
 ### Version A
 - [ ] `hotelcompanion_suite.html` — single self-contained file with all core sections
       plus Tools group (Night Log, Monthly Report *(nice-to-have)*, Group Check-in, Sign Generator, Daily Info Board)
-- [ ] `hotelcompanion_items.js` — **editable configuration file** containing the
-      Pre-Shift checklist items, Post-Shift checklist items, and Night Audit Tracker
-      steps as plain JavaScript arrays. The main HTML file loads this via `<script src="hotelcompanion_items.js">`.
-      Staff can customise checklist and audit content by editing only this file —
-      no changes to the main HTML are required. A `hotelcompanion_items.example.js`
-      (committed to the repo) shows the default arrays; the working `hotelcompanion_items.js`
-      is added to `.gitignore` so property-specific content is not committed.
+- [ ] `hotelcompanion_editor.html` — **standalone GUI content editor** (no coding required).
+      Opens in any browser as a separate file alongside `hotelcompanion_suite.html`.
+      Allows non-technical staff / managers to customise checklist and audit content
+      through a point-and-click interface — no code editing, no developer knowledge needed.
+
+      **Editor must include:**
+      - Three tabs / accordion sections: **Pre-Shift Items**, **Post-Shift Items**,
+        **Night Audit Steps**.
+      - Each item displayed as an editable row with:
+        - A drag handle (↕) for reordering.
+        - A text input for the item label.
+        - (Checklist tabs only) A "Required before continue?" toggle (checkbox/pill).
+        - (Checklist tabs only) A "Day restriction" dropdown (Every day, Mon only,
+          Tue only, Wed only, Thu only, Fri only, Sat only, Sun only,
+          Last night of month).
+        - A delete (🗑) button.
+      - An **"+ Add Item"** button at the bottom of each tab.
+      - An **"Export & Save"** button that serialises the current arrays to a
+        `hotelcompanion_items.js` file and triggers a browser download. The
+        downloaded file must be placed in the same folder as
+        `hotelcompanion_suite.html` to take effect.
+      - An **"Import / Load existing"** button that reads a previously saved
+        `hotelcompanion_items.js` (or `hotelcompanion_items.example.js`) back
+        into the editor so the user can continue editing.
+      - A **"Reset to Defaults"** button that reloads the built-in default arrays.
+      - Clear on-screen instructions (no assumed technical knowledge):
+        *"Edit your checklist and audit items below, then click Export & Save.
+        Place the downloaded file in the same folder as hotelcompanion_suite.html
+        and reload the app."*
+      - Design must match the project design system (§ 2) — same dark-gold theme,
+        fonts (Bebas Neue / DM Sans), and colour variables.
+
+      **Runtime loading in `hotelcompanion_suite.html`:**
+      The main app loads customised content via `<script src="hotelcompanion_items.js">`.
+      If the file is absent (first install or file not yet exported), the app must
+      fall back to built-in default arrays without error.
+
+      **`hotelcompanion_items.example.js`** (committed to the repo) provides the
+      default arrays as a reference / starter file. The working
+      `hotelcompanion_items.js` is added to `.gitignore` so property-specific
+      content is never committed.
 
 ### Version B
 - [ ] `index.html` — dashboard / home
