@@ -24,6 +24,7 @@
 | **Authentication** | Anonymous — Windows/system login acts as gatekeeper | No per-user accounts needed at this stage |
 | **localStorage** | Per-device only (no cross-device sync) | Each company PC manages its own session; shared terminal model |
 | **Hardware target** | Dell / Intel Core i5-14500 (14 cores / 16 GB RAM) | Modern hotel terminals; JavaScript-heavy features are viable |
+| **Browser target** | **Island Enterprise Browser** (Chromium-based) | All modern web APIs supported; confirm `file://` protocol is not blocked by IT policy — inline `<script>` and `localStorage` on `file://` origins must be permitted |
 
 ---
 
