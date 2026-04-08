@@ -437,7 +437,7 @@ circumstances. Always reflect this in payment advice.
 
 Current shift context:
 - Checklist completion: {checklistPct}
-- Incidents this shift: {incidentSummary}  ← sourced from Night Log entries
+- Incidents this shift: {incidentSummary}
 [- Shift notes: {shiftNotes} — only include if non-empty]
 
 You specialise in night shift hospitality: late check-ins, lone worker safety,
@@ -446,6 +446,8 @@ card payment scripts, security protocols. Keep responses practical, warm, and
 actionable. Use bold headers and specific scripts where relevant. Always factor in
 the lone-worker reality — escalating to a duty manager is always valid.
 ```
+
+> **Implementation note:** `{incidentSummary}` is sourced from the Night Log entries array for the current shift. Only the summary text is injected into the prompt — no raw entry objects.
 
 **Chat history:** send the last 10 messages from `chatHistory` (alternating
 `user`/`assistant` roles) as the `messages` array.
