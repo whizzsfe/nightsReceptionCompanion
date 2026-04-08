@@ -98,8 +98,12 @@ The following are only written when `persistData === true`:
 - Handover notes (`shiftCompanion_handoverNotes`)
 - Lone-worker safety check-in timestamp (`shiftCompanion_lastCheckIn`)
 - Night Log entries for the current shift (`shiftCompanion_nightLogEntries`)
-- Checklist tick state (`shiftCompanion_checklistState`)
-- Night Audit step state (`shiftCompanion_auditState`)
+- Checklist tick state (`shiftCompanion_checklistState`) — stored as a map of
+  `{ [itemId]: boolean }` keyed by the stable `id` field from `HOTELCOMPANION_ITEMS`,
+  **not** by array index. This ensures saved ticks remain correctly mapped if items
+  are reordered, inserted, or deleted via the GUI editor.
+- Night Audit step state (`shiftCompanion_auditState`) — stored as a map of
+  `{ [itemId]: boolean }` keyed by the stable `id` field, for the same reason.
 - Daily Info Board data (`shiftCompanion_boardData`)
 
 All tool data uses the unified `shiftCompanion_` namespace. No tool may use its own
@@ -167,7 +171,9 @@ and brief rationale in a comment block at the top of every file you create, e.g.
 2. Inline all CSS (no `<link>` to local stylesheets). Google Fonts `<link>` is allowed.
 3. Inline all JavaScript (no `<script src="…">`).
 4. The sidebar nav must contain all core sections plus a "TOOLS" divider group with
-   the four tool sections (see § 5).
+   the five tool sections: Night Log, Monthly Report *(nice-to-have — include only if
+   Night Log JSON export is implemented; omit otherwise)*, Group Check-in, Sign
+   Generator, and Daily Info Board (see § 5).
 5. All inter-section navigation must use the existing `showSection(id, btn)` pattern.
 6. `localStorage` is the persistence mechanism, but saving session data is **opt-in**
    via the sidebar "Persist Data" toggle (see § 3).
@@ -534,6 +540,33 @@ Before considering the build complete, verify all of the following:
         `hotelcompanion_items.js` file and triggers a browser download. The
         downloaded file must be placed in the same folder as
         `hotelcompanion_suite.html` to take effect.
+        The exported file must use this exact schema — a single global assignment
+        that the main app can detect and parse safely:
+        ```js
+        window.HOTELCOMPANION_ITEMS = {
+          version: 1,
+          preShift: [
+            { id: "pre_001", label: "Item label", required: false, dayRestriction: "every" },
+            // ...
+          ],
+          postShift: [
+            { id: "post_001", label: "Item label", required: false, dayRestriction: "every" },
+            // ...
+          ],
+          auditSteps: [
+            { id: "audit_001", label: "Step label" },
+            // ...
+          ]
+        };
+        ```
+        - `id`: stable, unique string (e.g. `"pre_001"`). Generated once per item at
+          creation time and **never changed** — this is the key used to persist and
+          retrieve checklist tick state, so it must survive reordering/insertion.
+        - `label`: non-empty string.
+        - `required` *(checklist items only)*: boolean — maps to "Required before continue?".
+        - `dayRestriction` *(checklist items only)*: one of `"every"`, `"mon"`, `"tue"`,
+          `"wed"`, `"thu"`, `"fri"`, `"sat"`, `"sun"`, `"last_night_of_month"`.
+        - `auditSteps` items have only `id` and `label` — no `required` or `dayRestriction`.
       - The exported `hotelcompanion_items.js` must be a **data-only** file in a
         deterministic format so it can be safely reloaded by the editor without
         executing the file's contents.
