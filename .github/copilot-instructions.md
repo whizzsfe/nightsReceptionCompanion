@@ -96,7 +96,6 @@ across sessions and page reloads:
 The following are only written when `persistData === true`:
 - Shift notes (`shiftCompanion_shiftNotes`)
 - Handover notes (`shiftCompanion_handoverNotes`)
-- Incident log (`shiftCompanion_incidents`)
 - Lone-worker safety check-in timestamp (`shiftCompanion_lastCheckIn`)
 
 #### Sidebar "Persist Data" toggle
@@ -111,7 +110,7 @@ The following are only written when `persistData === true`:
 - A **End Shift** button triggers a confirmation modal before:
   1. Saving the shift summary to history (always).
   2. Clearing all session-data keys from `localStorage`.
-  3. Resetting all in-memory state (incidents, notes, checklist ticks, audit state).
+  3. Resetting all in-memory state (notes, checklist ticks, audit state). Night Log entries are managed within the Night Log section and are cleared separately via its own end-shift flow.
 - Shift history and profile data are NOT cleared.
 
 ### Accessibility
@@ -220,7 +219,7 @@ migrate into each section.
 | `dashboard` | Night Dashboard | `§ section-dashboard` | Live date/time clock (topbar), stat cards (checklist %, incidents, streak), quick-action cards, lone-worker safety check-in button, incoming handover banner |
 | `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | Pre/During/Post tabs, all checklist items (merged & deduplicated), progress bar, `required-before-continue` highlights, handover-sheet print view |
 | `nightaudit` | Night Audit | `§ section-nightaudit` | Step-by-step audit tracker, checkbox per step, progress bar, notes per step, reset button |
-| `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel, incident mini-log (guest/room, type, description, status, timestamp). **Important:** this incident log is the lightweight quick in-shift log — no floor, severity, or image fields. It complements the full Night Log tool (see Tools section below) rather than replacing it. Do not treat them as duplicates or merge them into one. |
+| `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel. **Do not add a separate incident log here.** All incident logging — including quick in-shift entries — is handled exclusively by the Night Log tool (see Tools section below). The incident mini-log that exists in `hotelcompanion_enhanced.html § section-notes` is a duplicate of Night Log and must not be carried forward. |
 | `motivation` | Motivation | `§ section-motivation` | Quote carousel (8 quotes, "Next Quote" button), excellence tips grid |
 | `ai` | AI Coach | `§ section-ai` | Dual-mode AI chat (see § 8), suggestion chips, API key prompt/connect flow, clear chat button |
 | `history` | Shift History | `§ section-history` | Expandable shift entries, aggregate stats (shifts completed, avg checklist %, total incidents, most common incident type), clear history, load handover from history |
@@ -233,7 +232,7 @@ items by a divider and a `TOOLS` label in `var(--muted)` / `DM Mono`).
 
 | Section slug | Display title | Source file | Key features to preserve |
 |---|---|---|---|
-| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete, JSON export, end-shift flow. **This is the full operational incident logger — distinct from the lightweight incident mini-log in the Notes section. Do not merge or remove either.** *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
+| `nightlog` | Night Log | `NightLog.html` | Shift start/resume screen (leader name), floor-walk all-clear grid, issue entry form (timestamp, floor, category, severity, title, description, reporter, image capture), entry list with edit/delete, JSON export, end-shift flow. **This is the sole incident logger for the entire app.** *(JSON import and WhatsApp/email sharing are intentionally excluded from the unified version.)* |
 | `reports` | Monthly Report | `NightLogMonthlyReport.html` | Multi-file JSON drop/import, stat grid, bar charts (by category/floor/severity/all-clear coverage), shift summary table, filterable all-entries table. **Nice-to-have — only implement if Night Log JSON exports are available in the chosen delivery version; mark as optional in the build.** |
 | `checkin` | Group Check-in | `groupcheckinlist.html` | Logo upload, date field, group name, guest list with add/remove rows, bulk name import modal, portrait/landscape toggle, print |
 | `signs` | Sign Generator | `signGenerator.html` | A4/A3 size selector, portrait/landscape toggle, background colour palette + custom image + overlay slider, logo upload, body text + colour, sub-body text + colour, live preview, print |
@@ -245,7 +244,7 @@ These are always-visible elements that are not sections in the sidebar:
 
 | Element | Source | Description |
 |---|---|---|
-| **Floating Quick Log button** | `hotelcompanion_enhanced.html` | Fixed `⚡` button, bottom-right corner. Opens a modal to log an incident quickly from anywhere in the app. Appends to the main incident list in the Notes section. |
+| **Floating Quick Log button** | `hotelcompanion_enhanced.html` | Fixed `⚡` button, bottom-right corner. Opens a modal to log an incident quickly from anywhere in the app. Submits directly to the Night Log (`nightlog` section) entry list. |
 | **Brand Customisation modal** | `hotelcompanion_enhanced.html` | Opened from the last sidebar nav item (🎨 Customise). Hotel name, logo upload (base64), 14 preset accent colours + custom colour picker. Changes update CSS variables and print headers live. |
 | **Setup Profile modal** | `hotelcompanion_enhanced.html` | Shown on first visit (no saved name). Staff name, role (dropdown), shift type (dropdown). Always stored in `localStorage`. |
 
@@ -305,19 +304,6 @@ create table public.log_entries (
 alter table public.log_entries enable row level security;
 create policy "Staff see own entries"
   on public.log_entries for all using (auth.uid() = staff_id);
-
--- Incidents (lightweight, from notes section)
-create table public.incidents (
-  id          uuid primary key default gen_random_uuid(),
-  shift_id    uuid references public.shifts(id) on delete cascade,
-  staff_id    uuid references public.profiles(id) on delete cascade,
-  category    text,
-  description text,
-  created_at  timestamptz default now()
-);
-alter table public.incidents enable row level security;
-create policy "Staff see own incidents"
-  on public.incidents for all using (auth.uid() = staff_id);
 ```
 
 **Storage bucket:** Create a public bucket named `nightlog-images`. Apply the policy:
@@ -417,7 +403,7 @@ circumstances. Always reflect this in payment advice.
 
 Current shift context:
 - Checklist completion: {checklistPct}
-- Incidents this shift: {incidentSummary}
+- Incidents this shift: {incidentSummary}  ← sourced from Night Log entries
 [- Shift notes: {shiftNotes} — only include if non-empty]
 
 You specialise in night shift hospitality: late check-ins, lone worker safety,
@@ -469,12 +455,12 @@ Before considering the build complete, verify all of the following:
 - [ ] AI Coach Smart Defaults mode works with no API key (keyword match, 900 ms delay).
 - [ ] AI Coach Live mode works when a valid Anthropic API key is entered.
 - [ ] AI system prompt includes live shift context (staff name, incidents, checklist %).
-- [ ] Night Log section and Notes section incident log coexist as separate, complementary features — Night Log is the full operational logger; Notes incident log is the lightweight quick in-shift log. Neither has been removed or merged into the other.
+- [ ] Night Log is the sole incident logger; no separate incident list exists in the Notes section.
 - [ ] Night Log JSON export produces a valid file. *(If Monthly Report is implemented, verify it can re-import the same JSON schema; otherwise skip.)*
 - [ ] The Sign Generator prints correctly at A4 and A3.
 - [ ] The Group Check-in list prints correctly in portrait and landscape.
 - [ ] Tools section in sidebar is visually separated from core nav items.
-- [ ] Floating Quick Log button is visible on all sections and posts to the incident log.
+- [ ] Floating Quick Log button is visible on all sections and posts to the Night Log entry list.
 - [ ] Brand Customisation modal updates accent colour and hotel name across the whole app.
 - [ ] No console errors on page load.
 - [ ] *(Version B only)* Unauthenticated users are redirected to `login.html`.
@@ -540,7 +526,7 @@ built faithfully.
   Safety/Security, Billing Dispute, VIP Special Request, Lost & Found, Other),
   Description (textarea), Status (dropdown — Resolved, Pending Follow-up, Escalated to
   Manager, Monitoring).
-- On submit: appends to the in-memory `incidents` array, calls `renderIncidents()`,
+- On submit: appends an entry to the Night Log's in-memory `logEntries` array, calls `renderNightLogEntries()`,
   saves to localStorage if persist is ON, flashes the button green briefly.
 - If any of Guest/Room, Type, or Description is empty: show a validation message.
 
