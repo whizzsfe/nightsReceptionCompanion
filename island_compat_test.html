@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Island Browser Compatibility Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap">
 <style>
   body { font-family: sans-serif; background: #111; color: #f0ede8; padding: 2rem; }
   h1 { color: #D4A843; }
@@ -21,7 +24,7 @@
 </head>
 <body>
 <h1>Night Companion — Island Browser Compatibility Test</h1>
-<p style="color:#888">Open this file via <code>file://</code> in Island. All items should be <strong style="color:#4CAF82">PASS</strong> except the two <strong style="color:#D4A843">WARN</strong> items which need manual verification.</p>
+<p style="color:#888">Open this file via <code>file://</code> in Island. All items should be <strong style="color:#4CAF82">PASS</strong> except the <strong style="color:#D4A843">WARN</strong> item (File System Access API — fallback exists).</p>
 <div id="results"></div>
 <div id="summary"></div>
 
@@ -31,6 +34,16 @@
   function test(name, fn) {
     try {
       const result = fn();
+      results.push({ name, status: result === 'warn' ? 'warn' : 'pass',
+        note: result === 'warn' ? 'check manually' : 'OK' });
+    } catch(e) {
+      results.push({ name, status: 'fail', note: e.message });
+    }
+  }
+
+  async function testAsync(name, fn) {
+    try {
+      const result = await fn();
       results.push({ name, status: result === 'warn' ? 'warn' : 'pass',
         note: result === 'warn' ? 'check manually' : 'OK' });
     } catch(e) {
@@ -117,51 +130,66 @@
     if (!window.showSaveFilePicker) return 'warn';
   });
 
-  // 13. Google Fonts CDN reachability — manual check
-  test('Google Fonts CDN (manual check — needs internet on first load)', () => {
-    return 'warn';
-  });
-
-  // 14. getUserMedia blocked on file:// — PASS means camera correctly unavailable
+  // 13. getUserMedia blocked on file:// — PASS means camera correctly unavailable
   test('getUserMedia blocked on file:// (file picker used instead — expected)', () => {
     if (window.location.protocol === 'file:') {
-      // Correct behaviour — camera blocked, file picker is the intentional approach
       return true;
     }
-    // If not file:// this test is not applicable
     return 'warn';
   });
 
-  // Render results
-  const container = document.getElementById('results');
-  results.forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'test ' + r.status;
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = r.name;
-    const badgeSpan = document.createElement('span');
-    badgeSpan.className = 'badge';
-    badgeSpan.textContent = r.status.toUpperCase() + ' — ' + r.note;
-    div.appendChild(nameSpan);
-    div.appendChild(badgeSpan);
-    container.appendChild(div);
-  });
+  // 14. Google Fonts CDN — async real check via CSS Font Loading API
+  // (runs after sync tests, appended to results before render)
+  async function runFontTest() {
+    await testAsync('Google Fonts CDN (Bebas Neue loaded)', async () => {
+      // 5 second timeout — if Island blocks the CDN request it will hang
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timed out after 5s — CDN may be blocked or no internet')), 5000)
+      );
+      const load = document.fonts.load('16px "Bebas Neue"').then(fonts => {
+        if (!fonts.length) throw new Error('Font not loaded — Google Fonts CDN unreachable or blocked');
+      });
+      await Promise.race([load, timeout]);
+    });
+  }
 
-  const passed = results.filter(r => r.status === 'pass').length;
-  const warned = results.filter(r => r.status === 'warn').length;
-  const failed = results.filter(r => r.status === 'fail').length;
-  document.getElementById('summary').innerHTML =
-    `<hr style="border-color:#2a2a2a">
-     <strong style="color:${failed ? '#E05555' : '#4CAF82'}">
-       ${passed} passed &nbsp;&bull;&nbsp; ${warned} manual checks &nbsp;&bull;&nbsp; ${failed} failed
-     </strong><br><br>
-     <small style="color:#888">
-       ${failed === 0
-         ? '✅ All critical checks passed. Safe to proceed with the build.'
-         : '❌ One or more critical checks failed. Island IT policy may be blocking file:// access — discuss with your IT administrator before building.'}
-       <br>WARN items: File System Access API falling back to &lt;a download&gt; is fine.
-       Google Fonts requires internet on first load only.
-     </small>`;
+  function renderResults() {
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+    results.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'test ' + r.status;
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = r.name;
+      const badgeSpan = document.createElement('span');
+      badgeSpan.className = 'badge';
+      badgeSpan.textContent = r.status.toUpperCase() + ' — ' + r.note;
+      div.appendChild(nameSpan);
+      div.appendChild(badgeSpan);
+      container.appendChild(div);
+    });
+
+    const passed = results.filter(r => r.status === 'pass').length;
+    const warned = results.filter(r => r.status === 'warn').length;
+    const failed = results.filter(r => r.status === 'fail').length;
+    document.getElementById('summary').innerHTML =
+      `<hr style="border-color:#2a2a2a">
+       <strong style="color:${failed ? '#E05555' : '#4CAF82'}">
+         ${passed} passed &nbsp;&bull;&nbsp; ${warned} manual checks &nbsp;&bull;&nbsp; ${failed} failed
+       </strong><br><br>
+       <small style="color:#888">
+         ${failed === 0
+           ? '✅ All critical checks passed. Safe to proceed with the build.'
+           : '❌ One or more critical checks failed. Island IT policy may be blocking file:// access — discuss with your IT administrator before building.'}
+         <br>WARN: File System Access API falls back to &lt;a download&gt; — this is fine.
+       </small>`;
+  }
+
+  // Run sync tests then render, then run async font test and re-render
+  renderResults();
+  document.getElementById('summary').innerHTML = '<p style="color:#888">Checking Google Fonts CDN…</p>';
+  runFontTest().then(() => renderResults());
+
 </script>
 </body>
 </html>
