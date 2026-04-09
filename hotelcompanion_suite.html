@@ -1207,18 +1207,14 @@
     .colour-swatch:hover { transform: scale(1.15); }
     .colour-swatch.selected { border-color: var(--text); }
 
-    /* â”€â”€â”€ DAILY INFO BOARD â”€â”€â”€ */
-    .board-top-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-    .board-table-wrap { overflow-x: auto; margin-bottom: 20px; }
-    .board-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 700px;
-    }
+    /* --- DAILY INFO BOARD --- */
+    .board-top-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .board-date-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+    .board-table-wrap { overflow-x: auto; margin-bottom: 16px; }
+    .board-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 820px; }
     .board-table th {
       background: var(--card2);
-      padding: 9px 10px;
+      padding: 8px 6px;
       text-align: center;
       font-family: 'DM Mono', monospace;
       font-size: 10px;
@@ -1227,39 +1223,58 @@
       letter-spacing: 0.06em;
       border: 1px solid var(--border);
       white-space: nowrap;
+      line-height: 1.4;
     }
-    .board-table th.row-header { text-align: left; color: var(--muted); }
-    .board-table td {
-      border: 1px solid var(--border);
-      padding: 7px 10px;
-      text-align: center;
-      color: var(--text);
-      font-size: 13px;
-    }
-    .board-table td.row-header { text-align: left; background: var(--card2); font-weight: 500; white-space: nowrap; font-size: 12px; color: var(--muted); }
-    .board-table td[contenteditable="true"]:focus { outline: none; background: rgba(212,168,67,0.06); border-color: var(--gold); }
-    .board-table td[contenteditable="true"]:empty::before { content: 'â€”'; color: rgba(136,136,128,0.4); }
+    .board-table th.row-header { text-align: left; color: var(--muted); min-width: 105px; }
+    .board-table th.board-col-today { color: var(--gold-light); background: rgba(212,168,67,0.10); }
+    .board-date-sub { display: block; font-size: 9px; color: var(--muted); font-weight: 400; letter-spacing: 0; text-transform: none; }
+    .board-table td { border: 1px solid var(--border); padding: 2px 3px; text-align: center; color: var(--text); font-size: 12px; }
+    .board-table td.row-header { text-align: left; background: var(--card2); font-weight: 500; white-space: nowrap; font-size: 11px; color: var(--muted); padding: 5px 8px; }
+    .board-table td.board-today-cell { background: rgba(212,168,67,0.06); }
+    .board-input { width: 100%; background: transparent; border: none; text-align: center; color: var(--text); font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 5px 3px; }
+    .board-input.today { color: var(--gold-light); font-weight: 600; }
+    .board-input:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.06); }
+    .board-input::-webkit-outer-spin-button, .board-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .board-input[type=number] { -moz-appearance: textfield; }
 
-    .board-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    .vip-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .vip-table th { background: var(--card2); padding: 7px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid var(--border); }
-    .vip-table td { border: 1px solid var(--border); padding: 6px 8px; color: var(--text); }
-    .vip-table td[contenteditable="true"]:focus { outline: none; background: rgba(212,168,67,0.05); }
-    .vip-table td[contenteditable="true"]:empty::before { content: 'â€”'; color: rgba(136,136,128,0.3); }
+    .board-mid-row { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+    .board-daily-info { flex: 0 0 auto; }
+    .board-vip-section { flex: 1; min-width: 0; }
+    .board-section-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; padding: 3px 0 3px 7px; border-left: 2px solid var(--gold); }
+    .board-info-table { border-collapse: collapse; width: 100%; }
+    .board-info-table td { border: 1px solid var(--border); padding: 2px 0; }
+    .board-info-table td.info-label { background: var(--card2); font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; padding: 4px 8px; font-weight: 600; }
+    .board-info-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 4px 6px; }
+    .board-info-input:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.06); }
+    .board-info-input::-webkit-outer-spin-button, .board-info-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .board-info-input[type=number] { -moz-appearance: textfield; }
 
-    .staff-assign-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .vip-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .vip-table th { background: var(--card2); padding: 6px 8px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid var(--border); }
+    .vip-table td { border: 1px solid var(--border); padding: 1px 2px; color: var(--text); }
+    .vip-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 4px 6px; }
+    .vip-input:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.06); }
+
+    .board-staff-row { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+    .board-staff-section { flex: 1; }
+    .staff-assign-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .staff-assign-table th { background: var(--card2); padding: 7px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid var(--border); }
-    .staff-assign-table td { border: 1px solid var(--border); padding: 6px 8px; color: var(--text); font-size: 12px; }
-    .staff-assign-table td.row-label { font-weight: 600; background: var(--card2); color: var(--muted); white-space: nowrap; }
-    .staff-assign-table td[contenteditable="true"]:focus { outline: none; background: rgba(212,168,67,0.05); }
-    .staff-assign-table td[contenteditable="true"]:empty::before { content: 'â€”'; color: rgba(136,136,128,0.3); }
-
+    .staff-assign-table td { border: 1px solid var(--border); padding: 1px 2px; color: var(--text); font-size: 12px; }
+    .staff-assign-table td.row-label { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 600; background: var(--card2); color: var(--muted); white-space: nowrap; padding: 5px 8px; }
+    .board-staff-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 4px 6px; }
+    .board-staff-input:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.06); }
     .principle-widget {
+      flex: 0 0 200px;
       background: linear-gradient(135deg, rgba(212,168,67,0.1), rgba(212,168,67,0.04));
       border: 1px solid rgba(212,168,67,0.25);
       border-radius: var(--radius-lg);
       padding: 18px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 90px;
     }
     .principle-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
     .principle-text { font-family: 'Bebas Neue', cursive; font-size: 22px; letter-spacing: 0.08em; color: var(--gold); line-height: 1.1; }
@@ -1360,12 +1375,19 @@
 
       /* Daily Info Board print */
       #section-board { color: #000; }
-      #section-board .board-top-row .btn { display: none; }
       .board-table, .board-table th, .board-table td { border-color: #999; color: #000; background: #fff; }
+      .board-table th.board-col-today { background: #f5f0e0; }
+      .board-table td.board-today-cell { background: #fdfaf3; }
+      .board-input, .board-info-input, .vip-input, .board-staff-input { color: #000; }
+      .board-info-table, .board-info-table td { border-color: #999; }
+      .board-info-table td.info-label { background: #f0f0f0; color: #333; }
       .vip-table, .vip-table th, .vip-table td { border-color: #999; color: #000; background: #fff; }
       .staff-assign-table, .staff-assign-table th, .staff-assign-table td { border-color: #999; color: #000; background: #fff; }
+      .staff-assign-table td.row-label { background: #f0f0f0; color: #333; }
+      .board-section-title { color: #333; border-left-color: #999; }
       .principle-widget { border-color: #ccc; background: #f9f9f9; }
       .principle-text { color: #000; }
+      @page { size: A4 landscape; margin: 8mm; }
 
       @page { margin: 12mm; }
     }
@@ -1407,7 +1429,8 @@
       .floor-walk-grid { grid-template-columns: repeat(3, 1fr); }
       .sign-layout { grid-template-columns: 1fr; }
       .sign-preview-outer { position: static; }
-      .board-bottom-row { grid-template-columns: 1fr; }
+      .board-mid-row, .board-staff-row { flex-direction: column; }
+      .principle-widget { flex: 0 0 auto; width: 100%; }
       .chart-grid { grid-template-columns: 1fr; }
       .report-stat-grid { grid-template-columns: repeat(2, 1fr); }
       .ai-chat-container { height: calc(100vh - var(--topbar-h) - 28px); }
@@ -2471,124 +2494,170 @@
   <div class="flex-between mb-12" style="flex-wrap:wrap;gap:10px;">
     <div>
       <div class="section-heading">Daily Info Board</div>
-      <div class="section-sub">7-day rolling occupancy &amp; operational data.</div>
+      <div class="section-sub">Operational statistics and staffing overview.</div>
     </div>
     <div class="flex-row">
-      <button class="btn btn-ghost btn-sm" onclick="resetBoard()" aria-label="Reset board data">↺ Reset</button>
-      <button class="btn btn-gold btn-sm" onclick="window.print()" aria-label="Print info board">🖨️ Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetBoard()" aria-label="Reset board data">&#x21BA; Reset</button>
+      <button class="btn btn-gold btn-sm" onclick="window.print()" aria-label="Print info board">&#x1F5A8;&#xFE0F; Print</button>
     </div>
   </div>
 
+  <!-- Date Input -->
   <div class="board-top-row">
-    <div class="form-group" style="margin-bottom:0;">
-      <label for="boardDate" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Reference Date</label>
-      <input type="date" id="boardDate" aria-label="Board reference date" oninput="updateBoardHeaders()" style="width:180px;">
-    </div>
-    <div class="principle-widget" style="flex:1;max-width:320px;">
-      <div class="principle-label">Principle of the Day</div>
-      <div class="principle-text" id="principleText">Be Caring</div>
-    </div>
+    <span class="board-date-label">Today&#x2019;s Date:</span>
+    <input type="date" id="boardDate" data-board-input="boardDate" aria-label="Board reference date" oninput="updateBoardHeaders();onBoardInput();" style="width:180px;">
   </div>
 
-  <!-- 7-Day Stats Grid -->
+  <!-- Stats Grid: TODAY + Mon&#x2013;Sun (8 data columns) -->
   <div class="board-table-wrap">
     <table class="board-table" id="boardStatsTable">
       <thead>
         <tr>
-          <th class="row-header">Metric</th>
-          <th id="bh0">Mon</th>
-          <th id="bh1">Tue</th>
-          <th id="bh2">Wed</th>
-          <th id="bh3">Thu</th>
-          <th id="bh4">Fri</th>
-          <th id="bh5">Sat</th>
-          <th id="bh6">Sun</th>
+          <th class="row-header"></th>
+          <th class="board-col-today">TODAY<span class="board-date-sub" id="bdLabel0"></span></th>
+          <th>MONDAY<span class="board-date-sub" id="bdLabel1"></span></th>
+          <th>TUESDAY<span class="board-date-sub" id="bdLabel2"></span></th>
+          <th>WEDNESDAY<span class="board-date-sub" id="bdLabel3"></span></th>
+          <th>THURSDAY<span class="board-date-sub" id="bdLabel4"></span></th>
+          <th>FRIDAY<span class="board-date-sub" id="bdLabel5"></span></th>
+          <th>SATURDAY<span class="board-date-sub" id="bdLabel6"></span></th>
+          <th>SUNDAY<span class="board-date-sub" id="bdLabel7"></span></th>
         </tr>
       </thead>
       <tbody>
-        <tr><td class="row-header">Rooms Sold</td>
-          <td contenteditable="true" data-board="stats" data-row="0" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="6"></td>
+        <tr>
+          <td class="row-header">ROOMS SOLD</td>
+          <td class="board-today-cell"><input type="number" class="board-input today" data-board-input="rs0" min="0" aria-label="Rooms sold today"></td>
+          <td><input type="number" class="board-input" data-board-input="rs1" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="rs2" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="rs3" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="rs4" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="rs5" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="rs6" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="rs7" min="0"></td>
         </tr>
-        <tr><td class="row-header">Guests in House</td>
-          <td contenteditable="true" data-board="stats" data-row="1" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="6"></td>
+        <tr>
+          <td class="row-header">GUESTS IN HOUSE</td>
+          <td class="board-today-cell"><input type="number" class="board-input today" data-board-input="gih0" min="0" aria-label="Guests in house today"></td>
+          <td><input type="number" class="board-input" data-board-input="gih1" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="gih2" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="gih3" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="gih4" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="gih5" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="gih6" min="0"></td>
+          <td><input type="number" class="board-input" data-board-input="gih7" min="0"></td>
         </tr>
-        <tr><td class="row-header">Occupancy %</td>
-          <td contenteditable="true" data-board="stats" data-row="2" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">Room Revenue</td>
-          <td contenteditable="true" data-board="stats" data-row="3" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">Total Revenue</td>
-          <td contenteditable="true" data-board="stats" data-row="4" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">ADR</td>
-          <td contenteditable="true" data-board="stats" data-row="5" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">RevPAR</td>
-          <td contenteditable="true" data-board="stats" data-row="6" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">Arrivals</td>
-          <td contenteditable="true" data-board="stats" data-row="7" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">Departures</td>
-          <td contenteditable="true" data-board="stats" data-row="8" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="6"></td>
-        </tr>
-        <tr><td class="row-header">F&amp;B Covers</td>
-          <td contenteditable="true" data-board="stats" data-row="9" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="6"></td>
+        <tr>
+          <td class="row-header">OCCUPANCY %</td>
+          <td class="board-today-cell"><input type="number" class="board-input today" data-board-input="occ0" min="0" max="100" step="0.01" aria-label="Occupancy today"></td>
+          <td><input type="number" class="board-input" data-board-input="occ1" min="0" max="100" step="0.01"></td>
+          <td><input type="number" class="board-input" data-board-input="occ2" min="0" max="100" step="0.01"></td>
+          <td><input type="number" class="board-input" data-board-input="occ3" min="0" max="100" step="0.01"></td>
+          <td><input type="number" class="board-input" data-board-input="occ4" min="0" max="100" step="0.01"></td>
+          <td><input type="number" class="board-input" data-board-input="occ5" min="0" max="100" step="0.01"></td>
+          <td><input type="number" class="board-input" data-board-input="occ6" min="0" max="100" step="0.01"></td>
+          <td><input type="number" class="board-input" data-board-input="occ7" min="0" max="100" step="0.01"></td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Bottom Row: VIP / Staff / Principle -->
-  <div class="board-bottom-row">
+  <!-- Today's Data + VIP Guests -->
+  <div class="board-mid-row">
+
+    <!-- Today-only operational data -->
+    <div class="board-daily-info">
+      <div class="board-section-title">Today&#x2019;s Data</div>
+      <table class="board-info-table">
+        <tbody>
+          <tr><td class="info-label">ARRIVALS</td><td><input type="number" class="board-info-input" data-board-input="arrivals" min="0" aria-label="Arrivals"></td></tr>
+          <tr><td class="info-label">DEPARTURES</td><td><input type="number" class="board-info-input" data-board-input="departures" min="0" aria-label="Departures"></td></tr>
+          <tr><td class="info-label">ROOM REVENUE &#xA3;</td><td><input type="text" class="board-info-input" data-board-input="roomRevenue" aria-label="Room revenue"></td></tr>
+          <tr><td class="info-label">AVG ROOM RATE &#xA3;</td><td><input type="text" class="board-info-input" data-board-input="avgRoomRate" aria-label="Average room rate"></td></tr>
+          <tr><td class="info-label">OOO / OOS</td><td><input type="number" class="board-info-input" data-board-input="oooOos" min="0" aria-label="Out of order/out of service"></td></tr>
+          <tr><td class="info-label">BB&#x2019;S</td><td><input type="number" class="board-info-input" data-board-input="bbs" min="0" aria-label="Bed and breakfast"></td></tr>
+          <tr><td class="info-label">DBB&#x2019;S</td><td><input type="number" class="board-info-input" data-board-input="dbbs" min="0" aria-label="Dinner bed and breakfast"></td></tr>
+          <tr><td class="info-label">GROUPS</td><td><input type="text" class="board-info-input" data-board-input="groups" aria-label="Groups"></td></tr>
+          <tr><td class="info-label">EARLY DM</td><td><input type="text" class="board-info-input" data-board-input="earlyDm" aria-label="Early duty manager"></td></tr>
+          <tr><td class="info-label">LATE DM</td><td><input type="text" class="board-info-input" data-board-input="lateDm" aria-label="Late duty manager"></td></tr>
+          <tr><td class="info-label">DISABLED GUEST(S)</td><td><input type="text" class="board-info-input" data-board-input="disabledGuests" aria-label="Disabled guests"></td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- VIP Guests -->
-    <div class="card">
-      <div class="card-title" style="margin-bottom:10px;">VIP Guests</div>
+    <div class="board-vip-section">
+      <div class="board-section-title">VIP Guests</div>
       <table class="vip-table">
-        <thead><tr><th>Name</th><th>Code</th><th>Room</th></tr></thead>
-        <tbody id="vipTableBody">
-          <!-- 10 rows injected by JS -->
+        <thead>
+          <tr>
+            <th style="width:60%;text-align:left;padding-left:8px;">NAME</th>
+            <th style="width:20%;text-align:center;">CODE</th>
+            <th style="width:20%;text-align:center;">ROOMS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName0" aria-label="VIP 1 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode0" style="text-align:center;" aria-label="VIP 1 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom0" style="text-align:center;" aria-label="VIP 1 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName1" aria-label="VIP 2 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode1" style="text-align:center;" aria-label="VIP 2 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom1" style="text-align:center;" aria-label="VIP 2 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName2" aria-label="VIP 3 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode2" style="text-align:center;" aria-label="VIP 3 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom2" style="text-align:center;" aria-label="VIP 3 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName3" aria-label="VIP 4 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode3" style="text-align:center;" aria-label="VIP 4 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom3" style="text-align:center;" aria-label="VIP 4 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName4" aria-label="VIP 5 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode4" style="text-align:center;" aria-label="VIP 5 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom4" style="text-align:center;" aria-label="VIP 5 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName5" aria-label="VIP 6 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode5" style="text-align:center;" aria-label="VIP 6 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom5" style="text-align:center;" aria-label="VIP 6 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName6" aria-label="VIP 7 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode6" style="text-align:center;" aria-label="VIP 7 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom6" style="text-align:center;" aria-label="VIP 7 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName7" aria-label="VIP 8 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode7" style="text-align:center;" aria-label="VIP 8 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom7" style="text-align:center;" aria-label="VIP 8 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName8" aria-label="VIP 9 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode8" style="text-align:center;" aria-label="VIP 9 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom8" style="text-align:center;" aria-label="VIP 9 room"></td></tr>
+          <tr><td><input type="text" class="vip-input" data-board-input="vipName9" aria-label="VIP 10 name"></td><td><input type="text" class="vip-input" data-board-input="vipCode9" style="text-align:center;" aria-label="VIP 10 code"></td><td><input type="text" class="vip-input" data-board-input="vipRoom9" style="text-align:center;" aria-label="VIP 10 room"></td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Staff Assignments -->
-    <div class="card">
-      <div class="card-title" style="margin-bottom:10px;">Staff Assignments</div>
+  </div><!-- /board-mid-row -->
+
+  <!-- Staff Assignments + Principle of Wonderful -->
+  <div class="board-staff-row">
+
+    <div class="board-staff-section">
+      <div class="board-section-title">Staff Assignments</div>
       <table class="staff-assign-table">
-        <thead><tr><th></th><th>AM</th><th>PM</th><th>Night</th></tr></thead>
+        <thead>
+          <tr><th></th><th>AM</th><th>PM</th><th>Night</th></tr>
+        </thead>
         <tbody>
           <tr>
-            <td class="row-label">Pool Responsible</td>
-            <td contenteditable="true" data-board="staff" data-row="0" data-col="0"></td>
-            <td contenteditable="true" data-board="staff" data-row="0" data-col="1"></td>
-            <td contenteditable="true" data-board="staff" data-row="0" data-col="2"></td>
+            <td class="row-label">POOL RESP.</td>
+            <td><input type="text" class="board-staff-input" data-board-input="poolRespAm" placeholder="AM" aria-label="Pool responsible AM"></td>
+            <td><input type="text" class="board-staff-input" data-board-input="poolRespPm" placeholder="PM" aria-label="Pool responsible PM"></td>
+            <td><input type="text" class="board-staff-input" data-board-input="poolRespNight" placeholder="Night" aria-label="Pool responsible Night"></td>
           </tr>
           <tr>
-            <td class="row-label">Pool Tester</td>
-            <td contenteditable="true" data-board="staff" data-row="1" data-col="0"></td>
-            <td contenteditable="true" data-board="staff" data-row="1" data-col="1"></td>
-            <td contenteditable="true" data-board="staff" data-row="1" data-col="2"></td>
+            <td class="row-label">POOL TESTER</td>
+            <td><input type="text" class="board-staff-input" data-board-input="poolTesterAm" placeholder="AM" aria-label="Pool tester AM"></td>
+            <td><input type="text" class="board-staff-input" data-board-input="poolTesterPm" placeholder="PM" aria-label="Pool tester PM"></td>
+            <td><input type="text" class="board-staff-input" data-board-input="poolTesterNight" placeholder="Night" aria-label="Pool tester Night"></td>
           </tr>
           <tr>
-            <td class="row-label">First Aider</td>
-            <td contenteditable="true" data-board="staff" data-row="2" data-col="0"></td>
-            <td contenteditable="true" data-board="staff" data-row="2" data-col="1"></td>
-            <td contenteditable="true" data-board="staff" data-row="2" data-col="2"></td>
+            <td class="row-label">FIRST AIDER</td>
+            <td><input type="text" class="board-staff-input" data-board-input="firstAiderAm" placeholder="AM" aria-label="First aider AM"></td>
+            <td><input type="text" class="board-staff-input" data-board-input="firstAiderPm" placeholder="PM" aria-label="First aider PM"></td>
+            <td><input type="text" class="board-staff-input" data-board-input="firstAiderNight" placeholder="Night" aria-label="First aider Night"></td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Special Notes -->
-    <div class="card">
-      <div class="card-title" style="margin-bottom:10px;">Special Notes / Info</div>
-      <textarea id="boardNotes" placeholder="Any special notes for the board…" rows="6" aria-label="Board special notes" oninput="onBoardInput()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;resize:vertical;outline:none;"></textarea>
+    <div class="principle-widget">
+      <div class="principle-label">Principle of Wonderful</div>
+      <div class="principle-text" id="principleText">Be Caring</div>
     </div>
 
+  </div><!-- /board-staff-row -->
+
+  <!-- Special Notes / Info -->
+  <div style="margin-top:4px;">
+    <div class="board-section-title">Special Notes / Info</div>
+    <textarea id="boardNotes" data-board-input="boardNotes" placeholder="Any special notes for the board&#x2026;" rows="4" aria-label="Board special notes" oninput="onBoardInput()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;resize:vertical;outline:none;margin-top:8px;"></textarea>
   </div>
+
 </section>
 
     </div><!-- /content -->
@@ -4130,46 +4199,58 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // -- Daily Info Board --
-const PRINCIPLES = [
-  { day:'Mon', text:'Be Caring' },
-  { day:'Tue', text:'Be A Storyteller' },
-  { day:'Wed', text:'Be Extraordinary' },
-  { day:'Thu', text:'Be Open-Minded' },
-  { day:'Fri', text:'Be Caring' },
-  { day:'Sat', text:'Be A Storyteller' },
-  { day:'Sun', text:'Be Extraordinary' }
-];
+function getPrinciple(date) {
+  const day = date.getDay(); // 0=Sun,1=Mon,...6=Sat
+  if (day === 1 || day === 2) return 'Be Caring';
+  if (day === 3 || day === 4) return 'Be A Storyteller';
+  if (day === 5 || day === 6) return 'Be Extraordinary';
+  return 'Be Open-Minded'; // Sunday
+}
+
+function formatBoardDate(date) {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  return d + '/' + m + '/' + date.getFullYear();
+}
 
 function initBoard() {
+  const inp = document.getElementById('boardDate');
+  if (inp && !inp.value) {
+    inp.value = new Date().toISOString().split('T')[0];
+  }
   updateBoardHeaders();
-  updatePrincipleOfDay();
   loadBoardData();
 }
 
 function updateBoardHeaders() {
-  const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const el = document.getElementById('boardDay' + i);
-    if (el) el.textContent = d.toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short' });
-  }
-}
+  const inp = document.getElementById('boardDate');
+  const todayDate = inp && inp.value ? new Date(inp.value + 'T00:00:00') : new Date();
 
-function updatePrincipleOfDay() {
-  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const today    = dayNames[new Date().getDay()];
-  const principle = PRINCIPLES.find(p => p.day === today) || PRINCIPLES[0];
-  const el = document.getElementById('boardPrinciple');
-  if (el) el.textContent = principle.text;
+  // Column 0: TODAY
+  const lbl0 = document.getElementById('bdLabel0');
+  if (lbl0) lbl0.textContent = formatBoardDate(todayDate);
+
+  // Columns 1-7: next occurrence of Mon through Sun
+  const dayNames = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
+  const dayIndices = [1, 2, 3, 4, 5, 6, 0]; // Mon=1 ... Sun=0
+  for (let i = 0; i < 7; i++) {
+    const lbl = document.getElementById('bdLabel' + (i + 1));
+    if (!lbl) continue;
+    const target = dayIndices[i];
+    const d = new Date(todayDate);
+    d.setDate(todayDate.getDate() + 1);
+    while (d.getDay() !== target) d.setDate(d.getDate() + 1);
+    lbl.textContent = formatBoardDate(d);
+  }
+
+  // Update principle based on today
+  const el = document.getElementById('principleText');
+  if (el) el.textContent = getPrinciple(todayDate);
 }
 
 function collectBoardData() {
   const data = {};
-  document.querySelectorAll('#section-board [data-board-key]').forEach(el => {
-    data[el.getAttribute('data-board-key')] = el.textContent || el.value || '';
-  });
-  document.querySelectorAll('#section-board input[data-board-input], #section-board textarea[data-board-input]').forEach(el => {
+  document.querySelectorAll('#section-board [data-board-input]').forEach(el => {
     data[el.getAttribute('data-board-input')] = el.value || '';
   });
   return data;
@@ -4187,11 +4268,10 @@ function loadBoardData() {
     if (!raw) return;
     const data = JSON.parse(raw);
     Object.keys(data).forEach(key => {
-      const el = document.querySelector(`#section-board [data-board-key="${key}"]`);
-      if (el) { if ('value' in el) el.value = data[key]; else el.textContent = data[key]; }
-      const inp = document.querySelector(`#section-board [data-board-input="${key}"]`);
-      if (inp) inp.value = data[key];
+      const el = document.querySelector('#section-board [data-board-input="' + key + '"]');
+      if (el) el.value = data[key];
     });
+    updateBoardHeaders();
   } catch {}
 }
 
@@ -4199,10 +4279,9 @@ function onBoardInput() { saveBoardData(); }
 
 function resetBoard() {
   if (!confirm('Clear all Daily Info Board data?')) return;
-  document.querySelectorAll('#section-board [data-board-key]').forEach(el => {
-    if ('value' in el) el.value = ''; else el.textContent = '';
-  });
   document.querySelectorAll('#section-board [data-board-input]').forEach(el => { el.value = ''; });
+  const inp = document.getElementById('boardDate');
+  if (inp) { inp.value = new Date().toISOString().split('T')[0]; updateBoardHeaders(); }
   try { localStorage.removeItem('shiftCompanion_boardData'); } catch {}
 }
 
