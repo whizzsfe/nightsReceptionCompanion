@@ -4205,3 +4205,346 @@ function resetBoard() {
   document.querySelectorAll('#section-board [data-board-input]').forEach(el => { el.value = ''; });
   try { localStorage.removeItem('shiftCompanion_boardData'); } catch {}
 }
+
+// -------------------------------------------------------------
+// CHUNK 11 — END SHIFT + HISTORY + INIT + CLOSE
+// -------------------------------------------------------------
+
+// -- Shift History --
+function renderHistory() {
+  const list  = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+  if (!list) return;
+
+  if (shiftHistory.length === 0) {
+    list.innerHTML  = '';
+    if (empty) empty.classList.remove('hidden');
+    updateHistoryStats();
+    return;
+  }
+  if (empty) empty.classList.add('hidden');
+
+  list.innerHTML = [...shiftHistory].reverse().map((s, revIdx) => {
+    const idx = shiftHistory.length - 1 - revIdx;
+    const date    = s.date     || '—';
+    const staff   = s.staffName  || '—';
+    const role    = s.staffRole  || '—';
+    const hn      = s.handoverNotes || '';
+    const sn      = s.shiftNotes   || '';
+    const issues  = s.incidentCount ?? 0;
+    const clPct   = s.checklistPct ?? 0;
+    const auditPct= s.auditPct     ?? 0;
+    return `
+      <div class="history-entry">
+        <div class="history-entry-header">
+          <div>
+            <span class="history-staff">${escapeHtml(staff)}</span>
+            <span class="history-role">${escapeHtml(role)}</span>
+          </div>
+          <div class="history-meta">
+            <span>${escapeHtml(date)}</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadHandoverFromHistory(${idx})" aria-label="Load handover from this shift">?? Load Handover</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">? Details</button>
+          </div>
+        </div>
+        <div class="history-stats">
+          <span>Checklist: <strong>${clPct}%</strong></span>
+          <span>Audit: <strong>${auditPct}%</strong></span>
+          <span>Incidents: <strong>${issues}</strong></span>
+        </div>
+        <div class="history-detail hidden">
+          ${sn  ? `<div class="history-section-label">Shift Notes</div><div class="history-section-body">${escapeHtml(sn)}</div>` : ''}
+          ${hn  ? `<div class="history-section-label">Handover Notes</div><div class="history-section-body">${escapeHtml(hn)}</div>` : ''}
+          ${!sn && !hn ? '<p style="color:var(--muted)">No notes recorded.</p>' : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  updateHistoryStats();
+}
+
+function toggleHistoryDetail(btn) {
+  const detail = btn.closest('.history-entry').querySelector('.history-detail');
+  if (!detail) return;
+  detail.classList.toggle('hidden');
+  btn.textContent = detail.classList.contains('hidden') ? '? Details' : '? Hide';
+}
+
+function updateHistoryStats() {
+  const total = shiftHistory.length;
+  document.getElementById('histTotalShifts')?.setAttribute('data-val', total);
+  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setEl('histTotalShifts', total);
+
+  if (total === 0) {
+    setEl('histAvgChecklist',  '—');
+    setEl('histTotalIncidents','—');
+    setEl('histCommonType',    '—');
+    return;
+  }
+  const avgCl   = Math.round(shiftHistory.reduce((a,s) => a + (s.checklistPct||0), 0) / total);
+  const totalInc = shiftHistory.reduce((a,s) => a + (s.incidentCount||0), 0);
+  setEl('histAvgChecklist',   avgCl + '%');
+  setEl('histTotalIncidents', totalInc);
+
+  // Most common incident category
+  const catMap = {};
+  shiftHistory.forEach(s => (s.incidents||[]).forEach(e => {
+    if (e.category) catMap[e.category] = (catMap[e.category]||0)+1;
+  }));
+  const top = Object.entries(catMap).sort((a,b) => b[1]-a[1])[0];
+  setEl('histCommonType', top ? top[0] : '—');
+}
+
+function loadHandoverFromHistory(idx) {
+  const entry = shiftHistory[idx];
+  if (!entry || !entry.handoverNotes) { alert('No handover notes found for this shift.'); return; }
+  try { localStorage.setItem('shiftCompanion_pendingHandover', entry.handoverNotes); } catch {}
+  showSection('dashboard', document.querySelector('[data-section=dashboard]'));
+  showHandoverBanner(entry.handoverNotes);
+}
+
+function clearHistory() {
+  if (!confirm('Permanently delete all shift history? This cannot be undone.')) return;
+  shiftHistory = [];
+  try { localStorage.removeItem('shiftCompanion_history'); } catch {}
+  renderHistory();
+}
+
+// -- End Shift --
+function confirmEndShift() {
+  // Collect current state for saving
+  const handoverEl = document.getElementById('handoverNotes');
+  const shiftEl    = document.getElementById('shiftNotes');
+  const auditEl    = document.getElementById('auditNotes');
+
+  const handoverNotes = handoverEl?.value || '';
+  const shiftNotes    = shiftEl?.value    || '';
+  const auditNotes    = auditEl?.value    || '';
+
+  // Checklist % 
+  const preItems  = getActiveChecklistItems('preAudit').filter(i => !i.isAuditCta);
+  const postItems = getActiveChecklistItems('postAudit');
+  const allItems  = [...preItems, ...postItems];
+  const done      = allItems.filter(i => checkState[i.id]).length;
+  const clPct     = allItems.length > 0 ? Math.round((done / allItems.length) * 100) : 0;
+
+  // Audit %
+  const asteps = getAuditSteps();
+  const adone  = asteps.filter(s => auditState[s.id]).length;
+  const auditPct = asteps.length > 0 ? Math.round((adone / asteps.length) * 100) : 0;
+
+  // Build history entry
+  const entry = {
+    date:          new Date().toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }),
+    staffName:     staffName,
+    staffRole:     staffRole,
+    staffShift:    staffShift,
+    shiftNotes,
+    handoverNotes,
+    auditNotes,
+    checklistPct:  clPct,
+    auditPct,
+    incidentCount: logEntries.filter(e => e.type === 'issue').length,
+    incidents:     logEntries.filter(e => e.type === 'issue')
+  };
+
+  // Save to history (always)
+  shiftHistory.push(entry);
+  try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
+
+  // Write handover for next user
+  if (handoverNotes) {
+    try { localStorage.setItem('shiftCompanion_pendingHandover', handoverNotes); } catch {}
+  }
+
+  // Clear all session data from localStorage
+  const sessionKeys = [
+    'shiftCompanion_shiftNotes', 'shiftCompanion_handoverNotes',
+    'shiftCompanion_lastCheckIn', 'shiftCompanion_nightLogEntries',
+    'shiftCompanion_checklistState', 'shiftCompanion_auditState',
+    'shiftCompanion_boardData', 'shiftCompanion_shiftStart',
+    'shiftCompanion_nlLeader', 'shiftCompanion_nlStartTime',
+    'shiftCompanion_nightlogActive', 'shiftCompanion_floorWalkState'
+  ];
+  sessionKeys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+
+  // Reset in-memory session state
+  checkState        = {};
+  auditState        = {};
+  logEntries        = [];
+  floorWalkState    = {};
+  nlPhotoBase64     = null;
+  nightlogActive    = false;
+  shiftLeader       = staffName;
+  shiftStartTime    = null;
+  shiftStart        = Date.now();
+  lastCheckInTime   = null;
+  if (shiftEl)    shiftEl.value    = '';
+  if (handoverEl) handoverEl.value = '';
+  if (auditEl)    auditEl?.value != null && (auditEl.value = '');
+
+  // Reset Night Log UI
+  document.getElementById('nlStartScreen')?.classList.remove('hidden');
+  document.getElementById('nlMainUi')?.classList.add('hidden');
+  const nlLeaderInput = document.getElementById('nlLeaderName');
+  if (nlLeaderInput) nlLeaderInput.value = staffName || '';
+
+  closeModal('endShiftModal');
+
+  renderChecklist('preAudit');
+  renderAuditSteps();
+  renderHistory();
+  renderNightLogEntries();
+  updateDashboardStats();
+  updateCheckInDisplay();
+
+  // Navigate to dashboard
+  showSection('dashboard', document.querySelector('[data-section=dashboard]'));
+}
+
+// -- showHandoverBanner (called from loadHandoverFromHistory) --
+function showHandoverBanner(text) {
+  const banner = document.getElementById('handoverBanner');
+  const textEl = document.getElementById('handoverBannerText');
+  const incoming = document.getElementById('incomingHandoverText');
+  if (banner) banner.classList.remove('hidden');
+  if (textEl) textEl.textContent = text;
+  if (incoming) incoming.textContent = text;
+}
+
+// -- INIT --
+function init() {
+  loadState();
+  applyBrandOnLoad();
+  updateSidebarStaffCard();
+
+  // Restore textarea values
+  const sn = persistData ? (localStorage.getItem('shiftCompanion_shiftNotes')    || '') : '';
+  const hn = persistData ? (localStorage.getItem('shiftCompanion_handoverNotes') || '') : '';
+  const an = persistData ? (localStorage.getItem('shiftCompanion_auditNotes')    || '') : '';
+  const shiftEl    = document.getElementById('shiftNotes');
+  const handoverEl = document.getElementById('handoverNotes');
+  const auditEl    = document.getElementById('auditNotes');
+  if (shiftEl)    shiftEl.value    = sn;
+  if (handoverEl) handoverEl.value = hn;
+  if (auditEl)    auditEl.value    = an;
+
+  // Render dynamic sections
+  renderChecklist('preAudit');
+  renderAuditSteps();
+  renderHistory();
+  renderNightLogEntries();
+
+  // Board
+  initBoard();
+
+  // Night log resume
+  if (nightlogActive && shiftLeader) {
+    document.getElementById('nlStartScreen')?.classList.add('hidden');
+    document.getElementById('nlMainUi')?.classList.remove('hidden');
+  } else {
+    const nlLeaderInput = document.getElementById('nlLeaderName');
+    if (nlLeaderInput && !nlLeaderInput.value) nlLeaderInput.value = staffName || '';
+  }
+
+  // Incoming handover banner
+  const pendingHandover = (() => { try { return localStorage.getItem('shiftCompanion_pendingHandover'); } catch { return null; } })();
+  if (pendingHandover) {
+    showHandoverBanner(pendingHandover);
+  }
+
+  // Dashboard stats
+  updateDashboardStats();
+  updateCheckInDisplay();
+
+  // AI Coach greeting
+  updateAiStatusBadge();
+  aiGreeting();
+
+  // Brand swatches
+  initBrandSwatches();
+
+  // Sign generator default preview
+  setTimeout(updateSignPreview, 100);
+
+  // Show first section
+  showSection('dashboard', document.querySelector('[data-section=dashboard]'));
+
+  // Profile modal on first use
+  if (!staffName) {
+    openModal('profileModal');
+  }
+
+  // Wire checklist tab buttons
+  document.getElementById('tabPreAudit')?.addEventListener('click',  () => switchChecklistTab('preAudit'));
+  document.getElementById('tabPostAudit')?.addEventListener('click', () => switchChecklistTab('postAudit'));
+
+  // Wire audit reset
+  document.getElementById('auditResetBtn')?.addEventListener('click', resetAudit);
+
+  // Wire end-shift confirm button
+  document.getElementById('confirmEndShiftBtn')?.addEventListener('click', confirmEndShift);
+
+  // Wire quick log submit
+  document.getElementById('submitQuickLogBtn')?.addEventListener('click', submitQuickLog);
+
+  // Wire history clear
+  document.getElementById('clearHistoryBtn')?.addEventListener('click', clearHistory);
+
+  // Wire print handover
+  document.getElementById('printHandoverBtn')?.addEventListener('click', printHandover);
+
+  // Wire chat send button
+  document.getElementById('sendChatBtn')?.addEventListener('click', sendChat);
+
+  // Wire clear chat button
+  document.getElementById('clearChatBtn')?.addEventListener('click', clearChat);
+
+  // Wire group check-in add row
+  document.getElementById('addCheckinRowBtn')?.addEventListener('click', () => addCheckinRow(''));
+
+  // Wire bulk import confirm
+  document.getElementById('bulkImportConfirmBtn')?.addEventListener('click', doBulkImport);
+
+  // Wire checkin logo
+  const ciLogo = document.getElementById('checkinLogoInput');
+  if (ciLogo) ciLogo.addEventListener('change', loadCheckinLogo);
+
+  // Wire orientation buttons
+  document.getElementById('orientPortrait')?.addEventListener('click',  () => setCheckinOrientation('portrait'));
+  document.getElementById('orientLandscape')?.addEventListener('click', () => setCheckinOrientation('landscape'));
+
+  // Board: wire all contenteditable / input cells for auto-save
+  document.querySelectorAll('#section-board [data-board-key], #section-board [data-board-input]').forEach(el => {
+    el.addEventListener('input', onBoardInput);
+  });
+
+  // Wire report filter
+  const rptFilter = document.getElementById('rptFilter');
+  if (rptFilter) rptFilter.addEventListener('input', filterReportEntries);
+
+  // Wire report clear
+  document.getElementById('clearReportBtn')?.addEventListener('click', clearReportData);
+
+  // Wire export night log
+  document.getElementById('exportNightlogBtn')?.addEventListener('click', exportNightlogJSON);
+
+  // Wire add night log entry
+  document.getElementById('addNlEntryBtn')?.addEventListener('click', addLogEntry);
+
+  // Wire remove photo
+  document.getElementById('nlPhotoRemoveBtn')?.addEventListener('click', removeNlPhoto);
+
+  // Wire start nightlog
+  document.getElementById('nlStartBtn')?.addEventListener('click', startNightlog);
+
+  // Wire sign print
+  document.getElementById('printSignBtn')?.addEventListener('click', printSign);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
