@@ -3027,3 +3027,265 @@ document.addEventListener('DOMContentLoaded', () => {
   const custItem = document.querySelector('.nav-item[onclick*="brandModal"]');
   if (custItem) { custItem.removeAttribute('onclick'); custItem.addEventListener('click', openBrandModal); }
 });
+
+// -------------------------------------------------------------
+// CHUNK 8 — CHECKLIST, NIGHT AUDIT, NOTES
+// -------------------------------------------------------------
+
+// -- Default checklist items (fallback if no hotelcompanion_items.js) --
+const DEFAULT_PRE_AUDIT = [
+  { id:'pre_001', label:'Check all guests are checked in, no arrivals outstanding', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_002', label:'Review any VIP notes and special requests for tonight', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_003', label:'Complete handover with late shift — read incoming handover notes', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_004', label:'Check all float / cash drawer is balanced and correct', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_005', label:'Confirm all room keys are accounted for and key log is up to date', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_006', label:'Check all doors, exits and car park are secured', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_007', label:'Log any maintenance faults reported during the day shift', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_008', label:'Check breakfast prep is in order and restaurant is ready', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_009', label:'Review any pending payment or billing issues from day shift', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_010', label:'Confirm fire alarm panel is green / no faults showing', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_011', label:'Check in-house guest list — note any early checkouts or late stays', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_012', label:'Confirm tomorrow\'s arrivals list is printed and ready', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_013', label:'Carry out first floor walk — all clear check for all floors', notes:'• Check corridors, stairwells and exits\n• Note any noise complaints or disturbances', required:true,  dayRestriction:'every' },
+  { id:'pre_014', label:'Log any out-of-order rooms in the PMS', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_015', label:'Set night rate / DND status on switchboard', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_016', label:'Confirm lone worker check-in protocol is understood', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_017', label:'Run Night Audit at 03:01', notes:'• Navigate to Night Audit Tracker\n• Follow all steps in sequence\n• Do not skip posting or reconciliation', required:true,  dayRestriction:'every', isAuditCta:true }
+];
+
+const DEFAULT_POST_AUDIT = [
+  { id:'post_001', label:'Print all night audit reports from PMS', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_002', label:'File all reports in the shift folder / binder', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_003', label:'Reconcile all card payments and check for voids or declines', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_004', label:'Complete banking / cash summary and seal the cash bag', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_005', label:'Print and check housekeeping report — update room statuses', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_006', label:'Check group arrivals for today — pre-assign rooms if required', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_007', label:'Check all VIP arrivals and prepare welcome notes / amenities', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_008', label:'Set up reception desk for morning shift — float, keys, printed lists', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_009', label:'Log any incidents or complaints in the Night Log', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_010', label:'Carry out final floor walk — all areas checked', notes:'• All exits secured\n• No disturbances\n• Lobby clean and presentation-ready', required:true,  dayRestriction:'every' },
+  { id:'post_011', label:'Complete handover notes for morning shift', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_012', label:'Check the weather and note any travel alerts affecting guests', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_013', label:'Prepare breakfast area — napkins, condiments, hot drinks station', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_014', label:'Print today\'s departures list and place at desk', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_015', label:'Verify all due-out rooms are flagged in PMS', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_016', label:'Check any pre-authorisations and confirm they are settling correctly', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_017', label:'Review and respond to any Priority Guest messages or follow-ups', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_018', label:'Print and review today\'s function sheet / event schedule', notes:'', required:false, dayRestriction:'mon' },
+  { id:'post_019', label:'Order stock / stationary replenishment if required', notes:'', required:false, dayRestriction:'mon' },
+  { id:'post_020', label:'Send weekend close-of-business report to management', notes:'', required:false, dayRestriction:'sat' },
+  { id:'post_021', label:'Perform month-end revenue reconciliation summary', notes:'', required:false, dayRestriction:'last_night_of_month' },
+  { id:'post_022', label:'Archive previous month\'s reports', notes:'', required:false, dayRestriction:'last_night_of_month' },
+  { id:'post_023', label:'Check in with security team — confirm night rounds completed', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_024', label:'Confirm all in-house guest billing is correct before morning', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_025', label:'Brief morning shift on any outstanding issues', notes:'', required:true,  dayRestriction:'every' }
+];
+
+function getActiveChecklistItems(tab) {
+  const src = (window.HOTELCOMPANION_ITEMS && Array.isArray(window.HOTELCOMPANION_ITEMS[tab]))
+    ? window.HOTELCOMPANION_ITEMS[tab]
+    : (tab === 'preAudit' ? DEFAULT_PRE_AUDIT : DEFAULT_POST_AUDIT);
+  return src;
+}
+
+function getDayKey() {
+  const d = new Date().getDay(); // 0=Sun
+  return ['sun','mon','tue','wed','thu','fri','sat'][d];
+}
+
+function isLastNightOfMonth() {
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return tomorrow.getDate() === 1;
+}
+
+function itemAppliestoday(item) {
+  const dr = item.dayRestriction || 'every';
+  if (dr === 'every') return true;
+  if (dr === 'last_night_of_month') return isLastNightOfMonth();
+  return dr === getDayKey();
+}
+
+const DAY_RESTRICTION_LABELS = {
+  mon:'Mon only', tue:'Tue only', wed:'Wed only', thu:'Thu only',
+  fri:'Fri only', sat:'Sat only', sun:'Sun only', last_night_of_month:'Last night of month'
+};
+
+function renderChecklist(tab) {
+  checklistTab = tab;
+  const container = document.getElementById('checklistItems');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const items = getActiveChecklistItems(tab);
+  items.forEach((item, idx) => {
+    const applies = itemAppliestoday(item);
+
+    // Night Audit CTA card (last pre-audit item with isAuditCta flag)
+    if (item.isAuditCta) {
+      const cta = document.createElement('div');
+      cta.className = 'night-audit-cta';
+      cta.setAttribute('role', 'button');
+      cta.setAttribute('tabindex', '0');
+      cta.setAttribute('aria-label', 'Go to Night Audit Tracker');
+      cta.innerHTML = '<div class="night-audit-cta-icon">??</div><div class="night-audit-cta-text"><h3>Run Night Audit</h3><p>Navigate to the Night Audit Tracker to run the step-by-step audit procedure.</p></div><span style="color:var(--gold);font-size:18px;">›</span>';
+      cta.addEventListener('click', () => showSection('nightaudit', document.querySelector('[data-section=nightaudit]')));
+      cta.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') cta.click(); });
+      container.appendChild(cta);
+      return;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'check-item' + (checkState[item.id] ? ' done' : '') + (item.required ? ' required-item' : '') + (!applies ? ' greyed-out' : '');
+    div.setAttribute('role', 'checkbox');
+    div.setAttribute('aria-checked', checkState[item.id] ? 'true' : 'false');
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('aria-label', item.label);
+
+    const checked = checkState[item.id];
+    div.innerHTML = `
+      <div class="check-box ${checked ? 'checked' : ''}" aria-hidden="true">${checked ? '?' : ''}</div>
+      <div class="check-item-main">
+        <div class="check-label">${escapeHtml(item.label)}</div>
+        ${item.notes ? `<div class="check-notes">${escapeHtml(item.notes)}</div>` : ''}
+        <div class="check-badges">
+          ${item.required ? '<span class="badge badge-gold">Required</span>' : ''}
+          ${!applies && item.dayRestriction !== 'every' ? `<span class="badge badge-muted">${DAY_RESTRICTION_LABELS[item.dayRestriction] || item.dayRestriction}</span>` : ''}
+        </div>
+      </div>
+    `;
+
+    div.addEventListener('click', () => toggleCheck(item.id, tab));
+    div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCheck(item.id, tab); } });
+    container.appendChild(div);
+  });
+
+  updateChecklistProgress(tab);
+}
+
+function toggleCheck(id, tab) {
+  checkState[id] = !checkState[id];
+  renderChecklist(tab || checklistTab);
+  updateDashboardStats();
+  saveState();
+}
+
+function updateChecklistProgress(tab) {
+  const items   = getActiveChecklistItems(tab);
+  const visible = items.filter(it => !it.isAuditCta);
+  const total   = visible.length;
+  const done    = visible.filter(it => checkState[it.id]).length;
+  const pct     = total > 0 ? Math.round((done / total) * 100) : 0;
+  const fill    = document.getElementById('checklistProgressFill');
+  const label   = document.getElementById('checklistProgressLabel');
+  if (fill)  fill.style.width = pct + '%';
+  if (label) label.textContent = done + ' of ' + total + ' complete';
+}
+
+function switchChecklistTab(tab) {
+  checklistTab = tab;
+  document.getElementById('tabPreAudit')?.classList.toggle('active', tab === 'preAudit');
+  document.getElementById('tabPostAudit')?.classList.toggle('active', tab === 'postAudit');
+  document.getElementById('tabPreAudit')?.setAttribute('aria-selected', tab === 'preAudit');
+  document.getElementById('tabPostAudit')?.setAttribute('aria-selected', tab === 'postAudit');
+  renderChecklist(tab);
+}
+
+// -- Night Audit --
+const DEFAULT_AUDIT_STEPS = [
+  { id:'audit_001', label:'Post all room and package charges in the PMS' },
+  { id:'audit_002', label:'Run the night audit / end-of-day procedure in the PMS' },
+  { id:'audit_003', label:'Verify all room rates match the rate plan — check exceptions' },
+  { id:'audit_004', label:'Post all F&B charges from restaurant / bar journals' },
+  { id:'audit_005', label:'Reconcile all card terminal batches to the PMS totals' },
+  { id:'audit_006', label:'Void any test or error transactions after authorisation' },
+  { id:'audit_007', label:'Print the Revenue/Manager report and review for anomalies' },
+  { id:'audit_008', label:'Print the Accounts Receivable / City Ledger report' },
+  { id:'audit_009', label:'Print the No-Show report and action any guaranteed bookings' },
+  { id:'audit_010', label:'Print the Guest Ledger report and check folios are correct' },
+  { id:'audit_011', label:'Print the Trial Balance / Daily Summary report' },
+  { id:'audit_012', label:'Check and reconcile advance deposit ledger' },
+  { id:'audit_013', label:'Transfer all check-out folios to the city ledger or zero them' },
+  { id:'audit_014', label:'Print the Housekeeping discrepancy report and resolve conflicts' },
+  { id:'audit_015', label:'Run the statistical report (occupancy, ADR, RevPAR)' },
+  { id:'audit_016', label:'File all printed reports in the shift folder' },
+  { id:'audit_017', label:'Update the Daily Information Board data' },
+  { id:'audit_018', label:'Confirm PMS date has rolled to the new business day' }
+];
+
+function getAuditSteps() {
+  return (window.HOTELCOMPANION_ITEMS && Array.isArray(window.HOTELCOMPANION_ITEMS.auditSteps))
+    ? window.HOTELCOMPANION_ITEMS.auditSteps
+    : DEFAULT_AUDIT_STEPS;
+}
+
+function renderAuditSteps() {
+  const container = document.getElementById('auditSteps');
+  if (!container) return;
+  container.innerHTML = '';
+  const steps = getAuditSteps();
+  steps.forEach((step, idx) => {
+    const done = !!auditState[step.id];
+    const div = document.createElement('div');
+    div.className = 'audit-step' + (done ? ' done' : '');
+    div.setAttribute('role', 'checkbox');
+    div.setAttribute('aria-checked', done ? 'true' : 'false');
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('aria-label', step.label);
+    div.innerHTML = `
+      <div class="audit-step-num" aria-hidden="true">${done ? '?' : (idx + 1)}</div>
+      <div class="audit-step-main">
+        <div class="audit-step-label">${escapeHtml(step.label)}</div>
+      </div>
+    `;
+    div.addEventListener('click', () => toggleAuditStep(step.id));
+    div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAuditStep(step.id); } });
+    container.appendChild(div);
+  });
+  updateAuditProgress();
+}
+
+function toggleAuditStep(id) {
+  auditState[id] = !auditState[id];
+  renderAuditSteps();
+  saveState();
+}
+
+function updateAuditProgress() {
+  const steps = getAuditSteps();
+  const total = steps.length;
+  const done  = steps.filter(s => auditState[s.id]).length;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  const fill  = document.getElementById('auditProgressFill');
+  const label = document.getElementById('auditProgressLabel');
+  if (fill)  fill.style.width = pct + '%';
+  if (label) label.textContent = done + ' of ' + total + ' complete';
+}
+
+function resetAudit() {
+  if (!confirm('Reset all audit step checkboxes?')) return;
+  auditState = {};
+  renderAuditSteps();
+  saveState();
+}
+
+function onAuditNotesInput() { saveState(); }
+
+// -- Notes / Handover --
+function onShiftNotesInput()    { saveState(); }
+function onHandoverNotesInput() { saveState(); }
+
+function printHandover() {
+  const meta = document.getElementById('printHandoverMeta');
+  const psn  = document.getElementById('printShiftNotes');
+  const phn  = document.getElementById('printHandoverNotes');
+  if (meta) meta.textContent = 'Staff: ' + (staffName || '—') + ' · ' + staffRole + ' · ' + new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  if (psn)  psn.textContent  = document.getElementById('shiftNotes')?.value    || '(No shift notes)';
+  if (phn)  phn.textContent  = document.getElementById('handoverNotes')?.value || '(No handover notes)';
+  window.print();
+}
+
+// -- Utility --
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
