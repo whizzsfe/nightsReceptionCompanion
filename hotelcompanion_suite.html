@@ -3289,3 +3289,919 @@ function printHandover() {
 function escapeHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+
+// -------------------------------------------------------------
+// CHUNK 9 — AI COACH (ARIA)
+// -------------------------------------------------------------
+
+const BUILT_IN_REPLIES = [
+  { keywords:['guest wants to pay cash','paying cash','cash payment','cash only'],
+    response:`**Cash Payment Policy**\n\n**Our Position:** We are a card-only hotel. All payments must be processed through our approved card terminals.\n\n**Script (firm but warm):**\n*"I completely understand, and I'm sorry for any inconvenience. We operate as a card-only property for security and accounting reasons, so unfortunately we're unable to accept cash payments at the desk. If you have a debit card or prepaid card, I can process that for you — otherwise I'd be happy to help you find the nearest ATM."*\n\n**If the guest insists:** Escalate to the Duty Manager. Do not accept cash under any circumstances.` },
+
+  { keywords:['card declined','card not working','payment declined','decline at check'],
+    response:`**Card Declined at Check-In**\n\n1. Remain calm and discreet — face the terminal away from other guests\n2. *"I'm sorry, it looks like the card hasn't gone through. Could you try again, or do you have another card?"*\n3. Ask them to try inserting rather than tapping (or vice versa)\n4. Check the pre-authorisation amount is correct in the PMS\n5. If three attempts fail: *"I'd suggest contacting your bank — sometimes a quick call releases the payment. In the meantime, I can hold your reservation for 15 minutes."*\n6. If no resolution: escalate to Duty Manager\n7. Never leave a guest without a room over a payment issue — find a solution` },
+
+  { keywords:['noise complaint','noisy room','loud guests','disturbance'],
+    response:`**Noise Complaint Escalation**\n\n**Step 1 — Phone call:**\n*"Good evening, this is [your name] from reception. I'm sorry to disturb you — we've had a noise report from a neighbouring guest. I'd appreciate it if you could keep the volume down for the rest of the evening. Thank you so much for your understanding."*\n\n**Step 2 — In-person (if phone call ignored):**\nKnock on the door. *"I apologise for disturbing you personally, but we've had a second noise report and I need to ask you to keep it down immediately or I will have to involve the duty manager."*\n\n**Step 3 — Duty Manager:**\nCall the duty manager if a second visit is required. Log the incident in the Night Log.` },
+
+  { keywords:['intoxicated','drunk guest','guest is drunk','heavily intoxicated','inebriated'],
+    response:`**Intoxicated Guest at Desk**\n\n**De-escalation:**\n- Stay calm and speak slowly and clearly\n- Maintain distance — do not lean over the desk\n- Do not argue or raise your voice\n- Acknowledge them: *"I can see you've had a long night. Let's get you sorted."*\n\n**Safety Protocol:**\n1. If they are a hotel guest, verify room number before releasing key\n2. Do not issue a key to someone who cannot safely operate the lift alone — offer to escort\n3. If they become aggressive: call Security or Police immediately (999). Do not attempt to physically intervene\n4. Log all interactions in the Night Log\n5. If they are not a guest and refuse to leave: trespass procedure applies — call for assistance` },
+
+  { keywords:['no booking found','no reservation','walk-in','late arrival no booking','arrival no reservation'],
+    response:`**Late Arrival — No Booking Found**\n\n1. Ask for the guest's full name and check all spelling variations\n2. Search by arrival date, email, and phone number\n3. Check email reservations channel (booking.com, expedia, direct) for an unprocessed booking\n4. *"I'm so sorry — I can't find a reservation under that name. Do you have a confirmation email or booking reference?"*\n5. If they have a reference: cross-check with the ORM/channel manager\n6. If genuinely no reservation exists: quote the best available rate for tonight. If no rooms are available, offer to call a nearby hotel\n7. Never turn away a guest in distress without offering an alternative` },
+
+  { keywords:['locked out','lost room key','key not working','lost key'],
+    response:`**Guest Locked Out at Night**\n\n1. Verify the guest's identity before issuing a new key\n2. Ask for: full name, room number, and one piece of verification (booking name on reservation, vehicle in car park, description of room contents)\n3. If verified: re-encode the key and hand it over\n4. *"Here's your new key, [name]. Just to let you know your old card will no longer work, so this is your current key."*\n5. If UNABLE to verify identity: do not issue key — ask them to wait while you call the room, or escalate to Duty Manager\n6. Log the incident in the Night Log if a second key was needed` },
+
+  { keywords:['night audit error','audit error','pms error','audit problem'],
+    response:`**Night Audit Error — What To Do**\n\n**Do not panic. Take a breath and check these first:**\n\n1. **Date roll failed** — Re-run the audit. Check the PMS date before proceeding\n2. **Rate variance** — Check the bucket/rate plan for the affected room. Override if authorised\n3. **Unposted charges** — Post manually and re-run the audit report\n4. **Terminal batch mismatch** — Print the terminal batch report and compare line by line to PMS\n5. **Golden Rules:** Never force-close the audit without understanding the error | Never void a charge without manager approval\n\n**If stuck:** Call the PMS helpdesk (number in manual). Do not wait until morning — call now.` },
+
+  { keywords:['suspicious person','suspicious individual','intruder','unknown person in lobby'],
+    response:`**Suspicious Person in Lobby**\n\n**Observe ? Approach ? Escalate**\n\n**Observe:** Do not confront immediately. Note appearance, behaviour, and any items they're carrying.\n\n**Approach (if safe to do so):**\n*"Good evening, can I help you? Are you a guest with us tonight?"*\nIf they have a legitimate purpose they will explain it. If evasive, state clearly: *"I'm afraid this area is for hotel guests only. May I ask you to wait outside?"*\n\n**Escalate:**\n- If they refuse to leave: call Security\n- If you feel unsafe at any point: do not approach — call 999 immediately\n- Log everything in the Night Log` },
+
+  { keywords:['pre-auth','pre authorisation','pre authorization','billing query','hold on card'],
+    response:`**Pre-Authorisation / Billing Query Script**\n\n*"Thank you for asking — I'm happy to explain. When you check in, we place a temporary hold on your card to cover the cost of your stay plus an incidental deposit. This isn't a charge — it's simply a hold while you're with us. Once you check out, we release the hold and charge only what you've used. The hold may show on your bank statement for 3–5 business days after release, depending on your bank. If you have specific concerns about the amount, I can print a copy of your folio right now — would that help?"*` },
+
+  { keywords:['guest complaint','handling complaint','complaint script','unhappy guest'],
+    response:`**LEARN Model — Handling a Guest Complaint**\n\n**L — Listen:** Give the guest your full attention. Do not interrupt.\n\n**E — Empathise:** *"I completely understand why you're frustrated, and I sincerely apologise for the experience you've had."*\n\n**A — Apologise:** Apologise for the situation, not for yourself. Be genuine.\n\n**R — Resolve:** Take ownership. Tell them exactly what you will do: *"I'm going to [action] right now and I'll follow up with you within [timeframe]."*\n\n**N — Notify:** Log the complaint in the Night Log and notify the Duty Manager of any significant issue.\n\nNever argue. Never make promises you can't keep. Always follow up.` },
+
+  { keywords:['vip check-in','vip arrival','vip guest','vip script'],
+    response:`**VIP Arrival Script**\n\nPrepare before they arrive:\n- Room is pre-assigned, inspected, and ready\n- Welcome note and any amenities in place\n- Name confirmed in PMS and noted on shift\n\n**On arrival:**\n*"Good evening, [name] — we're delighted to have you with us tonight. We've reserved our [room type] for you. Let me get you checked in straight away."*\n\n- Escort them through check-in smoothly — no unnecessary questions\n- Present key card: *"Your room is on the [floor], take the lift just to your left."*\n- Offer any additional needs: *"Is there anything I can arrange for you this evening?"*\n- Log the VIP arrival in the shift notes` },
+
+  { keywords:['angry guest','guest shouting','irate guest','very upset guest'],
+    response:`**Dealing with an Angry Guest**\n\n1. **Stay calm.** Lower your own voice slightly — it naturally encourages the guest to match your tone\n2. **Listen fully** — do not interrupt, even if you disagree\n3. **Validate:** *"I can hear how frustrated you are and I want to sort this for you."*\n4. **Avoid:** Saying "calm down", being defensive, crossing your arms, sighing\n5. **Take action:** Move to a quieter area if possible. Offer to find a solution right now\n6. **If abusive:** *"I want to help you, but I need you to speak to me respectfully so we can work through this together."* — One warning, then call Duty Manager\n7. **Debrief:** Check in with a colleague after the interaction. Log the incident.` },
+
+  { keywords:['local recommendation','recommendation','things to do','restaurants nearby','local area'],
+    response:`**Giving Local Recommendations**\n\nStructure your recommendation confidently:\n\n1. **Confirm what they're looking for** — *"Are you looking for somewhere to eat tonight, or more for sightseeing tomorrow?"*\n2. **Give two or three options** — not a laundry list\n3. **Add a personal touch** — *"A lot of our guests really enjoy [name] — it's about a 5-minute walk, great for [reason]."*\n4. **Offer more** — *"I can also print a local area map or look up directions for you."*\n\nTip: Keep a mental (or written) list of 3–4 per category: casual dining, fine dining, bars, sightseeing. Update it if guests give you feedback.` },
+
+  { keywords:['phone greeting','answering the phone','phone script','call handling'],
+    response:`**Phone Handling Scripts**\n\n**External incoming call:**\n*"Good evening, [Hotel Name], reception speaking — how can I help you?"*\n\n**Internal guest call:**\n*"Good evening, [name] speaking — how can I assist you?"*\n\n**Transferring a call:**\n*"Of course, I'll transfer you now. If you get disconnected, please call back and I'll connect you again."*\n\n**Taking a message:**\n*"I'm afraid [name] isn't available right now. May I take a message? Could I get your name and number?"*\n\n**Always:** Speak clearly, smile (it comes through in your voice), and ask before placing anyone on hold.` },
+
+  { keywords:['fire alarm','fire evacuation','evacuation procedure','assembly point'],
+    response:`**Fire Alarm / Evacuation Procedure**\n\n1. **Treat every alarm as real** until confirmed otherwise\n2. **Do not use the lift** — direct all guests to the nearest fire exit stairwell\n3. **Assembly point** — direct guests to the designated assembly point (see site map in procedures folder)\n4. Call 999 immediately if you cannot confirm it is a false alarm\n5. Take the in-house guest list with you if safe to do so\n6. **Do not re-enter the building** until the fire service gives the all-clear\n7. Account for all guests and staff at the assembly point\n8. Log the incident — even for false alarms, a log entry is required\n\n**Reassuring guests:** *"Please follow me calmly to the exit — this is a precaution and we'll have you back inside as quickly as possible."*` },
+
+  { keywords:['maintenance fault','maintenance issue','something broken','fault report','repair needed'],
+    response:`**Logging a Maintenance Fault**\n\n1. Get full details from the guest: room number, nature of fault, how urgent\n2. Log it in the Night Log (and PMS maintenance module if available)\n3. **Severity guide:**\n   - **High (action now):** No heating in winter, no water, flooding, electrical fault, security breach\n   - **Medium (action by morning):** TV not working, noisy A/C, minor plumbing\n   - **Low (log and pass to day shift):** Lightbulb, cosmetic damage, minor fittings\n4. For HIGH severity faults: call the out-of-hours maintenance contact (number in procedures folder)\n5. Reassure the guest: *"I've logged this and our maintenance team will address it as soon as possible."*\n6. Offer a room move if the fault significantly impacts the guest's comfort` },
+
+  { keywords:['early check-in','early arrival','room not ready'],
+    response:`**Early Check-In Request**\n\n1. Check PMS for availability — is the requested room (or room type) already clean and inspected?\n2. If yes: check in immediately, noting the early arrival in the shift log\n3. If no: *"Your room isn't quite ready yet — our housekeeping team is still working on it. Your room will be ready by [standard check-in time]. In the meantime, you're very welcome to use our lobby/lounge/restaurant."*\n4. Offer to store luggage: *"I can store your bags here safely while you wait."*\n5. Take contact details and call/text when the room is ready\n6. Do not promise a specific room number until it has been confirmed clean` },
+
+  { keywords:['late check-out','late departure','extend stay','checkout extension'],
+    response:`**Late Check-Out Request**\n\n1. Check the PMS — is the room blocked for an early-arriving guest today?\n2. If room is free:\n   - Up to 12:00 — usually complimentary based on loyalty / length of stay\n   - 12:00–14:00 — typically free or small charge depending on policy\n   - 14:00+ — standard policy is to charge a half-day or full day\n3. *"I can arrange a late check-out until [time] for you — is that helpful?"*\n4. Always note it in the PMS and on the housekeeping sheet\n5. If room is blocked: *"I'm afraid we have guests arriving into that room today, so I'm unable to extend beyond [standard time]. I can arrange for your luggage to be stored if that helps."*` },
+
+  { keywords:['lost property','lost and found','found item','guest left something'],
+    response:`**Lost Property Procedure**\n\n**Guest reports a loss:**\n1. Take full details: item description, where/when last seen, room number\n2. Check the lost property log and secure storage immediately\n3. Check with housekeeping (they often find items when turning rooms)\n4. *"I've logged your details and we'll search thoroughly. Can I take your contact number? We'll call you as soon as we locate it."*\n\n**Found item:**\n1. Log it immediately: item description, where found, found by, date/time\n2. Place in secure lost property storage — do not leave at reception desk\n3. Valuable items (cash, jewellery, electronics): inform Duty Manager immediately\n4. Never dispose of found property` },
+
+  { keywords:['dnd','do not disturb','welfare check','dnr room','welfare concern'],
+    response:`**Do Not Disturb / Welfare Check**\n\n**If DND has been on for an extended period (typically 24h+):**\n1. Phone the room first — let it ring at least 10 times\n2. If no answer: attend the room in person with a colleague if possible\n3. Knock firmly: *"Good morning/evening, this is [name] from reception — I'm just checking everything is okay."*\n4. If still no answer and welfare concern is genuine: call the Duty Manager before entering\n5. A master key entry for welfare purposes must be done with authorisation and ideally two staff members\n6. **If the guest is unresponsive:** Call 999 immediately\n7. Log all actions and times precisely` },
+
+  { keywords:['medical emergency','guest taken ill','ambulance','person collapsed','unconscious'],
+    response:`**Medical Emergency**\n\n1. **Call 999 immediately** — do not delay\n2. Stay on the line with the operator — follow their instructions\n3. Send a colleague to the hotel entrance to direct the ambulance\n4. Keep the area clear\n5. Do not move the person unless instructed to by the 999 operator\n6. Retrieve the first aid kit and defibrillator if required\n7. Know the hotel address to give the operator: [confirm address in site procedures]\n8. Notify the Duty Manager immediately\n9. Log the full incident in the Night Log\n10. **After the incident:** Complete a full written incident report. Notify the General Manager in the morning.` },
+
+  { keywords:['unaccompanied minor','child alone','minor without adult'],
+    response:`**Unaccompanied Minor**\n\n**Safeguarding is the immediate priority.**\n\n1. Speak calmly to the child and establish their name, age, and room number\n2. Do not leave the child unattended\n3. Contact the Duty Manager immediately — this is an escalation situation\n4. Attempt to contact the responsible adult: call the room, ring the mobile if available\n5. Do not give out information about the child to unknown persons asking at the desk\n6. If the child appears to be at risk or in distress: call 999 and request police attendance\n7. Record all details: time, appearance, what was said\n8. A full incident report must be completed` },
+
+  { keywords:['group arrival','large group','coach party','tour group'],
+    response:`**Group Arrival Procedure**\n\n**Preparation (before arrival):**\n- Confirm all rooms are pre-assigned in PMS and keys are pre-cut\n- Prepare a key envelope per room with room number written clearly\n- Brief housekeeping on the group rooms\n- Have the rooming list ready at the desk\n\n**On arrival:**\n- Direct the group leader to reception\n- Hand keys to the group leader against the rooming list — one sign-off, not individual check-ins\n- Direct the group to the lift / stairwell\n- *"Here are your keys for all [X] rooms. Breakfast is served from [time] in [location]."*\n\n**After arrival:**\n- Confirm all rooms occupied and no one is missing from the list\n- Note any issues or special requests that came up during arrival` },
+
+  { keywords:['room move','move room','change room','different room'],
+    response:`**Room Move Procedure**\n\n1. Confirm reason for the room move and check for availability in PMS\n2. Verify the new room is clean, inspected, and ready\n3. In the PMS: check out from old room, check into new room (same booking)\n4. Encode a new key card for the new room number\n5. Invalidate/deactivate the old key\n6. Accompany the guest to the new room if possible, or give clear directions\n7. Notify housekeeping to service the vacated room\n8. Update the housekeeping board/PMS room status\n9. Note the room move in the Night Log and on the shift summary` },
+
+  { keywords:['guest refuses to leave','trespass','ejecting a guest','guest wont leave'],
+    response:`**Guest Refuses to Leave**\n\n1. Remain calm — do not physically attempt to remove anyone\n2. State clearly and calmly: *"I'm afraid your check-out time has passed and your reservation has ended. I need to ask you to vacate the room."*\n3. Offer to arrange transport or storage if the delay is logistical\n4. If they refuse a second time: call the Duty Manager immediately\n5. If the situation is threatening or escalates: call 999\n6. The police can remove a trespasser — do not wait if safety is a concern\n7. Document everything: times, what was said, who was present` },
+
+  { keywords:['power cut','power outage','electricity cut','no power','lights gone out'],
+    response:`**Power Cut / Outage**\n\n1. **Check emergency lighting** — it should activate automatically\n2. Check the fuse board / MCB panel (location in procedures folder)\n3. Call the emergency maintenance number immediately if the outage affects the whole building\n4. Inform guests via in-house telephone if phones are working: *"We are currently experiencing a brief power interruption. Our team is working to restore power. Emergency lighting is in place for your safety."*\n5. **Do not use the lift** — it may be inoperative or unsafe\n6. Note the start time of the outage for the incident report\n7. If the power is not restored within 15 minutes: escalate to Duty Manager and consider guest welfare (heating, electric doors, CCTV)\n8. Log the full incident in the Night Log` }
+];
+
+function getActiveScripts() {
+  const prop = window.HOTELCOMPANION_SCRIPTS;
+  if (prop && prop.version === 1 && Array.isArray(prop.scripts) && prop.scripts.length > 0) {
+    return { scripts: prop.scripts, source: 'property' };
+  }
+  return { scripts: BUILT_IN_REPLIES, source: 'builtin' };
+}
+
+function updateAiStatusBadge() {
+  const badge = document.getElementById('aiStatusBadge');
+  if (!badge) return;
+  const { source } = getActiveScripts();
+  if (source === 'property') {
+    badge.className = 'ai-status-badge green';
+    badge.textContent = 'Property Scripts Loaded';
+  } else {
+    badge.className = 'ai-status-badge gold';
+    badge.textContent = 'Smart Defaults Active';
+  }
+}
+
+function markdownToHtml(text) {
+  let h = escapeHtml(text);
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\n/g, '<br>');
+  return h;
+}
+
+function renderMessage(role, text) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+
+  const typing = container.querySelector('.typing-dots');
+  if (typing) typing.remove();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg ' + (role === 'user' ? 'chat-user' : 'chat-aria');
+
+  if (role === 'user') {
+    wrap.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+  } else {
+    wrap.innerHTML = `<div class="chat-avatar">??</div><div class="chat-bubble">${markdownToHtml(text)}</div>`;
+  }
+
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTypingDots() {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  const dots = document.createElement('div');
+  dots.className = 'chat-msg chat-aria typing-dots';
+  dots.innerHTML = `<div class="chat-avatar">??</div><div class="chat-bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
+  container.appendChild(dots);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTypingDots() {
+  document.querySelector('.typing-dots')?.remove();
+}
+
+function queryAi(text) {
+  const lower = text.toLowerCase();
+  const { scripts } = getActiveScripts();
+
+  // property scripts: check keywords array
+  for (const s of scripts) {
+    const ks = Array.isArray(s.keywords) ? s.keywords : [];
+    if (ks.some(k => lower.includes(k.toLowerCase()))) {
+      return s.response;
+    }
+  }
+  // fallback
+  return `I don't have a specific script for that. Consider:\n\n1. Contact your Duty Manager.\n2. Check the night manual.\n3. Log the incident in the Night Log.`;
+}
+
+let aiAwaitingReply = false;
+
+function sendChat() {
+  if (aiAwaitingReply) return;
+  const input = document.getElementById('chatInput');
+  const text  = (input?.value || '').trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = '';
+  renderMessage('user', text);
+  aiAwaitingReply = true;
+  showTypingDots();
+  setTimeout(() => {
+    const reply = queryAi(text);
+    hideTypingDots();
+    renderMessage('aria', reply);
+    aiAwaitingReply = false;
+  }, 900);
+}
+
+function chipQuery(text) {
+  if (aiAwaitingReply) return;
+  const input = document.getElementById('chatInput');
+  if (input) input.value = '';
+  renderMessage('user', text);
+  aiAwaitingReply = true;
+  showTypingDots();
+  setTimeout(() => {
+    const reply = queryAi(text);
+    hideTypingDots();
+    renderMessage('aria', reply);
+    aiAwaitingReply = false;
+  }, 900);
+}
+
+function clearChat() {
+  const container = document.getElementById('chatMessages');
+  if (container) container.innerHTML = '';
+  aiGreeting();
+}
+
+function aiGreeting() {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  container.innerHTML = '';
+  renderMessage('aria', `Good ${getGreetingTime()}, I'm **Aria** — your AI Hospitality Coach.\n\nI have scripts for common night-shift scenarios. Select a suggestion below or type your own question.\n\nTry: *"Noise complaint script"*, *"Card declined at check-in"*, or *"How do I handle an angry guest?"*`);
+}
+
+function getGreetingTime() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'morning';
+  if (h < 17) return 'afternoon';
+  return 'evening';
+}
+
+// Chat input — Enter submits, Shift+Enter newline, auto-resize
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('chatInput');
+  if (input) {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChat();
+      }
+    });
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    });
+  }
+});
+
+// -------------------------------------------------------------
+// CHUNK 10 — NIGHT LOG + QUICK LOG + TOOLS
+// -------------------------------------------------------------
+
+// -- Night Log --
+
+function startNightlog() {
+  const name = (document.getElementById('nlLeaderName')?.value || '').trim();
+  if (!name) { alert('Please enter your name to start the log.'); return; }
+  shiftLeader    = name;
+  shiftStartTime = new Date().toISOString();
+  nightlogActive = true;
+  document.getElementById('nlStartScreen')?.classList.add('hidden');
+  document.getElementById('nlMainUi')?.classList.remove('hidden');
+  renderNightLogEntries();
+  saveState();
+}
+
+function toggleFloorClear(floor) {
+  if (!nightlogActive) return;
+  floorWalkState[floor] = !floorWalkState[floor];
+  const btn = document.querySelector(`.floor-clear-btn[data-floor="${floor}"]`);
+  if (btn) {
+    btn.classList.toggle('clear', floorWalkState[floor]);
+    btn.classList.toggle('unclear', !floorWalkState[floor]);
+    btn.setAttribute('aria-pressed', floorWalkState[floor] ? 'true' : 'false');
+    btn.textContent = floor + (floorWalkState[floor] ? ' ?' : '');
+  }
+  // Log a floor_walk entry
+  const entryId = 'entry_' + Date.now() + '_' + Math.random().toString(16).slice(2,6);
+  logEntries.push({
+    id: entryId, type: 'floor_walk', timestamp: new Date().toISOString(),
+    floor: floor, allClear: floorWalkState[floor], notes: ''
+  });
+  renderNightLogEntries();
+  saveState();
+}
+
+function generateEntryId() {
+  return 'entry_' + Date.now() + '_' + Math.random().toString(16).slice(2,6);
+}
+
+function addLogEntry() {
+  if (!nightlogActive) { alert('Please start the log first.'); return; }
+
+  const floor    = document.getElementById('nlFloor')?.value    || '';
+  const category = document.getElementById('nlCategory')?.value || '';
+  const severity = document.getElementById('nlSeverity')?.value || 'medium';
+  const title    = (document.getElementById('nlTitle')?.value    || '').trim();
+  const desc     = (document.getElementById('nlDesc')?.value     || '').trim();
+  const reporter = (document.getElementById('nlReporter')?.value || '').trim();
+
+  if (!floor || !category || !title || !desc) {
+    alert('Please fill in Floor, Category, Title, and Description.'); return;
+  }
+
+  const entry = {
+    id: generateEntryId(), type: 'issue', timestamp: new Date().toISOString(),
+    floor, category, severity, title, description: desc,
+    reporter: reporter || shiftLeader,
+    imageBase64: nlPhotoBase64 || null, rectified: false
+  };
+
+  logEntries.push(entry);
+  renderNightLogEntries();
+  updateDashboardStats();
+
+  // Reset form
+  ['nlFloor','nlCategory','nlTitle','nlDesc','nlReporter'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  nlPhotoBase64 = null;
+  const preview = document.getElementById('nlPhotoPreview');
+  if (preview) { preview.src = ''; preview.classList.add('hidden'); }
+  const photoInput = document.getElementById('nlPhotoInput');
+  if (photoInput) photoInput.value = '';
+  document.getElementById('nlPhotoRemoveBtn')?.classList.add('hidden');
+
+  saveState();
+}
+
+function renderNightLogEntries() {
+  const list = document.getElementById('nlEntriesList');
+  if (!list) return;
+  if (logEntries.length === 0) {
+    list.innerHTML = '<p class="empty-state" style="text-align:center;color:var(--muted);padding:32px;">No entries yet. Use the form above to log an issue.</p>';
+    return;
+  }
+
+  const sorted = [...logEntries].reverse();
+  list.innerHTML = sorted.map(e => {
+    if (e.type === 'floor_walk') {
+      return `<div class="nl-entry nl-entry-walk">
+        <div class="nl-entry-header">
+          <span class="nl-entry-badge ${e.allClear ? 'badge-green' : 'badge-red'}">${e.allClear ? '? All Clear' : '? Issue Found'}</span>
+          <span class="nl-entry-floor">${escapeHtml(e.floor)} Floor</span>
+          <span class="nl-entry-time">${formatTime(e.timestamp)}</span>
+        </div>
+        ${e.notes ? `<div class="nl-entry-notes">${escapeHtml(e.notes)}</div>` : ''}
+      </div>`;
+    }
+    // issue
+    const sevClass = e.severity === 'high' ? 'badge-red' : e.severity === 'medium' ? 'badge-gold' : 'badge-muted';
+    return `<div class="nl-entry nl-entry-issue ${e.rectified ? 'rectified' : ''}">
+      <div class="nl-entry-header">
+        <span class="nl-entry-badge ${sevClass}">${e.severity}</span>
+        <span class="nl-entry-cat">${escapeHtml(e.category)}</span>
+        <span class="nl-entry-floor">${escapeHtml(e.floor)}</span>
+        <span class="nl-entry-time">${formatTime(e.timestamp)}</span>
+        <div class="nl-entry-actions">
+          <button class="btn btn-ghost nl-rectify-btn" onclick="toggleRectify('${e.id}')" aria-label="${e.rectified ? 'Mark unresolved' : 'Mark resolved'}">${e.rectified ? 'Reopen' : 'Resolve'}</button>
+          <button class="btn btn-ghost nl-delete-btn" onclick="deleteLogEntry('${e.id}')" aria-label="Delete entry">?</button>
+        </div>
+      </div>
+      <div class="nl-entry-title">${escapeHtml(e.title)}</div>
+      <div class="nl-entry-desc">${escapeHtml(e.description)}</div>
+      ${e.reporter ? `<div class="nl-entry-reporter">Reported by: ${escapeHtml(e.reporter)}</div>` : ''}
+      ${e.imageBase64 ? `<img src="${e.imageBase64}" class="nl-entry-thumb" alt="Attached photo">` : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleRectify(id) {
+  const entry = logEntries.find(e => e.id === id);
+  if (entry) { entry.rectified = !entry.rectified; renderNightLogEntries(); saveState(); }
+}
+
+function deleteLogEntry(id) {
+  if (!confirm('Delete this log entry?')) return;
+  logEntries = logEntries.filter(e => e.id !== id);
+  renderNightLogEntries();
+  updateDashboardStats();
+  saveState();
+}
+
+function formatTime(iso) {
+  try { return new Date(iso).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+  catch { return '—'; }
+}
+
+function exportNightlogJSON() {
+  const data = {
+    schemaVersion: 1,
+    shiftId:       shiftStartTime || new Date().toISOString(),
+    shiftLeader:   shiftLeader,
+    exportedAt:    new Date().toISOString(),
+    entries:       logEntries
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const fn   = 'nightlog-' + (shiftStartTime || new Date().toISOString()).slice(0,10) + '.json';
+  if (window.showSaveFilePicker) {
+    window.showSaveFilePicker({ suggestedName: fn, types:[{ description:'JSON', accept:{'application/json':['.json']} }] })
+      .then(h => h.createWritable()).then(w => { w.write(blob); return w; }).then(w => w.close())
+      .catch(() => fallbackDownload(blob, fn));
+  } else {
+    fallbackDownload(blob, fn);
+  }
+}
+
+function fallbackDownload(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+// Night Log photo handling
+document.addEventListener('DOMContentLoaded', () => {
+  const photoInput = document.getElementById('nlPhotoInput');
+  if (photoInput) {
+    photoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas  = document.createElement('canvas');
+          const max     = 800;
+          let w = img.width, h = img.height;
+          if (w > max || h > max) {
+            if (w > h) { h = Math.round(h * max / w); w = max; }
+            else       { w = Math.round(w * max / h); h = max; }
+          }
+          canvas.width  = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const b64 = canvas.toDataURL('image/jpeg', 0.7);
+          if (b64.length > 500 * 1024) {
+            alert('Warning: image is large even after compression. Consider using a smaller photo.');
+          }
+          nlPhotoBase64 = b64;
+          const prev = document.getElementById('nlPhotoPreview');
+          if (prev) { prev.src = b64; prev.classList.remove('hidden'); }
+          document.getElementById('nlPhotoRemoveBtn')?.classList.remove('hidden');
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+});
+
+function removeNlPhoto() {
+  nlPhotoBase64 = null;
+  const prev = document.getElementById('nlPhotoPreview');
+  if (prev) { prev.src = ''; prev.classList.add('hidden'); }
+  const input = document.getElementById('nlPhotoInput');
+  if (input) input.value = '';
+  document.getElementById('nlPhotoRemoveBtn')?.classList.add('hidden');
+}
+
+// -- Quick Log (Floating Button) --
+function submitQuickLog() {
+  const guest    = (document.getElementById('qlGuest')?.value    || '').trim();
+  const type     = document.getElementById('qlType')?.value      || '';
+  const desc     = (document.getElementById('qlDesc')?.value     || '').trim();
+  const status   = document.getElementById('qlStatus')?.value    || 'Pending Follow-up';
+
+  if (!guest || !type || !desc) {
+    alert('Please fill in Guest/Room, Type, and Description.'); return;
+  }
+
+  // Ensure night log is active enough to accept entries
+  if (!nightlogActive) {
+    shiftLeader    = staffName || 'Night Team';
+    shiftStartTime = shiftStartTime || new Date().toISOString();
+    nightlogActive = true;
+  }
+
+  const entry = {
+    id: generateEntryId(), type: 'issue', timestamp: new Date().toISOString(),
+    floor: 'Reception', category: type, severity: 'medium',
+    title: type + ': ' + guest, description: desc,
+    reporter: staffName || 'Reception', imageBase64: null, rectified: status === 'Resolved'
+  };
+
+  logEntries.push(entry);
+  renderNightLogEntries();
+  updateDashboardStats();
+  saveState();
+  closeModal('quickLogModal');
+
+  // Flash quick log button green
+  const btn = document.getElementById('quickLogBtn');
+  if (btn) {
+    btn.style.background = 'var(--green)';
+    btn.setAttribute('aria-label', 'Entry logged!');
+    setTimeout(() => { btn.style.background = ''; btn.setAttribute('aria-label', 'Quick log an incident'); }, 2500);
+  }
+
+  // Reset form
+  ['qlGuest','qlDesc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const qlType = document.getElementById('qlType'); if (qlType) qlType.selectedIndex = 0;
+}
+
+// -- Monthly Report --
+function handleReportFileChange(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        if (data.schemaVersion !== 1 || !Array.isArray(data.entries)) {
+          alert('File "' + file.name + '" does not match the expected Night Log format.'); return;
+        }
+        // Deduplicate by entry id
+        const existingIds = new Set(allReportEntries.map(e => e.id));
+        data.entries.forEach(en => { if (!existingIds.has(en.id)) allReportEntries.push(en); });
+        const existingShifts = new Set(reportShifts.map(s => s.shiftId));
+        if (!existingShifts.has(data.shiftId)) {
+          reportShifts.push({ shiftId: data.shiftId, shiftLeader: data.shiftLeader, exportedAt: data.exportedAt, entryCount: data.entries.length });
+        }
+        renderReports();
+      } catch { alert('Could not parse "' + file.name + '". Please check it is a valid Night Log JSON file.'); }
+    };
+    reader.readAsText(file);
+  });
+  e.target.value = '';
+}
+
+function renderReports() {
+  // Stat cards
+  const issues = allReportEntries.filter(e => e.type === 'issue');
+  const walks  = allReportEntries.filter(e => e.type === 'floor_walk');
+  const hi     = issues.filter(e => e.severity === 'high').length;
+  const resolved = issues.filter(e => e.rectified).length;
+
+  const setCard = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setCard('rptTotalShifts',   reportShifts.length);
+  setCard('rptTotalIssues',   issues.length);
+  setCard('rptHighSeverity',  hi);
+  setCard('rptFloorWalks',    walks.length);
+
+  // Charts
+  renderBarChart('chartCategory',  countBy(issues, 'category'),  'Issues by Category');
+  renderBarChart('chartFloor',     countBy(issues, 'floor'),     'Issues by Floor');
+  renderBarChart('chartSeverity',  countBy(issues, 'severity'),  'Issues by Severity');
+  renderBarChart('chartAllClear',  { 'All Clear': walks.filter(w=>w.allClear).length, 'Issues Found': walks.filter(w=>!w.allClear).length }, 'Floor Walk Results');
+
+  // Shift summary table
+  const tbody = document.querySelector('#rptShiftsTable tbody');
+  if (tbody) {
+    tbody.innerHTML = reportShifts.map(s => {
+      const issued = allReportEntries.filter(e => e.type === 'issue');
+      return `<tr><td>${formatDate(s.shiftId)}</td><td>${escapeHtml(s.shiftLeader||'—')}</td><td>${s.entryCount}</td></tr>`;
+    }).join('');
+  }
+
+  renderReportEntries('');
+}
+
+function countBy(arr, key) {
+  return arr.reduce((acc, item) => { const v = item[key]||'Unknown'; acc[v]=(acc[v]||0)+1; return acc; }, {});
+}
+
+function formatDate(iso) {
+  try { return new Date(iso).toLocaleDateString('en-GB'); } catch { return iso; }
+}
+
+function renderBarChart(canvasId, data, title) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx   = canvas.getContext('2d');
+  const keys  = Object.keys(data);
+  const vals  = keys.map(k => data[k]);
+  const max   = Math.max(...vals, 1);
+  const W = canvas.width, H = canvas.height;
+  const pad  = { top:30, right:16, bottom:60, left:40 };
+  const barW = Math.max(20, Math.floor((W - pad.left - pad.right) / Math.max(keys.length,1) - 8));
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#1E1E1E';
+  ctx.fillRect(0, 0, W, H);
+
+  // Title
+  ctx.fillStyle = '#F0EDE8';
+  ctx.font = 'bold 11px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(title, W / 2, 18);
+
+  // Bars
+  const usableW = W - pad.left - pad.right;
+  const usableH = H - pad.top  - pad.bottom;
+  const step    = usableW / Math.max(keys.length, 1);
+
+  keys.forEach((k, i) => {
+    const bh = Math.round((vals[i] / max) * usableH);
+    const bx = pad.left + i * step + (step - barW) / 2;
+    const by = pad.top  + usableH - bh;
+
+    ctx.fillStyle = '#D4A843';
+    ctx.fillRect(Math.round(bx), by, barW, bh);
+
+    // Value label
+    ctx.fillStyle = '#F0EDE8';
+    ctx.font = '10px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(vals[i], bx + barW/2, by - 4);
+
+    // Key label (rotated)
+    ctx.save();
+    ctx.translate(bx + barW/2, H - pad.bottom + 8);
+    ctx.rotate(-0.4);
+    ctx.fillStyle = '#888880';
+    ctx.font = '9px DM Sans, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(k.length > 12 ? k.slice(0,12)+'…' : k, 0, 0);
+    ctx.restore();
+  });
+
+  // Y axis
+  ctx.strokeStyle = '#2A2A2A';
+  ctx.lineWidth   = 1;
+  ctx.beginPath(); ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, pad.top + usableH); ctx.stroke();
+}
+
+function renderReportEntries(filter) {
+  const tbody = document.querySelector('#rptEntriesTable tbody');
+  if (!tbody) return;
+  const lower = (filter||'').toLowerCase();
+  const rows  = allReportEntries.filter(e => e.type === 'issue').filter(e => {
+    if (!lower) return true;
+    return [e.category, e.floor, e.severity, e.title, e.description, e.reporter]
+      .some(v => (v||'').toLowerCase().includes(lower));
+  });
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No entries match your search.</td></tr>'; return;
+  }
+  tbody.innerHTML = rows.map(e => `
+    <tr>
+      <td>${formatTime(e.timestamp)}</td>
+      <td>${escapeHtml(e.floor||'—')}</td>
+      <td>${escapeHtml(e.category||'—')}</td>
+      <td><span class="badge badge-${e.severity==='high'?'red':e.severity==='medium'?'gold':'muted'}">${e.severity||'—'}</span></td>
+      <td>${escapeHtml(e.title||'—')}</td>
+      <td><span class="badge ${e.rectified?'badge-green':'badge-muted'}">${e.rectified?'Resolved':'Pending'}</span></td>
+    </tr>`).join('');
+}
+
+function filterReportEntries() {
+  const val = document.getElementById('rptFilter')?.value || '';
+  renderReportEntries(val);
+}
+
+function clearReportData() {
+  if (!confirm('Clear all imported report data?')) return;
+  reportShifts = []; reportEntries = []; allReportEntries = [];
+  const tbody1 = document.querySelector('#rptShiftsTable tbody');
+  const tbody2 = document.querySelector('#rptEntriesTable tbody');
+  if (tbody1) tbody1.innerHTML = '';
+  if (tbody2) tbody2.innerHTML = '';
+  ['rptTotalShifts','rptTotalIssues','rptHighSeverity','rptFloorWalks'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '0';
+  });
+  ['chartCategory','chartFloor','chartSeverity','chartAllClear'].forEach(id => {
+    const canvas = document.getElementById(id); if (canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  });
+}
+
+// -- Group Check-in --
+function addCheckinRow(name) {
+  const tbody = document.querySelector('#checkinTable tbody');
+  if (!tbody) return;
+  const rowCount = tbody.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${rowCount}</td>
+    <td><input type="text" class="form-control guest-name-input" value="${escapeHtml(name||'')}" placeholder="Guest name" aria-label="Guest name for row ${rowCount}"></td>
+    <td><input type="checkbox" aria-label="Checked in"></td>
+    <td><button class="btn btn-ghost btn-sm" onclick="removeCheckinRow(this)" aria-label="Remove row">?</button></td>
+  `;
+  tbody.appendChild(tr);
+  renumberCheckinRows();
+}
+
+function removeCheckinRow(btn) {
+  btn.closest('tr').remove();
+  renumberCheckinRows();
+}
+
+function renumberCheckinRows() {
+  document.querySelectorAll('#checkinTable tbody tr').forEach((tr, i) => {
+    const first = tr.querySelector('td');
+    if (first) first.textContent = i + 1;
+  });
+}
+
+function doBulkImport() {
+  const raw   = document.getElementById('bulkImportText')?.value || '';
+  const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
+  if (names.length === 0) { alert('Please paste at least one name.'); return; }
+  // Clear existing rows
+  const tbody = document.querySelector('#checkinTable tbody');
+  if (tbody) tbody.innerHTML = '';
+  names.forEach(n => addCheckinRow(n));
+  closeModal('bulkImportModal');
+  const txt = document.getElementById('bulkImportText'); if (txt) txt.value = '';
+}
+
+function setCheckinOrientation(orient) {
+  const section = document.getElementById('section-checkin');
+  if (!section) return;
+  section.classList.toggle('landscape', orient === 'landscape');
+  document.getElementById('orientPortrait')?.classList.toggle('active', orient === 'portrait');
+  document.getElementById('orientLandscape')?.classList.toggle('active', orient === 'landscape');
+}
+
+function loadCheckinLogo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('checkinLogo');
+    if (img) { img.src = ev.target.result; img.classList.remove('hidden'); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// -- Sign Generator --
+let signBgImage = null;
+let signLogoImage = null;
+
+function updateSignPreview() {
+  const preview = document.getElementById('signPreview');
+  if (!preview) return;
+
+  const size       = document.getElementById('signSize')?.value      || 'a4';
+  const orient     = document.getElementById('signOrient')?.value    || 'portrait';
+  const bodyText   = document.getElementById('signBodyText')?.value  || '';
+  const bodyColour = document.getElementById('signBodyColour')?.value|| '#FFFFFF';
+  const subText    = document.getElementById('signSubText')?.value   || '';
+  const subColour  = document.getElementById('signSubColour')?.value || '#CCCCCC';
+  const bgColour   = document.getElementById('signBgColour')?.value  || '#111111';
+  const overlay    = document.getElementById('signOverlay')?.value   || '50';
+
+  const isLand  = orient === 'landscape';
+  const isA3    = size   === 'a3';
+  // Scale to fit preview container
+  const baseW   = isLand ? (isA3 ? 420 : 297) : (isA3 ? 297 : 210);
+  const baseH   = isLand ? (isA3 ? 297 : 210) : (isA3 ? 420 : 297);
+  const scAllow = Math.min(560 / baseW, 680 / baseH);
+  const pW = Math.round(baseW * scAllow);
+  const pH = Math.round(baseH * scAllow);
+
+  preview.style.width  = pW + 'px';
+  preview.style.height = pH + 'px';
+  preview.style.position = 'relative';
+  preview.style.overflow = 'hidden';
+  preview.style.background = bgColour;
+
+  // Background image layer
+  preview.querySelectorAll('.sign-bg-layer,.sign-overlay-layer').forEach(el => el.remove());
+  if (signBgImage) {
+    const bgEl = document.createElement('div');
+    bgEl.className = 'sign-bg-layer';
+    Object.assign(bgEl.style, { position:'absolute', inset:'0', backgroundImage:`url(${signBgImage})`, backgroundSize:'cover', backgroundPosition:'center', zIndex:'0' });
+    preview.appendChild(bgEl);
+    const olEl = document.createElement('div');
+    olEl.className = 'sign-overlay-layer';
+    Object.assign(olEl.style, { position:'absolute', inset:'0', background:`rgba(0,0,0,${(parseInt(overlay)/100).toFixed(2)})`, zIndex:'1' });
+    preview.appendChild(olEl);
+  }
+
+  // Content layer
+  let contentEl = preview.querySelector('.sign-content-layer');
+  if (!contentEl) {
+    contentEl = document.createElement('div');
+    contentEl.className = 'sign-content-layer';
+    Object.assign(contentEl.style, { position:'absolute', inset:'0', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', zIndex:'2', padding:'5%', textAlign:'center', gap:'4%' });
+    preview.appendChild(contentEl);
+  }
+  contentEl.innerHTML = '';
+
+  if (signLogoImage) {
+    const logoEl = document.createElement('img');
+    logoEl.src = signLogoImage;
+    Object.assign(logoEl.style, { maxWidth:'35%', maxHeight:'20%', objectFit:'contain', marginBottom:'4%' });
+    contentEl.appendChild(logoEl);
+  }
+
+  if (bodyText) {
+    const t = document.createElement('div');
+    t.textContent = bodyText;
+    Object.assign(t.style, { color: bodyColour, fontSize: Math.round(pW * 0.07) + 'px', fontFamily:'Bebas Neue, sans-serif', letterSpacing:'2px', lineHeight:'1.2', wordBreak:'break-word' });
+    contentEl.appendChild(t);
+  }
+
+  if (subText) {
+    const s = document.createElement('div');
+    s.textContent = subText;
+    Object.assign(s.style, { color: subColour, fontSize: Math.round(pW * 0.035) + 'px', fontFamily:'DM Sans, sans-serif', marginTop:'2%', wordBreak:'break-word' });
+    contentEl.appendChild(s);
+  }
+}
+
+function loadSignBgImage(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { signBgImage = ev.target.result; updateSignPreview(); };
+  reader.readAsDataURL(file);
+}
+
+function loadSignLogo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { signLogoImage = ev.target.result; updateSignPreview(); };
+  reader.readAsDataURL(file);
+}
+
+function setSignOption(sel) { updateSignPreview(); }
+function printSign() { window.print(); }
+
+// Attach sign input listeners after DOM loaded
+document.addEventListener('DOMContentLoaded', () => {
+  ['signBgInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', loadSignBgImage);
+  });
+  const signLogoInput = document.getElementById('signLogoInput');
+  if (signLogoInput) signLogoInput.addEventListener('change', loadSignLogo);
+
+  ['signSize','signOrient','signBodyColour','signSubColour','signBgColour','signOverlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => updateSignPreview());
+    if (el && el.tagName === 'INPUT' && el.type !== 'file') el.addEventListener('input', () => updateSignPreview());
+  });
+  ['signBodyText','signSubText'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => updateSignPreview());
+  });
+
+  // Report file import
+  const rptInput = document.getElementById('rptFileInput');
+  if (rptInput) rptInput.addEventListener('change', handleReportFileChange);
+
+  // Floor walk buttons
+  document.querySelectorAll('.floor-clear-btn').forEach(btn => {
+    const floor = btn.getAttribute('data-floor');
+    btn.addEventListener('click', () => toggleFloorClear(floor));
+  });
+});
+
+// -- Daily Info Board --
+const PRINCIPLES = [
+  { day:'Mon', text:'Be Caring' },
+  { day:'Tue', text:'Be A Storyteller' },
+  { day:'Wed', text:'Be Extraordinary' },
+  { day:'Thu', text:'Be Open-Minded' },
+  { day:'Fri', text:'Be Caring' },
+  { day:'Sat', text:'Be A Storyteller' },
+  { day:'Sun', text:'Be Extraordinary' }
+];
+
+function initBoard() {
+  updateBoardHeaders();
+  updatePrincipleOfDay();
+  loadBoardData();
+}
+
+function updateBoardHeaders() {
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const el = document.getElementById('boardDay' + i);
+    if (el) el.textContent = d.toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short' });
+  }
+}
+
+function updatePrincipleOfDay() {
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today    = dayNames[new Date().getDay()];
+  const principle = PRINCIPLES.find(p => p.day === today) || PRINCIPLES[0];
+  const el = document.getElementById('boardPrinciple');
+  if (el) el.textContent = principle.text;
+}
+
+function collectBoardData() {
+  const data = {};
+  document.querySelectorAll('#section-board [data-board-key]').forEach(el => {
+    data[el.getAttribute('data-board-key')] = el.textContent || el.value || '';
+  });
+  document.querySelectorAll('#section-board input[data-board-input], #section-board textarea[data-board-input]').forEach(el => {
+    data[el.getAttribute('data-board-input')] = el.value || '';
+  });
+  return data;
+}
+
+function saveBoardData() {
+  if (!persistData) return;
+  const data = collectBoardData();
+  try { localStorage.setItem('shiftCompanion_boardData', JSON.stringify(data)); } catch {}
+}
+
+function loadBoardData() {
+  try {
+    const raw = localStorage.getItem('shiftCompanion_boardData');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.keys(data).forEach(key => {
+      const el = document.querySelector(`#section-board [data-board-key="${key}"]`);
+      if (el) { if ('value' in el) el.value = data[key]; else el.textContent = data[key]; }
+      const inp = document.querySelector(`#section-board [data-board-input="${key}"]`);
+      if (inp) inp.value = data[key];
+    });
+  } catch {}
+}
+
+function onBoardInput() { saveBoardData(); }
+
+function resetBoard() {
+  if (!confirm('Clear all Daily Info Board data?')) return;
+  document.querySelectorAll('#section-board [data-board-key]').forEach(el => {
+    if ('value' in el) el.value = ''; else el.textContent = '';
+  });
+  document.querySelectorAll('#section-board [data-board-input]').forEach(el => { el.value = ''; });
+  try { localStorage.removeItem('shiftCompanion_boardData'); } catch {}
+}
