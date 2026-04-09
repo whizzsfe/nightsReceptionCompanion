@@ -11,10 +11,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="hotelcompanion_items.js" onerror="console.info('hotelcompanion_items.js not found — using built-in defaults.')"></script>
-  <script src="hotelcompanion_scripts.js" onerror="console.info('hotelcompanion_scripts.js not found — using Smart Defaults.')"></script>
+  <script src="hotelcompanion_items.js" onerror="console.info('hotelcompanion_items.js not found â€” using built-in defaults.')"></script>
+  <script src="hotelcompanion_scripts.js" onerror="console.info('hotelcompanion_scripts.js not found â€” using Smart Defaults.')"></script>
   <style>
-    /* ─── ROOT VARIABLES ─── */
+    /* â”€â”€â”€ ROOT VARIABLES â”€â”€â”€ */
     :root {
       --gold:        #D4A843;
       --gold-light:  #F0C96A;
@@ -36,7 +36,7 @@
       --transition:  0.2s ease;
     }
 
-    /* ─── RESET & BASE ─── */
+    /* â”€â”€â”€ RESET & BASE â”€â”€â”€ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { height: 100%; scroll-behavior: smooth; }
     body {
@@ -48,7 +48,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─── NOISE OVERLAY ─── */
+    /* â”€â”€â”€ NOISE OVERLAY â”€â”€â”€ */
     body::before {
       content: '';
       position: fixed;
@@ -61,10 +61,10 @@
       background-size: 150px 150px;
     }
 
-    /* ─── APP LAYOUT ─── */
+    /* â”€â”€â”€ APP LAYOUT â”€â”€â”€ */
     .app { display: flex; min-height: 100vh; }
 
-    /* ─── SIDEBAR ─── */
+    /* â”€â”€â”€ SIDEBAR â”€â”€â”€ */
     .sidebar {
       width: var(--sidebar-w);
       min-height: 100vh;
@@ -262,7 +262,7 @@
     .toggle-pill.on { background: rgba(212,168,67,0.3); }
     .toggle-pill.on::after { transform: translateX(18px); background: var(--gold); }
 
-    /* ─── MAIN AREA ─── */
+    /* â”€â”€â”€ MAIN AREA â”€â”€â”€ */
     .main {
       margin-left: var(--sidebar-w);
       flex: 1;
@@ -272,7 +272,7 @@
       min-width: 0;
     }
 
-    /* ─── TOPBAR ─── */
+    /* â”€â”€â”€ TOPBAR â”€â”€â”€ */
     .topbar {
       position: sticky;
       top: 0;
@@ -304,14 +304,14 @@
     }
     .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-    /* ─── CONTENT ─── */
+    /* â”€â”€â”€ CONTENT â”€â”€â”€ */
     .content { padding: 24px; flex: 1; }
 
-    /* ─── SECTION ROUTING ─── */
+    /* â”€â”€â”€ SECTION ROUTING â”€â”€â”€ */
     .section { display: none; }
     .section.active { display: block; animation: fadeIn 0.25s ease; }
 
-    /* ─── TYPOGRAPHY UTILITIES ─── */
+    /* â”€â”€â”€ TYPOGRAPHY UTILITIES â”€â”€â”€ */
     .section-heading {
       font-family: 'Bebas Neue', cursive;
       font-size: 26px;
@@ -331,7 +331,7 @@
       color: var(--text);
     }
 
-    /* ─── CARDS ─── */
+    /* â”€â”€â”€ CARDS â”€â”€â”€ */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -354,7 +354,7 @@
       color: var(--text);
     }
 
-    /* ─── BUTTONS ─── */
+    /* â”€â”€â”€ BUTTONS â”€â”€â”€ */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -405,7 +405,7 @@
     }
     .btn-icon:hover { background: var(--card); color: var(--text); border-color: var(--border); }
 
-    /* ─── FLOATING QUICK LOG BUTTON ─── */
+    /* â”€â”€â”€ FLOATING QUICK LOG BUTTON â”€â”€â”€ */
     .floating-btn {
       position: fixed;
       bottom: 28px;
@@ -430,7 +430,7 @@
     .floating-btn:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
     .floating-btn.flash-green { background: var(--green); box-shadow: 0 4px 20px rgba(76,175,130,0.4); }
 
-    /* ─── FORM ELEMENTS ─── */
+    /* â”€â”€â”€ FORM ELEMENTS â”€â”€â”€ */
     .form-group { margin-bottom: 14px; }
     .form-group label {
       display: block;
@@ -478,7 +478,7 @@
     input::placeholder, textarea::placeholder { color: var(--muted); }
     input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; }
 
-    /* ─── BADGES ─── */
+    /* â”€â”€â”€ BADGES â”€â”€â”€ */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -496,7 +496,7 @@
     .badge-blue  { background: rgba(74,144,217,0.15); color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
     .badge-muted { background: rgba(136,136,128,0.15); color: var(--muted); border: 1px solid rgba(136,136,128,0.2); }
 
-    /* ─── MODAL OVERLAY ─── */
+    /* â”€â”€â”€ MODAL OVERLAY â”€â”€â”€ */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -555,7 +555,7 @@
     }
     .modal-close:hover { color: var(--text); }
 
-    /* ─── PROGRESS BAR ─── */
+    /* â”€â”€â”€ PROGRESS BAR â”€â”€â”€ */
     .progress-wrap {
       background: var(--border);
       border-radius: 999px;
@@ -578,10 +578,10 @@
       margin-top: 3px;
     }
 
-    /* ─── DIVIDER ─── */
+    /* â”€â”€â”€ DIVIDER â”€â”€â”€ */
     .divider { height: 1px; background: var(--border); margin: 16px 0; }
 
-    /* ─── GRID UTILITIES ─── */
+    /* â”€â”€â”€ GRID UTILITIES â”€â”€â”€ */
     .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
@@ -595,7 +595,7 @@
     .mb-16 { margin-bottom: 16px; }
     .hidden { display: none !important; }
 
-    /* ─── DASHBOARD ─── */
+    /* â”€â”€â”€ DASHBOARD â”€â”€â”€ */
     .handover-banner {
       background: rgba(74,144,217,0.1);
       border: 1px solid rgba(74,144,217,0.35);
@@ -683,7 +683,7 @@
       font-style: italic;
     }
 
-    /* ─── CHECKLIST ─── */
+    /* â”€â”€â”€ CHECKLIST â”€â”€â”€ */
     .checklist-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
     .tab-btn {
       padding: 8px 18px;
@@ -754,7 +754,7 @@
     .night-audit-cta-text h3 { color: var(--gold); margin-bottom: 3px; }
     .night-audit-cta-text p { font-size: 13px; color: var(--muted); }
 
-    /* ─── NIGHT AUDIT ─── */
+    /* â”€â”€â”€ NIGHT AUDIT â”€â”€â”€ */
     .audit-step {
       display: flex;
       align-items: flex-start;
@@ -804,7 +804,7 @@
     }
     .audit-step-notes-input:focus { border-color: var(--gold); }
 
-    /* ─── NOTES & HANDOVER ─── */
+    /* â”€â”€â”€ NOTES & HANDOVER â”€â”€â”€ */
     .incoming-panel {
       background: rgba(74,144,217,0.06);
       border: 1px solid rgba(74,144,217,0.25);
@@ -831,7 +831,7 @@
     /* Handover print page (hidden on screen) */
     .handover-print-page { display: none; }
 
-    /* ─── MOTIVATION ─── */
+    /* â”€â”€â”€ MOTIVATION â”€â”€â”€ */
     .quote-card {
       background: linear-gradient(135deg, var(--card), var(--card2));
       border: 1px solid rgba(212,168,67,0.2);
@@ -881,7 +881,7 @@
     .tip-heading { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 6px; }
     .tip-body { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
-    /* ─── AI COACH ─── */
+    /* â”€â”€â”€ AI COACH â”€â”€â”€ */
     .ai-chat-container {
       display: flex;
       flex-direction: column;
@@ -1036,7 +1036,7 @@
     }
     .chat-textarea:focus { border-color: var(--gold); }
 
-    /* ─── HISTORY ─── */
+    /* â”€â”€â”€ HISTORY â”€â”€â”€ */
     .history-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
     .history-stat-card { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; text-align: center; }
     .history-stat-value { font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--gold); line-height: 1; margin-bottom: 3px; }
@@ -1067,7 +1067,7 @@
     .history-entry-body.open { display: block; }
     .history-entry-body pre { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); white-space: pre-wrap; }
 
-    /* ─── NIGHT LOG ─── */
+    /* â”€â”€â”€ NIGHT LOG â”€â”€â”€ */
     .nightlog-start-screen {
       max-width: 440px;
       margin: 40px auto;
@@ -1130,7 +1130,7 @@
     .photo-preview-wrap { margin-top: 8px; }
     .photo-preview-img { max-width: 100px; max-height: 80px; border-radius: var(--radius); object-fit: cover; border: 1px solid var(--border); }
 
-    /* ─── MONTHLY REPORT ─── */
+    /* â”€â”€â”€ MONTHLY REPORT â”€â”€â”€ */
     .report-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
     .chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
     .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
@@ -1141,7 +1141,7 @@
     .report-table tr:hover td { background: rgba(255,255,255,0.02); }
     .report-filter { max-width: 300px; }
 
-    /* ─── GROUP CHECK-IN ─── */
+    /* â”€â”€â”€ GROUP CHECK-IN â”€â”€â”€ */
     .checkin-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
     .checkin-table { width: 100%; border-collapse: collapse; }
     .checkin-table th { text-align: left; padding: 9px 10px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
@@ -1150,7 +1150,7 @@
     .checkin-table td input[type="text"]:focus { border-bottom-color: var(--gold); }
     .checkin-table td input[type="checkbox"] { width: 18px; height: 18px; }
 
-    /* ─── SIGN GENERATOR ─── */
+    /* â”€â”€â”€ SIGN GENERATOR â”€â”€â”€ */
     .sign-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: flex-start; }
     .sign-controls { }
     .sign-preview-outer { position: sticky; top: calc(var(--topbar-h) + 24px); }
@@ -1207,7 +1207,7 @@
     .colour-swatch:hover { transform: scale(1.15); }
     .colour-swatch.selected { border-color: var(--text); }
 
-    /* ─── DAILY INFO BOARD ─── */
+    /* â”€â”€â”€ DAILY INFO BOARD â”€â”€â”€ */
     .board-top-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
     .board-table-wrap { overflow-x: auto; margin-bottom: 20px; }
     .board-table {
@@ -1238,21 +1238,21 @@
     }
     .board-table td.row-header { text-align: left; background: var(--card2); font-weight: 500; white-space: nowrap; font-size: 12px; color: var(--muted); }
     .board-table td[contenteditable="true"]:focus { outline: none; background: rgba(212,168,67,0.06); border-color: var(--gold); }
-    .board-table td[contenteditable="true"]:empty::before { content: '—'; color: rgba(136,136,128,0.4); }
+    .board-table td[contenteditable="true"]:empty::before { content: 'â€”'; color: rgba(136,136,128,0.4); }
 
     .board-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     .vip-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .vip-table th { background: var(--card2); padding: 7px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid var(--border); }
     .vip-table td { border: 1px solid var(--border); padding: 6px 8px; color: var(--text); }
     .vip-table td[contenteditable="true"]:focus { outline: none; background: rgba(212,168,67,0.05); }
-    .vip-table td[contenteditable="true"]:empty::before { content: '—'; color: rgba(136,136,128,0.3); }
+    .vip-table td[contenteditable="true"]:empty::before { content: 'â€”'; color: rgba(136,136,128,0.3); }
 
     .staff-assign-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .staff-assign-table th { background: var(--card2); padding: 7px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid var(--border); }
     .staff-assign-table td { border: 1px solid var(--border); padding: 6px 8px; color: var(--text); font-size: 12px; }
     .staff-assign-table td.row-label { font-weight: 600; background: var(--card2); color: var(--muted); white-space: nowrap; }
     .staff-assign-table td[contenteditable="true"]:focus { outline: none; background: rgba(212,168,67,0.05); }
-    .staff-assign-table td[contenteditable="true"]:empty::before { content: '—'; color: rgba(136,136,128,0.3); }
+    .staff-assign-table td[contenteditable="true"]:empty::before { content: 'â€”'; color: rgba(136,136,128,0.3); }
 
     .principle-widget {
       background: linear-gradient(135deg, rgba(212,168,67,0.1), rgba(212,168,67,0.04));
@@ -1264,7 +1264,7 @@
     .principle-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
     .principle-text { font-family: 'Bebas Neue', cursive; font-size: 22px; letter-spacing: 0.08em; color: var(--gold); line-height: 1.1; }
 
-    /* ─── BRAND CUSTOMISE — colour swatches ─── */
+    /* â”€â”€â”€ BRAND CUSTOMISE â€” colour swatches â”€â”€â”€ */
     .brand-swatch-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .brand-swatch {
       width: 30px;
@@ -1288,7 +1288,7 @@
     .logo-preview-wrap { margin-top: 8px; }
     #logoPreviewImg { max-width: 100px; max-height: 60px; object-fit: contain; border-radius: var(--radius); background: rgba(255,255,255,0.05); padding: 4px; }
 
-    /* ─── EMPTY STATE ─── */
+    /* â”€â”€â”€ EMPTY STATE â”€â”€â”€ */
     .empty-state {
       text-align: center;
       padding: 48px 24px;
@@ -1297,7 +1297,7 @@
     .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
     .empty-state-text { font-size: 14px; line-height: 1.6; }
 
-    /* ─── VALIDATION MESSAGE ─── */
+    /* â”€â”€â”€ VALIDATION MESSAGE â”€â”€â”€ */
     .validation-msg {
       font-size: 13px;
       color: var(--red);
@@ -1306,7 +1306,7 @@
     }
     .validation-msg.visible { display: block; }
 
-    /* ─── ANIMATIONS ─── */
+    /* â”€â”€â”€ ANIMATIONS â”€â”€â”€ */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0);   }
@@ -1320,7 +1320,7 @@
       30%            { transform: translateY(-6px); }
     }
 
-    /* ─── PRINT STYLESHEET ─── */
+    /* â”€â”€â”€ PRINT STYLESHEET â”€â”€â”€ */
     @media print {
       .sidebar,
       .topbar,
@@ -1370,7 +1370,7 @@
       @page { margin: 12mm; }
     }
 
-    /* ─── RESPONSIVE (≤768px) ─── */
+    /* â”€â”€â”€ RESPONSIVE (â‰¤768px) â”€â”€â”€ */
     @media (max-width: 768px) {
       :root { --sidebar-w: 0px; }
       .sidebar {
@@ -1434,7 +1434,7 @@
 <!-- -----------------------------------------------------------
      FLOATING QUICK LOG BUTTON
 ----------------------------------------------------------- -->
-<button class="floating-btn" id="quickLogBtn" aria-label="Quick incident log" onclick="openModal('quickLogModal')">?</button>
+<button class="floating-btn" id="quickLogBtn" aria-label="Quick incident log" onclick="openModal('quickLogModal')">⚡</button>
 
 <!-- -----------------------------------------------------------
      SIDEBAR BACKDROP (mobile)
@@ -1473,25 +1473,25 @@
   <nav class="nav" id="mainNav">
     <div class="nav-section-label">Core</div>
     <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)" role="button" tabindex="0" aria-label="Night Dashboard">
-      <span class="nav-icon">??</span> Night Dashboard
+      <span class="nav-icon">🌙</span> Night Dashboard
     </div>
     <div class="nav-item" data-section="checklist" onclick="showSection('checklist',this)" role="button" tabindex="0" aria-label="Shift Checklist">
-      <span class="nav-icon">?</span> Shift Checklist
+      <span class="nav-icon">✓</span> Shift Checklist
     </div>
     <div class="nav-item" data-section="nightaudit" onclick="showSection('nightaudit',this)" role="button" tabindex="0" aria-label="Night Audit">
-      <span class="nav-icon">??</span> Night Audit
+      <span class="nav-icon">🧾</span> Night Audit
     </div>
     <div class="nav-item" data-section="notes" onclick="showSection('notes',this)" role="button" tabindex="0" aria-label="Notes and Handover">
-      <span class="nav-icon">??</span> Notes &amp; Handover
+      <span class="nav-icon">📝</span> Notes &amp; Handover
     </div>
     <div class="nav-item" data-section="motivation" onclick="showSection('motivation',this)" role="button" tabindex="0" aria-label="Motivation">
-      <span class="nav-icon">?</span> Motivation
+      <span class="nav-icon">⭐</span> Motivation
     </div>
     <div class="nav-item" data-section="ai" onclick="showSection('ai',this)" role="button" tabindex="0" aria-label="AI Coach">
-      <span class="nav-icon">??</span> AI Coach
+      <span class="nav-icon">🤖</span> AI Coach
     </div>
     <div class="nav-item" data-section="history" onclick="showSection('history',this)" role="button" tabindex="0" aria-label="Shift History">
-      <span class="nav-icon">??</span> Shift History
+      <span class="nav-icon">📂</span> Shift History
     </div>
 
     <!-- Tools Divider -->
@@ -1499,24 +1499,24 @@
     <div class="nav-section-label">Tools</div>
 
     <div class="nav-item" data-section="nightlog" onclick="showSection('nightlog',this)" role="button" tabindex="0" aria-label="Night Log">
-      <span class="nav-icon">??</span> Night Log
+      <span class="nav-icon">📋</span> Night Log
     </div>
     <div class="nav-item" data-section="reports" onclick="showSection('reports',this)" role="button" tabindex="0" aria-label="Monthly Report">
-      <span class="nav-icon">??</span> Monthly Report
+      <span class="nav-icon">📊</span> Monthly Report
     </div>
     <div class="nav-item" data-section="checkin" onclick="showSection('checkin',this)" role="button" tabindex="0" aria-label="Group Check-in">
-      <span class="nav-icon">??</span> Group Check-in
+      <span class="nav-icon">👥</span> Group Check-in
     </div>
     <div class="nav-item" data-section="signs" onclick="showSection('signs',this)" role="button" tabindex="0" aria-label="Sign Generator">
-      <span class="nav-icon">??</span> Sign Generator
+      <span class="nav-icon">🖨️</span> Sign Generator
     </div>
     <div class="nav-item" data-section="board" onclick="showSection('board',this)" role="button" tabindex="0" aria-label="Daily Info Board">
-      <span class="nav-icon">??</span> Daily Info Board
+      <span class="nav-icon">📅</span> Daily Info Board
     </div>
 
     <div class="tools-divider"></div>
     <div class="nav-item" onclick="openModal('brandModal')" role="button" tabindex="0" aria-label="Customise branding">
-      <span class="nav-icon">??</span> Customise
+      <span class="nav-icon">🎨</span> Customise
     </div>
   </nav>
 
@@ -1524,7 +1524,7 @@
   <div class="save-toggle-wrap">
     <div class="save-toggle-label">Data Persistence</div>
     <div class="save-toggle-row">
-      <span class="save-toggle-desc" id="persistDesc">Off � session only</span>
+      <span class="save-toggle-desc" id="persistDesc">Off — session only</span>
       <button class="toggle-pill" id="persistToggle" onclick="togglePersist()" aria-label="Toggle data persistence" aria-pressed="false"></button>
     </div>
   </div>
@@ -1537,7 +1537,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <span class="modal-title" id="profileModalTitle">Staff Profile</span>
-      <button class="modal-close" onclick="closeModal('profileModal')" aria-label="Close profile modal">?</button>
+      <button class="modal-close" onclick="closeModal('profileModal')" aria-label="Close profile modal">×</button>
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Set up your profile for this shift. This information is always saved to this device.</p>
@@ -1561,9 +1561,9 @@
       <div class="form-group">
         <label for="profileShift">Shift Type</label>
         <select id="profileShift">
-          <option value="Morning (6am�2pm)">Morning (6am�2pm)</option>
-          <option value="Afternoon (2pm�10pm)">Afternoon (2pm�10pm)</option>
-          <option value="Night (10pm�6am)" selected>Night (10pm�6am)</option>
+          <option value="Morning (6am–2pm)">Morning (6am–2pm)</option>
+          <option value="Afternoon (2pm–10pm)">Afternoon (2pm–10pm)</option>
+          <option value="Night (10pm–6am)" selected>Night (10pm–6am)</option>
           <option value="Split Shift">Split Shift</option>
         </select>
       </div>
@@ -1581,7 +1581,7 @@
   <div class="modal-box modal-wide">
     <div class="modal-header">
       <span class="modal-title" id="brandModalTitle">Brand Customisation</span>
-      <button class="modal-close" onclick="cancelBrand()" aria-label="Close brand customisation">?</button>
+      <button class="modal-close" onclick="cancelBrand()" aria-label="Close brand customisation">×</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -1629,8 +1629,8 @@
 <div class="modal-overlay" id="quickLogModal" role="dialog" aria-modal="true" aria-labelledby="quickLogModalTitle">
   <div class="modal-box">
     <div class="modal-header">
-      <span class="modal-title" id="quickLogModalTitle">? Quick Incident Log</span>
-      <button class="modal-close" onclick="closeModal('quickLogModal')" aria-label="Close quick log">?</button>
+      <span class="modal-title" id="quickLogModalTitle">⚡ Quick Incident Log</span>
+      <button class="modal-close" onclick="closeModal('quickLogModal')" aria-label="Close quick log">×</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -1640,7 +1640,7 @@
       <div class="form-group">
         <label for="qlType">Incident Type</label>
         <select id="qlType">
-          <option value="">� Select type �</option>
+          <option value="">— Select type —</option>
           <option value="Guest Complaint">Guest Complaint</option>
           <option value="Maintenance Issue">Maintenance Issue</option>
           <option value="Safety/Security">Safety / Security</option>
@@ -1652,7 +1652,7 @@
       </div>
       <div class="form-group">
         <label for="qlDescription">Description</label>
-        <textarea id="qlDescription" placeholder="Brief description of the incident�" rows="3" maxlength="500"></textarea>
+        <textarea id="qlDescription" placeholder="Brief description of the incident…" rows="3" maxlength="500"></textarea>
       </div>
       <div class="form-group">
         <label for="qlStatus">Status</label>
@@ -1679,7 +1679,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <span class="modal-title" id="endShiftModalTitle">End Shift</span>
-      <button class="modal-close" onclick="closeModal('endShiftModal')" aria-label="Close end shift modal">?</button>
+      <button class="modal-close" onclick="closeModal('endShiftModal')" aria-label="Close end shift modal">×</button>
     </div>
     <div class="modal-body">
       <p style="font-size:14px;color:var(--text);margin-bottom:12px;">Are you sure you want to end this shift?</p>
@@ -1698,18 +1698,18 @@
 </div>
 
 <!-- -----------------------------------------------------------
-     APP SHELL � MAIN AREA
+     APP SHELL — MAIN AREA
 ----------------------------------------------------------- -->
 <div class="app">
   <main class="main" id="mainArea">
 
     <!-- Topbar -->
     <header class="topbar">
-      <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">?</button>
+      <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
       <h1 class="topbar-title" id="topbarTitle">NIGHT DASHBOARD</h1>
       <div class="topbar-clock" id="topbarClock" aria-live="polite" aria-atomic="true"></div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="openModal('endShiftModal')" aria-label="End shift">?? End Shift</button>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('endShiftModal')" aria-label="End shift">🛑 End Shift</button>
       </div>
     </header>
 
@@ -1723,12 +1723,12 @@
 
   <!-- Handover Banner -->
   <div class="handover-banner hidden" id="handoverBanner">
-    <div class="handover-banner-icon">??</div>
+    <div class="handover-banner-icon">📋</div>
     <div class="handover-banner-content">
       <div class="handover-banner-title">Incoming Handover from Previous Shift</div>
       <div class="handover-banner-text" id="handoverBannerText"></div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="dismissHandoverBanner()" aria-label="Dismiss handover banner" style="flex-shrink:0;align-self:flex-start;">?</button>
+    <button class="btn btn-ghost btn-sm" onclick="dismissHandoverBanner()" aria-label="Dismiss handover banner" style="flex-shrink:0;align-self:flex-start;">×</button>
   </div>
 
   <!-- Stat Cards -->
@@ -1754,38 +1754,38 @@
   <!-- Lone Worker Safety -->
   <div class="card lone-worker-card">
     <div class="lone-worker-info">
-      <h3>??? Lone Worker Safety</h3>
+      <h3>🛡️ Lone Worker Safety</h3>
       <p>Check in regularly to confirm you are safe and well.</p>
       <div id="lastCheckIn">Not yet checked in this shift</div>
     </div>
-    <button class="btn btn-gold" id="checkInBtn" onclick="safetyCheckIn()" aria-label="Check in as safe">? I'm OK � Check In</button>
+    <button class="btn btn-gold" id="checkInBtn" onclick="safetyCheckIn()" aria-label="Check in as safe">✓ I'm OK — Check In</button>
   </div>
 
   <!-- Quick Actions -->
   <div class="quick-actions-grid">
     <div class="quick-action-card" onclick="showSection('checklist', document.querySelector('[data-section=checklist]'))" role="button" tabindex="0" aria-label="Go to Shift Checklist">
-      <div class="quick-action-icon">?</div>
+      <div class="quick-action-icon">✓</div>
       <div>
         <div class="quick-action-title">Shift Checklist</div>
         <div class="quick-action-desc">Pre-Audit and Post-Audit tasks</div>
       </div>
     </div>
     <div class="quick-action-card" onclick="showSection('nightaudit', document.querySelector('[data-section=nightaudit]'))" role="button" tabindex="0" aria-label="Go to Night Audit">
-      <div class="quick-action-icon">??</div>
+      <div class="quick-action-icon">🧾</div>
       <div>
         <div class="quick-action-title">Night Audit</div>
         <div class="quick-action-desc">Step-by-step audit tracker</div>
       </div>
     </div>
     <div class="quick-action-card" onclick="showSection('ai', document.querySelector('[data-section=ai]'))" role="button" tabindex="0" aria-label="Open AI Coach for payment scripts">
-      <div class="quick-action-icon">??</div>
+      <div class="quick-action-icon">💳</div>
       <div>
         <div class="quick-action-title">Card Payment Scripts</div>
-        <div class="quick-action-desc">AI Coach � billing &amp; payment guidance</div>
+        <div class="quick-action-desc">AI Coach — billing &amp; payment guidance</div>
       </div>
     </div>
     <div class="quick-action-card" onclick="showSection('notes', document.querySelector('[data-section=notes]'))" role="button" tabindex="0" aria-label="Log shift notes">
-      <div class="quick-action-icon">??</div>
+      <div class="quick-action-icon">📝</div>
       <div>
         <div class="quick-action-title">Log Shift Notes</div>
         <div class="quick-action-desc">Notes &amp; handover for next shift</div>
@@ -1795,7 +1795,7 @@
 
   <!-- Tip Card -->
   <div class="tip-card-dash" id="dashTip">
-    ?? <strong>Tonight's tip:</strong> A calm, friendly greeting sets the tone for every interaction � even at 3am.
+    💡 <strong>Tonight's tip:</strong> A calm, friendly greeting sets the tone for every interaction — even at 3am.
   </div>
 
 </section>
@@ -1837,7 +1837,7 @@
       <div class="section-heading">Night Audit Tracker</div>
       <div class="section-sub">Work through each step. Tick off as you go.</div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="resetAudit()" aria-label="Reset all audit steps">? Reset All</button>
+    <button class="btn btn-ghost btn-sm" onclick="resetAudit()" aria-label="Reset all audit steps">↺ Reset All</button>
   </div>
 
   <!-- Progress Bar -->
@@ -1852,7 +1852,7 @@
 
   <div class="card mt-16">
     <div class="card-title" style="margin-bottom:10px;font-size:16px;">Audit Notes</div>
-    <textarea id="auditNotes" placeholder="Any notes or issues encountered during the audit�" rows="4" aria-label="Audit notes" oninput="onAuditNotesInput()"></textarea>
+    <textarea id="auditNotes" placeholder="Any notes or issues encountered during the audit…" rows="4" aria-label="Audit notes" oninput="onAuditNotesInput()"></textarea>
   </div>
 </section>
 
@@ -1865,7 +1865,7 @@
 
   <!-- Incoming handover (read-only) -->
   <div class="incoming-panel" id="incomingHandoverPanel">
-    <div class="incoming-panel-title">?? Incoming Handover � Previous Shift</div>
+    <div class="incoming-panel-title">📋 Incoming Handover — Previous Shift</div>
     <div class="incoming-panel-text" id="incomingHandoverText">
       <span class="incoming-panel-empty">No incoming handover notes for this shift.</span>
     </div>
@@ -1877,7 +1877,7 @@
       <div class="card-title">Shift Notes</div>
       <span style="font-size:12px;color:var(--muted);">Saved when Persist Data is ON</span>
     </div>
-    <textarea id="shiftNotes" placeholder="Notes about this shift � guest interactions, issues, anything worth recording�" rows="6" aria-label="Shift notes" oninput="onShiftNotesInput()"></textarea>
+    <textarea id="shiftNotes" placeholder="Notes about this shift — guest interactions, issues, anything worth recording…" rows="6" aria-label="Shift notes" oninput="onShiftNotesInput()"></textarea>
   </div>
 
   <!-- Handover Notes -->
@@ -1886,11 +1886,11 @@
       <div class="card-title">Handover Notes for Next Shift</div>
       <span style="font-size:12px;color:var(--muted);">Sent to the next shift on End Shift</span>
     </div>
-    <textarea id="handoverNotes" placeholder="What does the next shift need to know? Pending tasks, VIP arrivals, outstanding issues�" rows="6" aria-label="Handover notes" oninput="onHandoverNotesInput()"></textarea>
+    <textarea id="handoverNotes" placeholder="What does the next shift need to know? Pending tasks, VIP arrivals, outstanding issues…" rows="6" aria-label="Handover notes" oninput="onHandoverNotesInput()"></textarea>
   </div>
 
   <div class="flex-row">
-    <button class="btn btn-ghost" onclick="printHandover()" aria-label="Print handover sheet">??? Print Handover Sheet</button>
+    <button class="btn btn-ghost" onclick="printHandover()" aria-label="Print handover sheet">🖨️ Print Handover Sheet</button>
   </div>
 
   <!-- Print-only handover page -->
@@ -1911,14 +1911,14 @@
 ----------------------------------------------------------- -->
 <section class="section" id="section-motivation" aria-label="Shift Motivation">
   <div class="section-heading">Shift Motivation</div>
-  <div class="section-sub">You are the heart of this hotel tonight � keep going.</div>
+  <div class="section-sub">You are the heart of this hotel tonight — keep going.</div>
 
   <!-- Quote Carousel -->
   <div class="quote-card">
-    <div class="quote-text" id="quoteText">The night shift is where legends are made. Every call handled well, every guest reassured � that's excellence in action.</div>
-    <div class="quote-author" id="quoteAuthor">� Hotel Operations Wisdom</div>
+    <div class="quote-text" id="quoteText">The night shift is where legends are made. Every call handled well, every guest reassured — that's excellence in action.</div>
+    <div class="quote-author" id="quoteAuthor">— Hotel Operations Wisdom</div>
     <div class="mt-16">
-      <button class="btn btn-gold" onclick="nextQuote()" aria-label="Show next motivational quote">Next Quote �</button>
+      <button class="btn btn-gold" onclick="nextQuote()" aria-label="Show next motivational quote">Next Quote ›</button>
     </div>
   </div>
 
@@ -1926,34 +1926,34 @@
   <div class="section-heading" style="margin-bottom:12px;">Excellence Tips</div>
   <div class="tips-grid">
     <div class="tip-card">
-      <div class="tip-icon">??</div>
+      <div class="tip-icon">🌟</div>
       <div class="tip-heading">Own Every Moment</div>
       <div class="tip-body">Night guests have fewer people to turn to. When you solve a problem at 2am, you become the most important person in their stay.</div>
     </div>
     <div class="tip-card">
-      <div class="tip-icon">??</div>
+      <div class="tip-icon">📞</div>
       <div class="tip-heading">Phone Etiquette</div>
       <div class="tip-body">Answer within 3 rings. Greet warmly, state the hotel name, your name, and ask how you can help. End every call with a positive close.</div>
     </div>
     <div class="tip-card">
-      <div class="tip-icon">??</div>
+      <div class="tip-icon">🧘</div>
       <div class="tip-heading">Stay Calm Under Pressure</div>
       <div class="tip-body">Take a breath before responding to any difficult situation. A measured, confident response defuses 90% of escalations before they start.</div>
     </div>
     <div class="tip-card">
-      <div class="tip-icon">???</div>
+      <div class="tip-icon">🗒️</div>
       <div class="tip-heading">Document Everything</div>
-      <div class="tip-body">If it happened on your shift, log it. Clear, timely records protect you, your team, and the guest � even if nothing comes of it.</div>
+      <div class="tip-body">If it happened on your shift, log it. Clear, timely records protect you, your team, and the guest — even if nothing comes of it.</div>
     </div>
     <div class="tip-card">
-      <div class="tip-icon">??</div>
+      <div class="tip-icon">📤</div>
       <div class="tip-heading">Handover Excellence</div>
       <div class="tip-body">A great handover takes 5 minutes and saves the next shift hours of confusion. Leave notes you'd want to receive yourself.</div>
     </div>
     <div class="tip-card">
-      <div class="tip-icon">??</div>
+      <div class="tip-icon">✨</div>
       <div class="tip-heading">The Little Extras</div>
-      <div class="tip-body">A welcome note, remembering a name, pre-empting a need � these are the moments guests describe to friends. You create them.</div>
+      <div class="tip-body">A welcome note, remembering a name, pre-empting a need — these are the moments guests describe to friends. You create them.</div>
     </div>
   </div>
 </section>
@@ -1966,10 +1966,10 @@
 
     <!-- Chat Header -->
     <div class="ai-chat-header">
-      <div class="ai-avatar-wrap" aria-hidden="true">??</div>
+      <div class="ai-avatar-wrap" aria-hidden="true">🤖</div>
       <div class="ai-header-info">
-        <div class="ai-name">Aria � AI Hospitality Coach</div>
-        <div class="ai-subtitle">Smart Defaults � Offline-ready � Hospitality specialist</div>
+        <div class="ai-name">Aria — AI Hospitality Coach</div>
+        <div class="ai-subtitle">Smart Defaults · Offline-ready · Hospitality specialist</div>
       </div>
       <span class="ai-status-badge gold" id="aiStatusBadge">Smart Defaults Active</span>
       <button class="btn btn-ghost btn-sm" onclick="clearChat()" aria-label="Clear chat history">Clear</button>
@@ -1984,17 +1984,17 @@
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about declined card script">Card declined at check-in</button>
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about noise complaint script">Noise complaint script</button>
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about intoxicated guest script">Intoxicated guest at desk</button>
-      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about late arrival script">Late arrival � no booking found</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about late arrival script">Late arrival — no booking found</button>
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about guest locked out script">Guest locked out at 3am</button>
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about guest complaint handling">Handle a guest complaint</button>
-      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about night audit errors">Night audit error � what to do</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about night audit errors">Night audit error — what to do</button>
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about suspicious person protocol">Suspicious person in lobby</button>
       <button class="chip" onclick="chipQuery(this)" aria-label="Ask about pre-auth billing">Pre-auth / billing query script</button>
     </div>
 
     <!-- Input Row -->
     <div class="chat-input-row">
-      <textarea class="chat-textarea" id="chatInput" placeholder="Ask Aria anything about hotel operations�" rows="1" aria-label="Chat input" maxlength="500"></textarea>
+      <textarea class="chat-textarea" id="chatInput" placeholder="Ask Aria anything about hotel operations…" rows="1" aria-label="Chat input" maxlength="500"></textarea>
       <button class="btn btn-gold" onclick="sendChat()" aria-label="Send message">Send</button>
     </div>
 
@@ -2010,7 +2010,7 @@
       <div class="section-heading">Shift History</div>
       <div class="section-sub">A record of all shifts completed on this device.</div>
     </div>
-    <button class="btn btn-danger btn-sm" onclick="clearHistory()" aria-label="Clear all shift history">?? Clear History</button>
+    <button class="btn btn-danger btn-sm" onclick="clearHistory()" aria-label="Clear all shift history">🗑 Clear History</button>
   </div>
 
   <!-- Aggregate Stats -->
@@ -2020,7 +2020,7 @@
       <div class="history-stat-label">Total Shifts</div>
     </div>
     <div class="history-stat-card">
-      <div class="history-stat-value" id="hStatAvgChecklist">�</div>
+      <div class="history-stat-value" id="hStatAvgChecklist">—</div>
       <div class="history-stat-label">Avg Checklist %</div>
     </div>
     <div class="history-stat-card">
@@ -2028,7 +2028,7 @@
       <div class="history-stat-label">Total Incidents</div>
     </div>
     <div class="history-stat-card">
-      <div class="history-stat-value" id="hStatTopType" style="font-size:14px;padding-top:6px;">�</div>
+      <div class="history-stat-value" id="hStatTopType" style="font-size:14px;padding-top:6px;">—</div>
       <div class="history-stat-label">Most Common Type</div>
     </div>
   </div>
@@ -2036,7 +2036,7 @@
   <!-- Entries -->
   <div id="historyList"></div>
   <div class="empty-state hidden" id="historyEmpty">
-    <div class="empty-state-icon">??</div>
+    <div class="empty-state-icon">📂</div>
     <div class="empty-state-text">No shifts recorded yet.<br>Complete your first shift using the End Shift button.</div>
   </div>
 </section>
@@ -2048,7 +2048,7 @@
 
   <!-- Start / Resume Screen -->
   <div class="nightlog-start-screen" id="nightlogStart">
-    <div style="font-size:48px;margin-bottom:12px;">??</div>
+    <div style="font-size:48px;margin-bottom:12px;">📋</div>
     <h2>Night Log</h2>
     <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">The sole incident log for your shift. Start a new shift or resume an existing one.</p>
     <div class="form-group" style="text-align:left;max-width:320px;margin:0 auto 16px;">
@@ -2069,16 +2069,16 @@
       <div>
         <div class="section-heading">Night Log</div>
         <div class="section-sub">
-          Shift Leader: <strong id="nlLeaderDisplay">�</strong> &nbsp;|&nbsp; Started: <span id="nlStartTimeDisplay" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);">�</span>
+          Shift Leader: <strong id="nlLeaderDisplay">—</strong> &nbsp;|&nbsp; Started: <span id="nlStartTimeDisplay" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);">—</span>
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="exportNightlogJSON()" aria-label="Export night log as JSON">?? Export JSON</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportNightlogJSON()" aria-label="Export night log as JSON">📤 Export JSON</button>
     </div>
 
     <!-- Floor Walk Grid -->
     <div class="card mb-16">
       <div class="card-header">
-        <div class="card-title">Floor Walk � All Clear</div>
+        <div class="card-title">Floor Walk — All Clear</div>
         <span style="font-size:12px;color:var(--muted);">Tap a floor to mark all clear</span>
       </div>
       <div class="floor-walk-grid" id="floorWalkGrid">
@@ -2121,7 +2121,7 @@
         <div class="form-group">
           <label for="nlFloor">Floor</label>
           <select id="nlFloor">
-            <option value="">� Select floor �</option>
+            <option value="">— Select floor —</option>
             <option value="Ground">Ground</option>
             <option value="First">First</option>
             <option value="Second">Second</option>
@@ -2135,7 +2135,7 @@
         <div class="form-group">
           <label for="nlCategory">Category</label>
           <select id="nlCategory">
-            <option value="">� Select category �</option>
+            <option value="">— Select category —</option>
             <option value="Noise Complaint">Noise Complaint</option>
             <option value="Maintenance Issue">Maintenance Issue</option>
             <option value="Guest Complaint">Guest Complaint</option>
@@ -2149,7 +2149,7 @@
         <div class="form-group">
           <label for="nlSeverity">Severity</label>
           <select id="nlSeverity">
-            <option value="">� Select severity �</option>
+            <option value="">— Select severity —</option>
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
@@ -2162,7 +2162,7 @@
       </div>
       <div class="form-group">
         <label for="nlDescription">Description</label>
-        <textarea id="nlDescription" placeholder="Full details of what happened�" rows="3" maxlength="1000"></textarea>
+        <textarea id="nlDescription" placeholder="Full details of what happened…" rows="3" maxlength="1000"></textarea>
       </div>
       <div class="form-group">
         <label for="nlReporter">Reporter</label>
@@ -2175,7 +2175,7 @@
           <img class="photo-preview-img" id="nlPhotoPreviewImg" src="" alt="Photo preview">
           <button class="btn btn-ghost btn-sm mt-8" onclick="removeNlPhoto()" aria-label="Remove photo">Remove Photo</button>
         </div>
-        <div class="validation-msg" id="nlPhotoWarning">?? Image is large (&gt;500 KB). Consider a smaller file.</div>
+        <div class="validation-msg" id="nlPhotoWarning">⚠️ Image is large (&gt;500 KB). Consider a smaller file.</div>
       </div>
       <div class="validation-msg" id="nlFormError">Please fill in Floor, Category, Severity, Title, and Description.</div>
       <div class="mt-12">
@@ -2190,7 +2190,7 @@
     </div>
     <div id="nightLogEntries">
       <div class="empty-state" id="nlEntriesEmpty">
-        <div class="empty-state-icon">??</div>
+        <div class="empty-state-icon">📋</div>
         <div class="empty-state-text">No entries yet. Log your first issue above.</div>
       </div>
     </div>
@@ -2211,7 +2211,7 @@
     <input type="file" id="reportFileInput" accept=".json" multiple aria-label="Import JSON shift files" onchange="importReportFiles(this.files)">
     <div class="mt-8" id="reportFilesStatus" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></div>
     <div class="mt-12 flex-row">
-      <button class="btn btn-ghost btn-sm" onclick="clearReportData()" aria-label="Clear all imported report data">? Clear All</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearReportData()" aria-label="Clear all imported report data">✕ Clear All</button>
     </div>
   </div>
 
@@ -2276,7 +2276,7 @@
   <div class="card" style="overflow-x:auto;">
     <div class="card-header">
       <div class="card-title">All Entries</div>
-      <input type="text" id="reportFilter" class="report-filter" placeholder="Filter by title, category, floor�" aria-label="Filter entries" oninput="filterReportEntries(this.value)" style="max-width:260px;">
+      <input type="text" id="reportFilter" class="report-filter" placeholder="Filter by title, category, floor…" aria-label="Filter entries" oninput="filterReportEntries(this.value)" style="max-width:260px;">
     </div>
     <table class="report-table">
       <thead>
@@ -2292,7 +2292,7 @@
       <tbody id="rEntriesTableBody"></tbody>
     </table>
     <div class="empty-state hidden" id="rEntriesEmpty">
-      <div class="empty-state-icon">??</div>
+      <div class="empty-state-icon">📋</div>
       <div class="empty-state-text">No entries to display. Import JSON files above.</div>
     </div>
   </div>
@@ -2307,7 +2307,7 @@
       <div class="section-heading">Group Check-in</div>
       <div class="section-sub">Print-ready group arrival list.</div>
     </div>
-    <button class="btn btn-gold" onclick="window.print()" aria-label="Print group check-in list">??? Print</button>
+    <button class="btn btn-gold" onclick="window.print()" aria-label="Print group check-in list">🖨️ Print</button>
   </div>
 
   <div class="card mb-16">
@@ -2332,7 +2332,7 @@
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:flex-end;">
-        <button class="btn btn-ghost" onclick="openModal('bulkImportModal')" aria-label="Bulk import guest names">?? Bulk Import</button>
+        <button class="btn btn-ghost" onclick="openModal('bulkImportModal')" aria-label="Bulk import guest names">📥 Bulk Import</button>
         <button class="btn btn-ghost btn-sm" onclick="addCheckinRow()" aria-label="Add guest row">+ Add Guest</button>
       </div>
     </div>
@@ -2362,7 +2362,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <span class="modal-title" id="bulkImportTitle">Bulk Import Guest Names</span>
-      <button class="modal-close" onclick="closeModal('bulkImportModal')" aria-label="Close bulk import">?</button>
+      <button class="modal-close" onclick="closeModal('bulkImportModal')" aria-label="Close bulk import">×</button>
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Paste one guest name per line. Each name will be added as a new row.</p>
@@ -2382,9 +2382,9 @@
   <div class="flex-between mb-12">
     <div>
       <div class="section-heading">Sign Generator</div>
-      <div class="section-sub">Design and print ISO-style signs � A4 or A3.</div>
+      <div class="section-sub">Design and print ISO-style signs — A4 or A3.</div>
     </div>
-    <button class="btn btn-gold" onclick="window.print()" aria-label="Print sign">??? Print Sign</button>
+    <button class="btn btn-gold" onclick="window.print()" aria-label="Print sign">🖨️ Print Sign</button>
   </div>
 
   <div class="sign-layout">
@@ -2474,8 +2474,8 @@
       <div class="section-sub">7-day rolling occupancy &amp; operational data.</div>
     </div>
     <div class="flex-row">
-      <button class="btn btn-ghost btn-sm" onclick="resetBoard()" aria-label="Reset board data">? Reset</button>
-      <button class="btn btn-gold btn-sm" onclick="window.print()" aria-label="Print info board">??? Print</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetBoard()" aria-label="Reset board data">↺ Reset</button>
+      <button class="btn btn-gold btn-sm" onclick="window.print()" aria-label="Print info board">🖨️ Print</button>
     </div>
   </div>
 
@@ -2585,7 +2585,7 @@
     <!-- Special Notes -->
     <div class="card">
       <div class="card-title" style="margin-bottom:10px;">Special Notes / Info</div>
-      <textarea id="boardNotes" placeholder="Any special notes for the board�" rows="6" aria-label="Board special notes" oninput="onBoardInput()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;resize:vertical;outline:none;"></textarea>
+      <textarea id="boardNotes" placeholder="Any special notes for the board…" rows="6" aria-label="Board special notes" oninput="onBoardInput()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;resize:vertical;outline:none;"></textarea>
     </div>
 
   </div>
@@ -2598,7 +2598,7 @@
 <script>
 'use strict';
 // -------------------------------------------------------------
-// CHUNK 7 � STATE, NAVIGATION, PERSIST, CLOCK, PROFILE, BRAND
+// CHUNK 7 — STATE, NAVIGATION, PERSIST, CLOCK, PROFILE, BRAND
 // -------------------------------------------------------------
 
 // -- Section title map --
@@ -2608,7 +2608,7 @@ const sectionTitles = {
   nightaudit: 'NIGHT AUDIT TRACKER',
   notes:      'NOTES & SHIFT HANDOVER',
   motivation: 'SHIFT MOTIVATION',
-  ai:         'AI COACH � ARIA',
+  ai:         'AI COACH — ARIA',
   history:    'SHIFT HISTORY',
   nightlog:   'NIGHT LOG',
   reports:    'MONTHLY REPORT',
@@ -2620,7 +2620,7 @@ const sectionTitles = {
 // -- State --
 let staffName    = '';
 let staffRole    = 'Front Desk Agent';
-let staffShift   = 'Night (10pm�6am)';
+let staffShift   = 'Night (10pm–6am)';
 let persistData  = false;
 let shiftStart   = null;
 let checkState   = {};        // { [itemId]: boolean }
@@ -2699,7 +2699,7 @@ function updateClock() {
   const d = now.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
   const t = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const el = document.getElementById('topbarClock');
-  if (el) el.textContent = d + ' � ' + t;
+  if (el) el.textContent = d + ' · ' + t;
 }
 setInterval(updateClock, 1000);
 updateClock();
@@ -2722,7 +2722,7 @@ function togglePersist() {
   const btn = document.getElementById('persistToggle');
   const desc = document.getElementById('persistDesc');
   if (btn) { btn.classList.toggle('on', persistData); btn.setAttribute('aria-pressed', persistData); }
-  if (desc) desc.textContent = persistData ? 'On � saving session data' : 'Off � session only';
+  if (desc) desc.textContent = persistData ? 'On — saving session data' : 'Off — session only';
   if (persistData) saveState();
 }
 
@@ -2749,7 +2749,7 @@ function loadState() {
   // Always-saved
   staffName  = localStorage.getItem('shiftCompanion_staffName')  || '';
   staffRole  = localStorage.getItem('shiftCompanion_staffRole')  || 'Front Desk Agent';
-  staffShift = localStorage.getItem('shiftCompanion_staffShift') || 'Night (10pm�6am)';
+  staffShift = localStorage.getItem('shiftCompanion_staffShift') || 'Night (10pm–6am)';
   persistData = localStorage.getItem('shiftCompanion_persist') === '1';
   const histRaw = localStorage.getItem('shiftCompanion_history');
   if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
@@ -2803,7 +2803,7 @@ function loadState() {
   const btn = document.getElementById('persistToggle');
   const desc = document.getElementById('persistDesc');
   if (btn) { btn.classList.toggle('on', persistData); btn.setAttribute('aria-pressed', persistData); }
-  if (desc) desc.textContent = persistData ? 'On � saving session data' : 'Off � session only';
+  if (desc) desc.textContent = persistData ? 'On — saving session data' : 'Off — session only';
 
   shiftStart = shiftStart || Date.now();
 }
@@ -2848,7 +2848,7 @@ function updateSidebarStaffCard() {
 function saveProfile() {
   staffName  = (document.getElementById('profileName')?.value  || '').trim();
   staffRole  = document.getElementById('profileRole')?.value  || 'Front Desk Agent';
-  staffShift = document.getElementById('profileShift')?.value || 'Night (10pm�6am)';
+  staffShift = document.getElementById('profileShift')?.value || 'Night (10pm–6am)';
   if (!staffName) { alert('Please enter your name.'); return; }
   localStorage.setItem('shiftCompanion_staffName',  staffName);
   localStorage.setItem('shiftCompanion_staffRole',  staffRole);
@@ -2866,7 +2866,7 @@ function safetyCheckIn() {
   if (btn) {
     btn.textContent = '? Checked In!';
     btn.disabled = true;
-    setTimeout(() => { btn.textContent = '? I\'m OK � Check In'; btn.disabled = false; }, 2500);
+    setTimeout(() => { btn.textContent = '? I\'m OK — Check In'; btn.disabled = false; }, 2500);
   }
 }
 function updateCheckInDisplay() {
@@ -3029,14 +3029,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // -------------------------------------------------------------
-// CHUNK 8 � CHECKLIST, NIGHT AUDIT, NOTES
+// CHUNK 8 — CHECKLIST, NIGHT AUDIT, NOTES
 // -------------------------------------------------------------
 
 // -- Default checklist items (fallback if no hotelcompanion_items.js) --
 const DEFAULT_PRE_AUDIT = [
   { id:'pre_001', label:'Check all guests are checked in, no arrivals outstanding', notes:'', required:true,  dayRestriction:'every' },
   { id:'pre_002', label:'Review any VIP notes and special requests for tonight', notes:'', required:true,  dayRestriction:'every' },
-  { id:'pre_003', label:'Complete handover with late shift � read incoming handover notes', notes:'', required:true,  dayRestriction:'every' },
+  { id:'pre_003', label:'Complete handover with late shift — read incoming handover notes', notes:'', required:true,  dayRestriction:'every' },
   { id:'pre_004', label:'Check all float / cash drawer is balanced and correct', notes:'', required:true,  dayRestriction:'every' },
   { id:'pre_005', label:'Confirm all room keys are accounted for and key log is up to date', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_006', label:'Check all doors, exits and car park are secured', notes:'', required:true,  dayRestriction:'every' },
@@ -3044,13 +3044,13 @@ const DEFAULT_PRE_AUDIT = [
   { id:'pre_008', label:'Check breakfast prep is in order and restaurant is ready', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_009', label:'Review any pending payment or billing issues from day shift', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_010', label:'Confirm fire alarm panel is green / no faults showing', notes:'', required:true,  dayRestriction:'every' },
-  { id:'pre_011', label:'Check in-house guest list � note any early checkouts or late stays', notes:'', required:false, dayRestriction:'every' },
+  { id:'pre_011', label:'Check in-house guest list — note any early checkouts or late stays', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_012', label:'Confirm tomorrow\'s arrivals list is printed and ready', notes:'', required:false, dayRestriction:'every' },
-  { id:'pre_013', label:'Carry out first floor walk � all clear check for all floors', notes:'� Check corridors, stairwells and exits\n� Note any noise complaints or disturbances', required:true,  dayRestriction:'every' },
+  { id:'pre_013', label:'Carry out first floor walk — all clear check for all floors', notes:'• Check corridors, stairwells and exits\n• Note any noise complaints or disturbances', required:true,  dayRestriction:'every' },
   { id:'pre_014', label:'Log any out-of-order rooms in the PMS', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_015', label:'Set night rate / DND status on switchboard', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_016', label:'Confirm lone worker check-in protocol is understood', notes:'', required:true,  dayRestriction:'every' },
-  { id:'pre_017', label:'Run Night Audit at 03:01', notes:'� Navigate to Night Audit Tracker\n� Follow all steps in sequence\n� Do not skip posting or reconciliation', required:true,  dayRestriction:'every', isAuditCta:true }
+  { id:'pre_017', label:'Run Night Audit at 03:01', notes:'• Navigate to Night Audit Tracker\n• Follow all steps in sequence\n• Do not skip posting or reconciliation', required:true,  dayRestriction:'every', isAuditCta:true }
 ];
 
 const DEFAULT_POST_AUDIT = [
@@ -3058,15 +3058,15 @@ const DEFAULT_POST_AUDIT = [
   { id:'post_002', label:'File all reports in the shift folder / binder', notes:'', required:false, dayRestriction:'every' },
   { id:'post_003', label:'Reconcile all card payments and check for voids or declines', notes:'', required:true,  dayRestriction:'every' },
   { id:'post_004', label:'Complete banking / cash summary and seal the cash bag', notes:'', required:true,  dayRestriction:'every' },
-  { id:'post_005', label:'Print and check housekeeping report � update room statuses', notes:'', required:true,  dayRestriction:'every' },
-  { id:'post_006', label:'Check group arrivals for today � pre-assign rooms if required', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_005', label:'Print and check housekeeping report — update room statuses', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_006', label:'Check group arrivals for today — pre-assign rooms if required', notes:'', required:false, dayRestriction:'every' },
   { id:'post_007', label:'Check all VIP arrivals and prepare welcome notes / amenities', notes:'', required:false, dayRestriction:'every' },
-  { id:'post_008', label:'Set up reception desk for morning shift � float, keys, printed lists', notes:'', required:true,  dayRestriction:'every' },
+  { id:'post_008', label:'Set up reception desk for morning shift — float, keys, printed lists', notes:'', required:true,  dayRestriction:'every' },
   { id:'post_009', label:'Log any incidents or complaints in the Night Log', notes:'', required:false, dayRestriction:'every' },
-  { id:'post_010', label:'Carry out final floor walk � all areas checked', notes:'� All exits secured\n� No disturbances\n� Lobby clean and presentation-ready', required:true,  dayRestriction:'every' },
+  { id:'post_010', label:'Carry out final floor walk — all areas checked', notes:'• All exits secured\n• No disturbances\n• Lobby clean and presentation-ready', required:true,  dayRestriction:'every' },
   { id:'post_011', label:'Complete handover notes for morning shift', notes:'', required:true,  dayRestriction:'every' },
   { id:'post_012', label:'Check the weather and note any travel alerts affecting guests', notes:'', required:false, dayRestriction:'every' },
-  { id:'post_013', label:'Prepare breakfast area � napkins, condiments, hot drinks station', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_013', label:'Prepare breakfast area — napkins, condiments, hot drinks station', notes:'', required:false, dayRestriction:'every' },
   { id:'post_014', label:'Print today\'s departures list and place at desk', notes:'', required:true,  dayRestriction:'every' },
   { id:'post_015', label:'Verify all due-out rooms are flagged in PMS', notes:'', required:false, dayRestriction:'every' },
   { id:'post_016', label:'Check any pre-authorisations and confirm they are settling correctly', notes:'', required:false, dayRestriction:'every' },
@@ -3076,7 +3076,7 @@ const DEFAULT_POST_AUDIT = [
   { id:'post_020', label:'Send weekend close-of-business report to management', notes:'', required:false, dayRestriction:'sat' },
   { id:'post_021', label:'Perform month-end revenue reconciliation summary', notes:'', required:false, dayRestriction:'last_night_of_month' },
   { id:'post_022', label:'Archive previous month\'s reports', notes:'', required:false, dayRestriction:'last_night_of_month' },
-  { id:'post_023', label:'Check in with security team � confirm night rounds completed', notes:'', required:false, dayRestriction:'every' },
+  { id:'post_023', label:'Check in with security team — confirm night rounds completed', notes:'', required:false, dayRestriction:'every' },
   { id:'post_024', label:'Confirm all in-house guest billing is correct before morning', notes:'', required:true,  dayRestriction:'every' },
   { id:'post_025', label:'Brief morning shift on any outstanding issues', notes:'', required:true,  dayRestriction:'every' }
 ];
@@ -3128,7 +3128,7 @@ function renderChecklist(tab) {
       cta.setAttribute('role', 'button');
       cta.setAttribute('tabindex', '0');
       cta.setAttribute('aria-label', 'Go to Night Audit Tracker');
-      cta.innerHTML = '<div class="night-audit-cta-icon">??</div><div class="night-audit-cta-text"><h3>Run Night Audit</h3><p>Navigate to the Night Audit Tracker to run the step-by-step audit procedure.</p></div><span style="color:var(--gold);font-size:18px;">�</span>';
+      cta.innerHTML = '<div class="night-audit-cta-icon">🧾</div><div class="night-audit-cta-text"><h3>Run Night Audit</h3><p>Navigate to the Night Audit Tracker to run the step-by-step audit procedure.</p></div><span style="color:var(--gold);font-size:18px;">›</span>';
       cta.addEventListener('click', () => showSection('nightaudit', document.querySelector('[data-section=nightaudit]')));
       cta.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') cta.click(); });
       container.appendChild(cta);
@@ -3195,7 +3195,7 @@ function switchChecklistTab(tab) {
 const DEFAULT_AUDIT_STEPS = [
   { id:'audit_001', label:'Post all room and package charges in the PMS' },
   { id:'audit_002', label:'Run the night audit / end-of-day procedure in the PMS' },
-  { id:'audit_003', label:'Verify all room rates match the rate plan � check exceptions' },
+  { id:'audit_003', label:'Verify all room rates match the rate plan — check exceptions' },
   { id:'audit_004', label:'Post all F&B charges from restaurant / bar journals' },
   { id:'audit_005', label:'Reconcile all card terminal batches to the PMS totals' },
   { id:'audit_006', label:'Void any test or error transactions after authorisation' },
@@ -3279,7 +3279,7 @@ function printHandover() {
   const meta = document.getElementById('printHandoverMeta');
   const psn  = document.getElementById('printShiftNotes');
   const phn  = document.getElementById('printHandoverNotes');
-  if (meta) meta.textContent = 'Staff: ' + (staffName || '�') + ' � ' + staffRole + ' � ' + new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  if (meta) meta.textContent = 'Staff: ' + (staffName || '—') + ' · ' + staffRole + ' · ' + new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
   if (psn)  psn.textContent  = document.getElementById('shiftNotes')?.value    || '(No shift notes)';
   if (phn)  phn.textContent  = document.getElementById('handoverNotes')?.value || '(No handover notes)';
   window.print();
@@ -3291,87 +3291,87 @@ function escapeHtml(str) {
 }
 
 // -------------------------------------------------------------
-// CHUNK 9 � AI COACH (ARIA)
+// CHUNK 9 — AI COACH (ARIA)
 // -------------------------------------------------------------
 
 const BUILT_IN_REPLIES = [
   { keywords:['guest wants to pay cash','paying cash','cash payment','cash only'],
-    response:`**Cash Payment Policy**\n\n**Our Position:** We are a card-only hotel. All payments must be processed through our approved card terminals.\n\n**Script (firm but warm):**\n*"I completely understand, and I'm sorry for any inconvenience. We operate as a card-only property for security and accounting reasons, so unfortunately we're unable to accept cash payments at the desk. If you have a debit card or prepaid card, I can process that for you � otherwise I'd be happy to help you find the nearest ATM."*\n\n**If the guest insists:** Escalate to the Duty Manager. Do not accept cash under any circumstances.` },
+    response:`**Cash Payment Policy**\n\n**Our Position:** We are a card-only hotel. All payments must be processed through our approved card terminals.\n\n**Script (firm but warm):**\n*"I completely understand, and I'm sorry for any inconvenience. We operate as a card-only property for security and accounting reasons, so unfortunately we're unable to accept cash payments at the desk. If you have a debit card or prepaid card, I can process that for you — otherwise I'd be happy to help you find the nearest ATM."*\n\n**If the guest insists:** Escalate to the Duty Manager. Do not accept cash under any circumstances.` },
 
   { keywords:['card declined','card not working','payment declined','decline at check'],
-    response:`**Card Declined at Check-In**\n\n1. Remain calm and discreet � face the terminal away from other guests\n2. *"I'm sorry, it looks like the card hasn't gone through. Could you try again, or do you have another card?"*\n3. Ask them to try inserting rather than tapping (or vice versa)\n4. Check the pre-authorisation amount is correct in the PMS\n5. If three attempts fail: *"I'd suggest contacting your bank � sometimes a quick call releases the payment. In the meantime, I can hold your reservation for 15 minutes."*\n6. If no resolution: escalate to Duty Manager\n7. Never leave a guest without a room over a payment issue � find a solution` },
+    response:`**Card Declined at Check-In**\n\n1. Remain calm and discreet — face the terminal away from other guests\n2. *"I'm sorry, it looks like the card hasn't gone through. Could you try again, or do you have another card?"*\n3. Ask them to try inserting rather than tapping (or vice versa)\n4. Check the pre-authorisation amount is correct in the PMS\n5. If three attempts fail: *"I'd suggest contacting your bank — sometimes a quick call releases the payment. In the meantime, I can hold your reservation for 15 minutes."*\n6. If no resolution: escalate to Duty Manager\n7. Never leave a guest without a room over a payment issue — find a solution` },
 
   { keywords:['noise complaint','noisy room','loud guests','disturbance'],
-    response:`**Noise Complaint Escalation**\n\n**Step 1 � Phone call:**\n*"Good evening, this is [your name] from reception. I'm sorry to disturb you � we've had a noise report from a neighbouring guest. I'd appreciate it if you could keep the volume down for the rest of the evening. Thank you so much for your understanding."*\n\n**Step 2 � In-person (if phone call ignored):**\nKnock on the door. *"I apologise for disturbing you personally, but we've had a second noise report and I need to ask you to keep it down immediately or I will have to involve the duty manager."*\n\n**Step 3 � Duty Manager:**\nCall the duty manager if a second visit is required. Log the incident in the Night Log.` },
+    response:`**Noise Complaint Escalation**\n\n**Step 1 — Phone call:**\n*"Good evening, this is [your name] from reception. I'm sorry to disturb you — we've had a noise report from a neighbouring guest. I'd appreciate it if you could keep the volume down for the rest of the evening. Thank you so much for your understanding."*\n\n**Step 2 — In-person (if phone call ignored):**\nKnock on the door. *"I apologise for disturbing you personally, but we've had a second noise report and I need to ask you to keep it down immediately or I will have to involve the duty manager."*\n\n**Step 3 — Duty Manager:**\nCall the duty manager if a second visit is required. Log the incident in the Night Log.` },
 
   { keywords:['intoxicated','drunk guest','guest is drunk','heavily intoxicated','inebriated'],
-    response:`**Intoxicated Guest at Desk**\n\n**De-escalation:**\n- Stay calm and speak slowly and clearly\n- Maintain distance � do not lean over the desk\n- Do not argue or raise your voice\n- Acknowledge them: *"I can see you've had a long night. Let's get you sorted."*\n\n**Safety Protocol:**\n1. If they are a hotel guest, verify room number before releasing key\n2. Do not issue a key to someone who cannot safely operate the lift alone � offer to escort\n3. If they become aggressive: call Security or Police immediately (999). Do not attempt to physically intervene\n4. Log all interactions in the Night Log\n5. If they are not a guest and refuse to leave: trespass procedure applies � call for assistance` },
+    response:`**Intoxicated Guest at Desk**\n\n**De-escalation:**\n- Stay calm and speak slowly and clearly\n- Maintain distance — do not lean over the desk\n- Do not argue or raise your voice\n- Acknowledge them: *"I can see you've had a long night. Let's get you sorted."*\n\n**Safety Protocol:**\n1. If they are a hotel guest, verify room number before releasing key\n2. Do not issue a key to someone who cannot safely operate the lift alone — offer to escort\n3. If they become aggressive: call Security or Police immediately (999). Do not attempt to physically intervene\n4. Log all interactions in the Night Log\n5. If they are not a guest and refuse to leave: trespass procedure applies — call for assistance` },
 
   { keywords:['no booking found','no reservation','walk-in','late arrival no booking','arrival no reservation'],
-    response:`**Late Arrival � No Booking Found**\n\n1. Ask for the guest's full name and check all spelling variations\n2. Search by arrival date, email, and phone number\n3. Check email reservations channel (booking.com, expedia, direct) for an unprocessed booking\n4. *"I'm so sorry � I can't find a reservation under that name. Do you have a confirmation email or booking reference?"*\n5. If they have a reference: cross-check with the ORM/channel manager\n6. If genuinely no reservation exists: quote the best available rate for tonight. If no rooms are available, offer to call a nearby hotel\n7. Never turn away a guest in distress without offering an alternative` },
+    response:`**Late Arrival — No Booking Found**\n\n1. Ask for the guest's full name and check all spelling variations\n2. Search by arrival date, email, and phone number\n3. Check email reservations channel (booking.com, expedia, direct) for an unprocessed booking\n4. *"I'm so sorry — I can't find a reservation under that name. Do you have a confirmation email or booking reference?"*\n5. If they have a reference: cross-check with the ORM/channel manager\n6. If genuinely no reservation exists: quote the best available rate for tonight. If no rooms are available, offer to call a nearby hotel\n7. Never turn away a guest in distress without offering an alternative` },
 
   { keywords:['locked out','lost room key','key not working','lost key'],
-    response:`**Guest Locked Out at Night**\n\n1. Verify the guest's identity before issuing a new key\n2. Ask for: full name, room number, and one piece of verification (booking name on reservation, vehicle in car park, description of room contents)\n3. If verified: re-encode the key and hand it over\n4. *"Here's your new key, [name]. Just to let you know your old card will no longer work, so this is your current key."*\n5. If UNABLE to verify identity: do not issue key � ask them to wait while you call the room, or escalate to Duty Manager\n6. Log the incident in the Night Log if a second key was needed` },
+    response:`**Guest Locked Out at Night**\n\n1. Verify the guest's identity before issuing a new key\n2. Ask for: full name, room number, and one piece of verification (booking name on reservation, vehicle in car park, description of room contents)\n3. If verified: re-encode the key and hand it over\n4. *"Here's your new key, [name]. Just to let you know your old card will no longer work, so this is your current key."*\n5. If UNABLE to verify identity: do not issue key — ask them to wait while you call the room, or escalate to Duty Manager\n6. Log the incident in the Night Log if a second key was needed` },
 
   { keywords:['night audit error','audit error','pms error','audit problem'],
-    response:`**Night Audit Error � What To Do**\n\n**Do not panic. Take a breath and check these first:**\n\n1. **Date roll failed** � Re-run the audit. Check the PMS date before proceeding\n2. **Rate variance** � Check the bucket/rate plan for the affected room. Override if authorised\n3. **Unposted charges** � Post manually and re-run the audit report\n4. **Terminal batch mismatch** � Print the terminal batch report and compare line by line to PMS\n5. **Golden Rules:** Never force-close the audit without understanding the error | Never void a charge without manager approval\n\n**If stuck:** Call the PMS helpdesk (number in manual). Do not wait until morning � call now.` },
+    response:`**Night Audit Error — What To Do**\n\n**Do not panic. Take a breath and check these first:**\n\n1. **Date roll failed** — Re-run the audit. Check the PMS date before proceeding\n2. **Rate variance** — Check the bucket/rate plan for the affected room. Override if authorised\n3. **Unposted charges** — Post manually and re-run the audit report\n4. **Terminal batch mismatch** — Print the terminal batch report and compare line by line to PMS\n5. **Golden Rules:** Never force-close the audit without understanding the error | Never void a charge without manager approval\n\n**If stuck:** Call the PMS helpdesk (number in manual). Do not wait until morning — call now.` },
 
   { keywords:['suspicious person','suspicious individual','intruder','unknown person in lobby'],
-    response:`**Suspicious Person in Lobby**\n\n**Observe ? Approach ? Escalate**\n\n**Observe:** Do not confront immediately. Note appearance, behaviour, and any items they're carrying.\n\n**Approach (if safe to do so):**\n*"Good evening, can I help you? Are you a guest with us tonight?"*\nIf they have a legitimate purpose they will explain it. If evasive, state clearly: *"I'm afraid this area is for hotel guests only. May I ask you to wait outside?"*\n\n**Escalate:**\n- If they refuse to leave: call Security\n- If you feel unsafe at any point: do not approach � call 999 immediately\n- Log everything in the Night Log` },
+    response:`**Suspicious Person in Lobby**\n\n**Observe ? Approach ? Escalate**\n\n**Observe:** Do not confront immediately. Note appearance, behaviour, and any items they're carrying.\n\n**Approach (if safe to do so):**\n*"Good evening, can I help you? Are you a guest with us tonight?"*\nIf they have a legitimate purpose they will explain it. If evasive, state clearly: *"I'm afraid this area is for hotel guests only. May I ask you to wait outside?"*\n\n**Escalate:**\n- If they refuse to leave: call Security\n- If you feel unsafe at any point: do not approach — call 999 immediately\n- Log everything in the Night Log` },
 
   { keywords:['pre-auth','pre authorisation','pre authorization','billing query','hold on card'],
-    response:`**Pre-Authorisation / Billing Query Script**\n\n*"Thank you for asking � I'm happy to explain. When you check in, we place a temporary hold on your card to cover the cost of your stay plus an incidental deposit. This isn't a charge � it's simply a hold while you're with us. Once you check out, we release the hold and charge only what you've used. The hold may show on your bank statement for 3�5 business days after release, depending on your bank. If you have specific concerns about the amount, I can print a copy of your folio right now � would that help?"*` },
+    response:`**Pre-Authorisation / Billing Query Script**\n\n*"Thank you for asking — I'm happy to explain. When you check in, we place a temporary hold on your card to cover the cost of your stay plus an incidental deposit. This isn't a charge — it's simply a hold while you're with us. Once you check out, we release the hold and charge only what you've used. The hold may show on your bank statement for 3–5 business days after release, depending on your bank. If you have specific concerns about the amount, I can print a copy of your folio right now — would that help?"*` },
 
   { keywords:['guest complaint','handling complaint','complaint script','unhappy guest'],
-    response:`**LEARN Model � Handling a Guest Complaint**\n\n**L � Listen:** Give the guest your full attention. Do not interrupt.\n\n**E � Empathise:** *"I completely understand why you're frustrated, and I sincerely apologise for the experience you've had."*\n\n**A � Apologise:** Apologise for the situation, not for yourself. Be genuine.\n\n**R � Resolve:** Take ownership. Tell them exactly what you will do: *"I'm going to [action] right now and I'll follow up with you within [timeframe]."*\n\n**N � Notify:** Log the complaint in the Night Log and notify the Duty Manager of any significant issue.\n\nNever argue. Never make promises you can't keep. Always follow up.` },
+    response:`**LEARN Model — Handling a Guest Complaint**\n\n**L — Listen:** Give the guest your full attention. Do not interrupt.\n\n**E — Empathise:** *"I completely understand why you're frustrated, and I sincerely apologise for the experience you've had."*\n\n**A — Apologise:** Apologise for the situation, not for yourself. Be genuine.\n\n**R — Resolve:** Take ownership. Tell them exactly what you will do: *"I'm going to [action] right now and I'll follow up with you within [timeframe]."*\n\n**N — Notify:** Log the complaint in the Night Log and notify the Duty Manager of any significant issue.\n\nNever argue. Never make promises you can't keep. Always follow up.` },
 
   { keywords:['vip check-in','vip arrival','vip guest','vip script'],
-    response:`**VIP Arrival Script**\n\nPrepare before they arrive:\n- Room is pre-assigned, inspected, and ready\n- Welcome note and any amenities in place\n- Name confirmed in PMS and noted on shift\n\n**On arrival:**\n*"Good evening, [name] � we're delighted to have you with us tonight. We've reserved our [room type] for you. Let me get you checked in straight away."*\n\n- Escort them through check-in smoothly � no unnecessary questions\n- Present key card: *"Your room is on the [floor], take the lift just to your left."*\n- Offer any additional needs: *"Is there anything I can arrange for you this evening?"*\n- Log the VIP arrival in the shift notes` },
+    response:`**VIP Arrival Script**\n\nPrepare before they arrive:\n- Room is pre-assigned, inspected, and ready\n- Welcome note and any amenities in place\n- Name confirmed in PMS and noted on shift\n\n**On arrival:**\n*"Good evening, [name] — we're delighted to have you with us tonight. We've reserved our [room type] for you. Let me get you checked in straight away."*\n\n- Escort them through check-in smoothly — no unnecessary questions\n- Present key card: *"Your room is on the [floor], take the lift just to your left."*\n- Offer any additional needs: *"Is there anything I can arrange for you this evening?"*\n- Log the VIP arrival in the shift notes` },
 
   { keywords:['angry guest','guest shouting','irate guest','very upset guest'],
-    response:`**Dealing with an Angry Guest**\n\n1. **Stay calm.** Lower your own voice slightly � it naturally encourages the guest to match your tone\n2. **Listen fully** � do not interrupt, even if you disagree\n3. **Validate:** *"I can hear how frustrated you are and I want to sort this for you."*\n4. **Avoid:** Saying "calm down", being defensive, crossing your arms, sighing\n5. **Take action:** Move to a quieter area if possible. Offer to find a solution right now\n6. **If abusive:** *"I want to help you, but I need you to speak to me respectfully so we can work through this together."* � One warning, then call Duty Manager\n7. **Debrief:** Check in with a colleague after the interaction. Log the incident.` },
+    response:`**Dealing with an Angry Guest**\n\n1. **Stay calm.** Lower your own voice slightly — it naturally encourages the guest to match your tone\n2. **Listen fully** — do not interrupt, even if you disagree\n3. **Validate:** *"I can hear how frustrated you are and I want to sort this for you."*\n4. **Avoid:** Saying "calm down", being defensive, crossing your arms, sighing\n5. **Take action:** Move to a quieter area if possible. Offer to find a solution right now\n6. **If abusive:** *"I want to help you, but I need you to speak to me respectfully so we can work through this together."* — One warning, then call Duty Manager\n7. **Debrief:** Check in with a colleague after the interaction. Log the incident.` },
 
   { keywords:['local recommendation','recommendation','things to do','restaurants nearby','local area'],
-    response:`**Giving Local Recommendations**\n\nStructure your recommendation confidently:\n\n1. **Confirm what they're looking for** � *"Are you looking for somewhere to eat tonight, or more for sightseeing tomorrow?"*\n2. **Give two or three options** � not a laundry list\n3. **Add a personal touch** � *"A lot of our guests really enjoy [name] � it's about a 5-minute walk, great for [reason]."*\n4. **Offer more** � *"I can also print a local area map or look up directions for you."*\n\nTip: Keep a mental (or written) list of 3�4 per category: casual dining, fine dining, bars, sightseeing. Update it if guests give you feedback.` },
+    response:`**Giving Local Recommendations**\n\nStructure your recommendation confidently:\n\n1. **Confirm what they're looking for** — *"Are you looking for somewhere to eat tonight, or more for sightseeing tomorrow?"*\n2. **Give two or three options** — not a laundry list\n3. **Add a personal touch** — *"A lot of our guests really enjoy [name] — it's about a 5-minute walk, great for [reason]."*\n4. **Offer more** — *"I can also print a local area map or look up directions for you."*\n\nTip: Keep a mental (or written) list of 3–4 per category: casual dining, fine dining, bars, sightseeing. Update it if guests give you feedback.` },
 
   { keywords:['phone greeting','answering the phone','phone script','call handling'],
-    response:`**Phone Handling Scripts**\n\n**External incoming call:**\n*"Good evening, [Hotel Name], reception speaking � how can I help you?"*\n\n**Internal guest call:**\n*"Good evening, [name] speaking � how can I assist you?"*\n\n**Transferring a call:**\n*"Of course, I'll transfer you now. If you get disconnected, please call back and I'll connect you again."*\n\n**Taking a message:**\n*"I'm afraid [name] isn't available right now. May I take a message? Could I get your name and number?"*\n\n**Always:** Speak clearly, smile (it comes through in your voice), and ask before placing anyone on hold.` },
+    response:`**Phone Handling Scripts**\n\n**External incoming call:**\n*"Good evening, [Hotel Name], reception speaking — how can I help you?"*\n\n**Internal guest call:**\n*"Good evening, [name] speaking — how can I assist you?"*\n\n**Transferring a call:**\n*"Of course, I'll transfer you now. If you get disconnected, please call back and I'll connect you again."*\n\n**Taking a message:**\n*"I'm afraid [name] isn't available right now. May I take a message? Could I get your name and number?"*\n\n**Always:** Speak clearly, smile (it comes through in your voice), and ask before placing anyone on hold.` },
 
   { keywords:['fire alarm','fire evacuation','evacuation procedure','assembly point'],
-    response:`**Fire Alarm / Evacuation Procedure**\n\n1. **Treat every alarm as real** until confirmed otherwise\n2. **Do not use the lift** � direct all guests to the nearest fire exit stairwell\n3. **Assembly point** � direct guests to the designated assembly point (see site map in procedures folder)\n4. Call 999 immediately if you cannot confirm it is a false alarm\n5. Take the in-house guest list with you if safe to do so\n6. **Do not re-enter the building** until the fire service gives the all-clear\n7. Account for all guests and staff at the assembly point\n8. Log the incident � even for false alarms, a log entry is required\n\n**Reassuring guests:** *"Please follow me calmly to the exit � this is a precaution and we'll have you back inside as quickly as possible."*` },
+    response:`**Fire Alarm / Evacuation Procedure**\n\n1. **Treat every alarm as real** until confirmed otherwise\n2. **Do not use the lift** — direct all guests to the nearest fire exit stairwell\n3. **Assembly point** — direct guests to the designated assembly point (see site map in procedures folder)\n4. Call 999 immediately if you cannot confirm it is a false alarm\n5. Take the in-house guest list with you if safe to do so\n6. **Do not re-enter the building** until the fire service gives the all-clear\n7. Account for all guests and staff at the assembly point\n8. Log the incident — even for false alarms, a log entry is required\n\n**Reassuring guests:** *"Please follow me calmly to the exit — this is a precaution and we'll have you back inside as quickly as possible."*` },
 
   { keywords:['maintenance fault','maintenance issue','something broken','fault report','repair needed'],
     response:`**Logging a Maintenance Fault**\n\n1. Get full details from the guest: room number, nature of fault, how urgent\n2. Log it in the Night Log (and PMS maintenance module if available)\n3. **Severity guide:**\n   - **High (action now):** No heating in winter, no water, flooding, electrical fault, security breach\n   - **Medium (action by morning):** TV not working, noisy A/C, minor plumbing\n   - **Low (log and pass to day shift):** Lightbulb, cosmetic damage, minor fittings\n4. For HIGH severity faults: call the out-of-hours maintenance contact (number in procedures folder)\n5. Reassure the guest: *"I've logged this and our maintenance team will address it as soon as possible."*\n6. Offer a room move if the fault significantly impacts the guest's comfort` },
 
   { keywords:['early check-in','early arrival','room not ready'],
-    response:`**Early Check-In Request**\n\n1. Check PMS for availability � is the requested room (or room type) already clean and inspected?\n2. If yes: check in immediately, noting the early arrival in the shift log\n3. If no: *"Your room isn't quite ready yet � our housekeeping team is still working on it. Your room will be ready by [standard check-in time]. In the meantime, you're very welcome to use our lobby/lounge/restaurant."*\n4. Offer to store luggage: *"I can store your bags here safely while you wait."*\n5. Take contact details and call/text when the room is ready\n6. Do not promise a specific room number until it has been confirmed clean` },
+    response:`**Early Check-In Request**\n\n1. Check PMS for availability — is the requested room (or room type) already clean and inspected?\n2. If yes: check in immediately, noting the early arrival in the shift log\n3. If no: *"Your room isn't quite ready yet — our housekeeping team is still working on it. Your room will be ready by [standard check-in time]. In the meantime, you're very welcome to use our lobby/lounge/restaurant."*\n4. Offer to store luggage: *"I can store your bags here safely while you wait."*\n5. Take contact details and call/text when the room is ready\n6. Do not promise a specific room number until it has been confirmed clean` },
 
   { keywords:['late check-out','late departure','extend stay','checkout extension'],
-    response:`**Late Check-Out Request**\n\n1. Check the PMS � is the room blocked for an early-arriving guest today?\n2. If room is free:\n   - Up to 12:00 � usually complimentary based on loyalty / length of stay\n   - 12:00�14:00 � typically free or small charge depending on policy\n   - 14:00+ � standard policy is to charge a half-day or full day\n3. *"I can arrange a late check-out until [time] for you � is that helpful?"*\n4. Always note it in the PMS and on the housekeeping sheet\n5. If room is blocked: *"I'm afraid we have guests arriving into that room today, so I'm unable to extend beyond [standard time]. I can arrange for your luggage to be stored if that helps."*` },
+    response:`**Late Check-Out Request**\n\n1. Check the PMS — is the room blocked for an early-arriving guest today?\n2. If room is free:\n   - Up to 12:00 — usually complimentary based on loyalty / length of stay\n   - 12:00–14:00 — typically free or small charge depending on policy\n   - 14:00+ — standard policy is to charge a half-day or full day\n3. *"I can arrange a late check-out until [time] for you — is that helpful?"*\n4. Always note it in the PMS and on the housekeeping sheet\n5. If room is blocked: *"I'm afraid we have guests arriving into that room today, so I'm unable to extend beyond [standard time]. I can arrange for your luggage to be stored if that helps."*` },
 
   { keywords:['lost property','lost and found','found item','guest left something'],
-    response:`**Lost Property Procedure**\n\n**Guest reports a loss:**\n1. Take full details: item description, where/when last seen, room number\n2. Check the lost property log and secure storage immediately\n3. Check with housekeeping (they often find items when turning rooms)\n4. *"I've logged your details and we'll search thoroughly. Can I take your contact number? We'll call you as soon as we locate it."*\n\n**Found item:**\n1. Log it immediately: item description, where found, found by, date/time\n2. Place in secure lost property storage � do not leave at reception desk\n3. Valuable items (cash, jewellery, electronics): inform Duty Manager immediately\n4. Never dispose of found property` },
+    response:`**Lost Property Procedure**\n\n**Guest reports a loss:**\n1. Take full details: item description, where/when last seen, room number\n2. Check the lost property log and secure storage immediately\n3. Check with housekeeping (they often find items when turning rooms)\n4. *"I've logged your details and we'll search thoroughly. Can I take your contact number? We'll call you as soon as we locate it."*\n\n**Found item:**\n1. Log it immediately: item description, where found, found by, date/time\n2. Place in secure lost property storage — do not leave at reception desk\n3. Valuable items (cash, jewellery, electronics): inform Duty Manager immediately\n4. Never dispose of found property` },
 
   { keywords:['dnd','do not disturb','welfare check','dnr room','welfare concern'],
-    response:`**Do Not Disturb / Welfare Check**\n\n**If DND has been on for an extended period (typically 24h+):**\n1. Phone the room first � let it ring at least 10 times\n2. If no answer: attend the room in person with a colleague if possible\n3. Knock firmly: *"Good morning/evening, this is [name] from reception � I'm just checking everything is okay."*\n4. If still no answer and welfare concern is genuine: call the Duty Manager before entering\n5. A master key entry for welfare purposes must be done with authorisation and ideally two staff members\n6. **If the guest is unresponsive:** Call 999 immediately\n7. Log all actions and times precisely` },
+    response:`**Do Not Disturb / Welfare Check**\n\n**If DND has been on for an extended period (typically 24h+):**\n1. Phone the room first — let it ring at least 10 times\n2. If no answer: attend the room in person with a colleague if possible\n3. Knock firmly: *"Good morning/evening, this is [name] from reception — I'm just checking everything is okay."*\n4. If still no answer and welfare concern is genuine: call the Duty Manager before entering\n5. A master key entry for welfare purposes must be done with authorisation and ideally two staff members\n6. **If the guest is unresponsive:** Call 999 immediately\n7. Log all actions and times precisely` },
 
   { keywords:['medical emergency','guest taken ill','ambulance','person collapsed','unconscious'],
-    response:`**Medical Emergency**\n\n1. **Call 999 immediately** � do not delay\n2. Stay on the line with the operator � follow their instructions\n3. Send a colleague to the hotel entrance to direct the ambulance\n4. Keep the area clear\n5. Do not move the person unless instructed to by the 999 operator\n6. Retrieve the first aid kit and defibrillator if required\n7. Know the hotel address to give the operator: [confirm address in site procedures]\n8. Notify the Duty Manager immediately\n9. Log the full incident in the Night Log\n10. **After the incident:** Complete a full written incident report. Notify the General Manager in the morning.` },
+    response:`**Medical Emergency**\n\n1. **Call 999 immediately** — do not delay\n2. Stay on the line with the operator — follow their instructions\n3. Send a colleague to the hotel entrance to direct the ambulance\n4. Keep the area clear\n5. Do not move the person unless instructed to by the 999 operator\n6. Retrieve the first aid kit and defibrillator if required\n7. Know the hotel address to give the operator: [confirm address in site procedures]\n8. Notify the Duty Manager immediately\n9. Log the full incident in the Night Log\n10. **After the incident:** Complete a full written incident report. Notify the General Manager in the morning.` },
 
   { keywords:['unaccompanied minor','child alone','minor without adult'],
-    response:`**Unaccompanied Minor**\n\n**Safeguarding is the immediate priority.**\n\n1. Speak calmly to the child and establish their name, age, and room number\n2. Do not leave the child unattended\n3. Contact the Duty Manager immediately � this is an escalation situation\n4. Attempt to contact the responsible adult: call the room, ring the mobile if available\n5. Do not give out information about the child to unknown persons asking at the desk\n6. If the child appears to be at risk or in distress: call 999 and request police attendance\n7. Record all details: time, appearance, what was said\n8. A full incident report must be completed` },
+    response:`**Unaccompanied Minor**\n\n**Safeguarding is the immediate priority.**\n\n1. Speak calmly to the child and establish their name, age, and room number\n2. Do not leave the child unattended\n3. Contact the Duty Manager immediately — this is an escalation situation\n4. Attempt to contact the responsible adult: call the room, ring the mobile if available\n5. Do not give out information about the child to unknown persons asking at the desk\n6. If the child appears to be at risk or in distress: call 999 and request police attendance\n7. Record all details: time, appearance, what was said\n8. A full incident report must be completed` },
 
   { keywords:['group arrival','large group','coach party','tour group'],
-    response:`**Group Arrival Procedure**\n\n**Preparation (before arrival):**\n- Confirm all rooms are pre-assigned in PMS and keys are pre-cut\n- Prepare a key envelope per room with room number written clearly\n- Brief housekeeping on the group rooms\n- Have the rooming list ready at the desk\n\n**On arrival:**\n- Direct the group leader to reception\n- Hand keys to the group leader against the rooming list � one sign-off, not individual check-ins\n- Direct the group to the lift / stairwell\n- *"Here are your keys for all [X] rooms. Breakfast is served from [time] in [location]."*\n\n**After arrival:**\n- Confirm all rooms occupied and no one is missing from the list\n- Note any issues or special requests that came up during arrival` },
+    response:`**Group Arrival Procedure**\n\n**Preparation (before arrival):**\n- Confirm all rooms are pre-assigned in PMS and keys are pre-cut\n- Prepare a key envelope per room with room number written clearly\n- Brief housekeeping on the group rooms\n- Have the rooming list ready at the desk\n\n**On arrival:**\n- Direct the group leader to reception\n- Hand keys to the group leader against the rooming list — one sign-off, not individual check-ins\n- Direct the group to the lift / stairwell\n- *"Here are your keys for all [X] rooms. Breakfast is served from [time] in [location]."*\n\n**After arrival:**\n- Confirm all rooms occupied and no one is missing from the list\n- Note any issues or special requests that came up during arrival` },
 
   { keywords:['room move','move room','change room','different room'],
     response:`**Room Move Procedure**\n\n1. Confirm reason for the room move and check for availability in PMS\n2. Verify the new room is clean, inspected, and ready\n3. In the PMS: check out from old room, check into new room (same booking)\n4. Encode a new key card for the new room number\n5. Invalidate/deactivate the old key\n6. Accompany the guest to the new room if possible, or give clear directions\n7. Notify housekeeping to service the vacated room\n8. Update the housekeeping board/PMS room status\n9. Note the room move in the Night Log and on the shift summary` },
 
   { keywords:['guest refuses to leave','trespass','ejecting a guest','guest wont leave'],
-    response:`**Guest Refuses to Leave**\n\n1. Remain calm � do not physically attempt to remove anyone\n2. State clearly and calmly: *"I'm afraid your check-out time has passed and your reservation has ended. I need to ask you to vacate the room."*\n3. Offer to arrange transport or storage if the delay is logistical\n4. If they refuse a second time: call the Duty Manager immediately\n5. If the situation is threatening or escalates: call 999\n6. The police can remove a trespasser � do not wait if safety is a concern\n7. Document everything: times, what was said, who was present` },
+    response:`**Guest Refuses to Leave**\n\n1. Remain calm — do not physically attempt to remove anyone\n2. State clearly and calmly: *"I'm afraid your check-out time has passed and your reservation has ended. I need to ask you to vacate the room."*\n3. Offer to arrange transport or storage if the delay is logistical\n4. If they refuse a second time: call the Duty Manager immediately\n5. If the situation is threatening or escalates: call 999\n6. The police can remove a trespasser — do not wait if safety is a concern\n7. Document everything: times, what was said, who was present` },
 
   { keywords:['power cut','power outage','electricity cut','no power','lights gone out'],
-    response:`**Power Cut / Outage**\n\n1. **Check emergency lighting** � it should activate automatically\n2. Check the fuse board / MCB panel (location in procedures folder)\n3. Call the emergency maintenance number immediately if the outage affects the whole building\n4. Inform guests via in-house telephone if phones are working: *"We are currently experiencing a brief power interruption. Our team is working to restore power. Emergency lighting is in place for your safety."*\n5. **Do not use the lift** � it may be inoperative or unsafe\n6. Note the start time of the outage for the incident report\n7. If the power is not restored within 15 minutes: escalate to Duty Manager and consider guest welfare (heating, electric doors, CCTV)\n8. Log the full incident in the Night Log` }
+    response:`**Power Cut / Outage**\n\n1. **Check emergency lighting** — it should activate automatically\n2. Check the fuse board / MCB panel (location in procedures folder)\n3. Call the emergency maintenance number immediately if the outage affects the whole building\n4. Inform guests via in-house telephone if phones are working: *"We are currently experiencing a brief power interruption. Our team is working to restore power. Emergency lighting is in place for your safety."*\n5. **Do not use the lift** — it may be inoperative or unsafe\n6. Note the start time of the outage for the incident report\n7. If the power is not restored within 15 minutes: escalate to Duty Manager and consider guest welfare (heating, electric doors, CCTV)\n8. Log the full incident in the Night Log` }
 ];
 
 function getActiveScripts() {
@@ -3415,7 +3415,7 @@ function renderMessage(role, text) {
   if (role === 'user') {
     wrap.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
   } else {
-    wrap.innerHTML = `<div class="chat-avatar">??</div><div class="chat-bubble">${markdownToHtml(text)}</div>`;
+    wrap.innerHTML = `<div class="chat-avatar">🤖</div><div class="chat-bubble">${markdownToHtml(text)}</div>`;
   }
 
   container.appendChild(wrap);
@@ -3427,7 +3427,7 @@ function showTypingDots() {
   if (!container) return;
   const dots = document.createElement('div');
   dots.className = 'chat-msg chat-aria typing-dots';
-  dots.innerHTML = `<div class="chat-avatar">??</div><div class="chat-bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
+  dots.innerHTML = `<div class="chat-avatar">🤖</div><div class="chat-bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
   container.appendChild(dots);
   container.scrollTop = container.scrollHeight;
 }
@@ -3496,7 +3496,7 @@ function aiGreeting() {
   const container = document.getElementById('chatMessages');
   if (!container) return;
   container.innerHTML = '';
-  renderMessage('aria', `Good ${getGreetingTime()}, I'm **Aria** � your AI Hospitality Coach.\n\nI have scripts for common night-shift scenarios. Select a suggestion below or type your own question.\n\nTry: *"Noise complaint script"*, *"Card declined at check-in"*, or *"How do I handle an angry guest?"*`);
+  renderMessage('aria', `Good ${getGreetingTime()}, I'm **Aria** — your AI Hospitality Coach.\n\nI have scripts for common night-shift scenarios. Select a suggestion below or type your own question.\n\nTry: *"Noise complaint script"*, *"Card declined at check-in"*, or *"How do I handle an angry guest?"*`);
 }
 
 function getGreetingTime() {
@@ -3506,7 +3506,7 @@ function getGreetingTime() {
   return 'evening';
 }
 
-// Chat input � Enter submits, Shift+Enter newline, auto-resize
+// Chat input — Enter submits, Shift+Enter newline, auto-resize
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('chatInput');
   if (input) {
@@ -3524,7 +3524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // -------------------------------------------------------------
-// CHUNK 10 � NIGHT LOG + QUICK LOG + TOOLS
+// CHUNK 10 — NIGHT LOG + QUICK LOG + TOOLS
 // -------------------------------------------------------------
 
 // -- Night Log --
@@ -3634,7 +3634,7 @@ function renderNightLogEntries() {
         <span class="nl-entry-time">${formatTime(e.timestamp)}</span>
         <div class="nl-entry-actions">
           <button class="btn btn-ghost nl-rectify-btn" onclick="toggleRectify('${e.id}')" aria-label="${e.rectified ? 'Mark unresolved' : 'Mark resolved'}">${e.rectified ? 'Reopen' : 'Resolve'}</button>
-          <button class="btn btn-ghost nl-delete-btn" onclick="deleteLogEntry('${e.id}')" aria-label="Delete entry">?</button>
+          <button class="btn btn-ghost nl-delete-btn" onclick="deleteLogEntry('${e.id}')" aria-label="Delete entry">✕</button>
         </div>
       </div>
       <div class="nl-entry-title">${escapeHtml(e.title)}</div>
@@ -3660,7 +3660,7 @@ function deleteLogEntry(id) {
 
 function formatTime(iso) {
   try { return new Date(iso).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
-  catch { return '�'; }
+  catch { return '—'; }
 }
 
 function exportNightlogJSON() {
@@ -3830,7 +3830,7 @@ function renderReports() {
   if (tbody) {
     tbody.innerHTML = reportShifts.map(s => {
       const issued = allReportEntries.filter(e => e.type === 'issue');
-      return `<tr><td>${formatDate(s.shiftId)}</td><td>${escapeHtml(s.shiftLeader||'�')}</td><td>${s.entryCount}</td></tr>`;
+      return `<tr><td>${formatDate(s.shiftId)}</td><td>${escapeHtml(s.shiftLeader||'—')}</td><td>${s.entryCount}</td></tr>`;
     }).join('');
   }
 
@@ -3894,7 +3894,7 @@ function renderBarChart(canvasId, data, title) {
     ctx.fillStyle = '#888880';
     ctx.font = '9px DM Sans, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(k.length > 12 ? k.slice(0,12)+'�' : k, 0, 0);
+    ctx.fillText(k.length > 12 ? k.slice(0,12)+'…' : k, 0, 0);
     ctx.restore();
   });
 
@@ -3919,10 +3919,10 @@ function renderReportEntries(filter) {
   tbody.innerHTML = rows.map(e => `
     <tr>
       <td>${formatTime(e.timestamp)}</td>
-      <td>${escapeHtml(e.floor||'�')}</td>
-      <td>${escapeHtml(e.category||'�')}</td>
-      <td><span class="badge badge-${e.severity==='high'?'red':e.severity==='medium'?'gold':'muted'}">${e.severity||'�'}</span></td>
-      <td>${escapeHtml(e.title||'�')}</td>
+      <td>${escapeHtml(e.floor||'—')}</td>
+      <td>${escapeHtml(e.category||'—')}</td>
+      <td><span class="badge badge-${e.severity==='high'?'red':e.severity==='medium'?'gold':'muted'}">${e.severity||'—'}</span></td>
+      <td>${escapeHtml(e.title||'—')}</td>
       <td><span class="badge ${e.rectified?'badge-green':'badge-muted'}">${e.rectified?'Resolved':'Pending'}</span></td>
     </tr>`).join('');
 }
@@ -3957,7 +3957,7 @@ function addCheckinRow(name) {
     <td>${rowCount}</td>
     <td><input type="text" class="form-control guest-name-input" value="${escapeHtml(name||'')}" placeholder="Guest name" aria-label="Guest name for row ${rowCount}"></td>
     <td><input type="checkbox" aria-label="Checked in"></td>
-    <td><button class="btn btn-ghost btn-sm" onclick="removeCheckinRow(this)" aria-label="Remove row">?</button></td>
+    <td><button class="btn btn-ghost btn-sm" onclick="removeCheckinRow(this)" aria-label="Remove row">✕</button></td>
   `;
   tbody.appendChild(tr);
   renumberCheckinRows();
@@ -4207,7 +4207,7 @@ function resetBoard() {
 }
 
 // -------------------------------------------------------------
-// CHUNK 11 � END SHIFT + HISTORY + INIT + CLOSE
+// CHUNK 11 — END SHIFT + HISTORY + INIT + CLOSE
 // -------------------------------------------------------------
 
 // -- Shift History --
@@ -4226,9 +4226,9 @@ function renderHistory() {
 
   list.innerHTML = [...shiftHistory].reverse().map((s, revIdx) => {
     const idx = shiftHistory.length - 1 - revIdx;
-    const date    = s.date     || '�';
-    const staff   = s.staffName  || '�';
-    const role    = s.staffRole  || '�';
+    const date    = s.date     || '—';
+    const staff   = s.staffName  || '—';
+    const role    = s.staffRole  || '—';
     const hn      = s.handoverNotes || '';
     const sn      = s.shiftNotes   || '';
     const issues  = s.incidentCount ?? 0;
@@ -4243,8 +4243,8 @@ function renderHistory() {
           </div>
           <div class="history-meta">
             <span>${escapeHtml(date)}</span>
-            <button class="btn btn-ghost btn-sm" onclick="loadHandoverFromHistory(${idx})" aria-label="Load handover from this shift">?? Load Handover</button>
-            <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">? Details</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadHandoverFromHistory(${idx})" aria-label="Load handover from this shift">📋 Load Handover</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">▼ Details</button>
           </div>
         </div>
         <div class="history-stats">
@@ -4277,9 +4277,9 @@ function updateHistoryStats() {
   setEl('histTotalShifts', total);
 
   if (total === 0) {
-    setEl('histAvgChecklist',  '�');
-    setEl('histTotalIncidents','�');
-    setEl('histCommonType',    '�');
+    setEl('histAvgChecklist',  '—');
+    setEl('histTotalIncidents','—');
+    setEl('histCommonType',    '—');
     return;
   }
   const avgCl   = Math.round(shiftHistory.reduce((a,s) => a + (s.checklistPct||0), 0) / total);
@@ -4293,7 +4293,7 @@ function updateHistoryStats() {
     if (e.category) catMap[e.category] = (catMap[e.category]||0)+1;
   }));
   const top = Object.entries(catMap).sort((a,b) => b[1]-a[1])[0];
-  setEl('histCommonType', top ? top[0] : '�');
+  setEl('histCommonType', top ? top[0] : '—');
 }
 
 function loadHandoverFromHistory(idx) {
