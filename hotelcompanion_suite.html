@@ -1152,10 +1152,12 @@
 
     /* --- GROUP CHECK-IN --- */
     .checkin-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
-    .checkin-table { width: 100%; border-collapse: collapse; }
-    .checkin-table th { text-align: left; padding: 9px 10px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
-    .checkin-table td { padding: 8px 10px; border-bottom: 1px solid rgba(42,42,42,0.6); }
-    .checkin-table td input[type="text"] { background: transparent; border: none; padding: 2px 0; font-size: 14px; color: var(--text); outline: none; border-bottom: 1px solid transparent; }
+    .checkin-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); }
+    .checkin-table th { text-align: left; padding: 9px 10px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+    .checkin-table th:last-child { border-right: none; }
+    .checkin-table td { padding: 8px 10px; border-bottom: 1px solid rgba(42,42,42,0.6); border-right: 1px solid rgba(42,42,42,0.4); }
+    .checkin-table td:last-child { border-right: none; }
+    .checkin-table td input[type="text"] { background: transparent; border: none; padding: 2px 0; font-size: 14px; color: var(--text); outline: none; border-bottom: 1px solid transparent; width: 100%; }
     .checkin-table td input[type="text"]:focus { border-bottom-color: var(--gold); }
     .checkin-table td input[type="checkbox"] { width: 18px; height: 18px; }
 
@@ -1375,7 +1377,23 @@
       /* Group Check-in print */
       #section-checkin { color: #000; }
       #section-checkin .checkin-controls { display: none; }
-      .checkin-table, .checkin-table th, .checkin-table td { border-color: #ccc; color: #000; }
+      #section-checkin .btn { display: none; }
+      #section-checkin .no-print { display: none; }
+      #section-checkin .flex-between { display: none; }
+      /* Hide the delete-button column on print */
+      #checkinTable th:last-child,
+      #checkinTable td:last-child { display: none; }
+      .checkin-table, .checkin-table th, .checkin-table td { border-color: #999; color: #000; }
+      .checkin-table { border: 1px solid #999; }
+      /* Inputs print as plain text — hide placeholder, show value only */
+      .checkin-table td input[type="text"] {
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        width: 100%;
+        min-width: 0;
+      }
+      .checkin-table td input[type="text"]::placeholder { color: transparent; }
 
       /* Sign Generator print */
       #section-signs .sign-controls { display: none; }
@@ -2343,7 +2361,7 @@
   <div class="flex-between mb-12">
     <div>
       <div class="section-heading">Group Check-in</div>
-      <div class="section-sub">Print-ready group arrival list.</div>
+      <div class="section-sub no-print">Print-ready group arrival list.</div>
     </div>
     <button class="btn btn-gold" onclick="window.print()" aria-label="Print group check-in list">🖨️ Print</button>
   </div>
@@ -2381,11 +2399,13 @@
     <table class="checkin-table" id="checkinTable">
       <thead>
         <tr>
-          <th style="width:50px;">#</th>
+          <th style="width:44px;">#</th>
           <th>Guest Name</th>
-          <th>Room</th>
-          <th style="width:90px;">Checked In</th>
-          <th style="width:50px;"></th>
+          <th style="width:100px;">Room</th>
+          <th>Email Address</th>
+          <th style="width:100px;">Car Reg</th>
+          <th style="width:110px;">Signature</th>
+          <th style="width:44px;"></th>
         </tr>
       </thead>
       <tbody id="checkinBody">
@@ -4091,7 +4111,10 @@ function addCheckinRow(name) {
   tr.innerHTML = `
     <td>${rowCount}</td>
     <td><input type="text" class="form-control guest-name-input" value="${escapeHtml(name||'')}" placeholder="Guest name" aria-label="Guest name for row ${rowCount}"></td>
-    <td><input type="checkbox" aria-label="Checked in"></td>
+    <td><input type="text" class="form-control" placeholder="Room" aria-label="Room for row ${rowCount}" style="width:80px;"></td>
+    <td><input type="text" class="form-control" placeholder="Email" aria-label="Email for row ${rowCount}"></td>
+    <td><input type="text" class="form-control" placeholder="Car reg" aria-label="Car reg for row ${rowCount}" style="width:88px;"></td>
+    <td></td>
     <td><button class="btn btn-ghost btn-sm" onclick="removeCheckinRow(this)" aria-label="Remove row">✕</button></td>
   `;
   tbody.appendChild(tr);
