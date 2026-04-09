@@ -1429,3 +1429,429 @@
 
   </style>
 </head>
+<body>
+
+<!-- -----------------------------------------------------------
+     FLOATING QUICK LOG BUTTON
+----------------------------------------------------------- -->
+<button class="floating-btn" id="quickLogBtn" aria-label="Quick incident log" onclick="openModal('quickLogModal')">?</button>
+
+<!-- -----------------------------------------------------------
+     SIDEBAR BACKDROP (mobile)
+----------------------------------------------------------- -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+<!-- -----------------------------------------------------------
+     SIDEBAR
+----------------------------------------------------------- -->
+<aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+  <div class="sidebar-accent"></div>
+
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <img src="hotelLogo.jpg" alt="Hotel logo" id="sidebarLogoImg" onerror="this.style.display='none'">
+    <div class="logo-tag">Night Companion</div>
+    <div class="logo-title" id="sidebarHotelName">Grand Hotel</div>
+  </div>
+
+  <!-- Staff Card -->
+  <div class="staff-card" id="staffCard" onclick="openModal('profileModal')" aria-label="Edit staff profile" role="button" tabindex="0">
+    <div class="staff-card-inner">
+      <div class="avatar" id="staffAvatar">NR</div>
+      <div class="staff-info">
+        <div class="staff-name" id="staffNameDisplay">Night Receptionist</div>
+        <div class="staff-role" id="staffRoleDisplay">Front Desk Agent</div>
+        <div class="shift-badge">
+          <span class="pulse-dot"></span>
+          <span id="staffShiftDisplay">Night Shift</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Navigation -->
+  <nav class="nav" id="mainNav">
+    <div class="nav-section-label">Core</div>
+    <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)" role="button" tabindex="0" aria-label="Night Dashboard">
+      <span class="nav-icon">??</span> Night Dashboard
+    </div>
+    <div class="nav-item" data-section="checklist" onclick="showSection('checklist',this)" role="button" tabindex="0" aria-label="Shift Checklist">
+      <span class="nav-icon">?</span> Shift Checklist
+    </div>
+    <div class="nav-item" data-section="nightaudit" onclick="showSection('nightaudit',this)" role="button" tabindex="0" aria-label="Night Audit">
+      <span class="nav-icon">??</span> Night Audit
+    </div>
+    <div class="nav-item" data-section="notes" onclick="showSection('notes',this)" role="button" tabindex="0" aria-label="Notes and Handover">
+      <span class="nav-icon">??</span> Notes &amp; Handover
+    </div>
+    <div class="nav-item" data-section="motivation" onclick="showSection('motivation',this)" role="button" tabindex="0" aria-label="Motivation">
+      <span class="nav-icon">?</span> Motivation
+    </div>
+    <div class="nav-item" data-section="ai" onclick="showSection('ai',this)" role="button" tabindex="0" aria-label="AI Coach">
+      <span class="nav-icon">??</span> AI Coach
+    </div>
+    <div class="nav-item" data-section="history" onclick="showSection('history',this)" role="button" tabindex="0" aria-label="Shift History">
+      <span class="nav-icon">??</span> Shift History
+    </div>
+
+    <!-- Tools Divider -->
+    <div class="tools-divider"></div>
+    <div class="nav-section-label">Tools</div>
+
+    <div class="nav-item" data-section="nightlog" onclick="showSection('nightlog',this)" role="button" tabindex="0" aria-label="Night Log">
+      <span class="nav-icon">??</span> Night Log
+    </div>
+    <div class="nav-item" data-section="reports" onclick="showSection('reports',this)" role="button" tabindex="0" aria-label="Monthly Report">
+      <span class="nav-icon">??</span> Monthly Report
+    </div>
+    <div class="nav-item" data-section="checkin" onclick="showSection('checkin',this)" role="button" tabindex="0" aria-label="Group Check-in">
+      <span class="nav-icon">??</span> Group Check-in
+    </div>
+    <div class="nav-item" data-section="signs" onclick="showSection('signs',this)" role="button" tabindex="0" aria-label="Sign Generator">
+      <span class="nav-icon">??</span> Sign Generator
+    </div>
+    <div class="nav-item" data-section="board" onclick="showSection('board',this)" role="button" tabindex="0" aria-label="Daily Info Board">
+      <span class="nav-icon">??</span> Daily Info Board
+    </div>
+
+    <div class="tools-divider"></div>
+    <div class="nav-item" onclick="openModal('brandModal')" role="button" tabindex="0" aria-label="Customise branding">
+      <span class="nav-icon">??</span> Customise
+    </div>
+  </nav>
+
+  <!-- Persist Toggle -->
+  <div class="save-toggle-wrap">
+    <div class="save-toggle-label">Data Persistence</div>
+    <div class="save-toggle-row">
+      <span class="save-toggle-desc" id="persistDesc">Off — session only</span>
+      <button class="toggle-pill" id="persistToggle" onclick="togglePersist()" aria-label="Toggle data persistence" aria-pressed="false"></button>
+    </div>
+  </div>
+</aside>
+
+<!-- -----------------------------------------------------------
+     PROFILE SETUP MODAL
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="profileModalTitle">Staff Profile</span>
+      <button class="modal-close" onclick="closeModal('profileModal')" aria-label="Close profile modal">?</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Set up your profile for this shift. This information is always saved to this device.</p>
+      <div class="form-group">
+        <label for="profileName">Your Name</label>
+        <input type="text" id="profileName" placeholder="e.g. Alex Johnson" maxlength="60" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="profileRole">Your Role</label>
+        <select id="profileRole">
+          <option value="Front Desk Agent">Front Desk Agent</option>
+          <option value="Concierge">Concierge</option>
+          <option value="Bell Staff">Bell Staff</option>
+          <option value="Housekeeping Supervisor">Housekeeping Supervisor</option>
+          <option value="Food &amp; Beverage">Food &amp; Beverage</option>
+          <option value="Night Auditor">Night Auditor</option>
+          <option value="Duty Manager">Duty Manager</option>
+          <option value="New Hire/Trainee">New Hire / Trainee</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="profileShift">Shift Type</label>
+        <select id="profileShift">
+          <option value="Morning (6am–2pm)">Morning (6am–2pm)</option>
+          <option value="Afternoon (2pm–10pm)">Afternoon (2pm–10pm)</option>
+          <option value="Night (10pm–6am)" selected>Night (10pm–6am)</option>
+          <option value="Split Shift">Split Shift</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gold" onclick="saveProfile()" aria-label="Save profile">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     BRAND CUSTOMISE MODAL
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="brandModal" role="dialog" aria-modal="true" aria-labelledby="brandModalTitle">
+  <div class="modal-box modal-wide">
+    <div class="modal-header">
+      <span class="modal-title" id="brandModalTitle">Brand Customisation</span>
+      <button class="modal-close" onclick="cancelBrand()" aria-label="Close brand customisation">?</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="brandHotelNameInput">Hotel / Property Name</label>
+        <input type="text" id="brandHotelNameInput" placeholder="e.g. The Grand Hotel" maxlength="80">
+      </div>
+      <div class="form-group">
+        <label>Hotel Logo</label>
+        <input type="file" id="brandLogoInput" accept="image/*" aria-label="Upload hotel logo">
+        <div class="logo-preview-wrap" id="logoPreviewWrap" style="display:none;">
+          <img id="logoPreviewImg" src="" alt="Logo preview">
+          <button class="btn btn-ghost btn-sm mt-8" onclick="removeBrandLogo()" aria-label="Remove logo">Remove Logo</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Brand Accent Colour</label>
+        <div class="brand-swatch-grid" id="brandSwatchGrid">
+          <!-- swatches injected by JS -->
+        </div>
+        <div class="flex-row mt-8">
+          <input type="color" id="brandColourPicker" value="#D4A843" aria-label="Custom colour picker" style="width:44px;flex-shrink:0;">
+          <input type="text" id="brandHexInput" placeholder="#D4A843" maxlength="7" style="width:110px;flex-shrink:0;">
+          <span style="font-size:12px;color:var(--muted);">Custom hex</span>
+        </div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:4px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Live Preview</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="brand-preview-dot" id="brandPreviewDot"></span>
+          <span id="brandPreviewName" style="font-weight:600;font-size:15px;">Grand Hotel</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Night Receptionist Companion Suite</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cancelBrand()" aria-label="Cancel brand changes">Cancel</button>
+      <button class="btn btn-gold" onclick="applyAndSaveBrand()" aria-label="Apply and save brand settings">Apply &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     QUICK LOG MODAL
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="quickLogModal" role="dialog" aria-modal="true" aria-labelledby="quickLogModalTitle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="quickLogModalTitle">? Quick Incident Log</span>
+      <button class="modal-close" onclick="closeModal('quickLogModal')" aria-label="Close quick log">?</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="qlGuestRoom">Guest / Room</label>
+        <input type="text" id="qlGuestRoom" placeholder="e.g. Room 214 / Mr. Smith" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="qlType">Incident Type</label>
+        <select id="qlType">
+          <option value="">— Select type —</option>
+          <option value="Guest Complaint">Guest Complaint</option>
+          <option value="Maintenance Issue">Maintenance Issue</option>
+          <option value="Safety/Security">Safety / Security</option>
+          <option value="Billing Dispute">Billing Dispute</option>
+          <option value="VIP Special Request">VIP Special Request</option>
+          <option value="Lost &amp; Found">Lost &amp; Found</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="qlDescription">Description</label>
+        <textarea id="qlDescription" placeholder="Brief description of the incident…" rows="3" maxlength="500"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="qlStatus">Status</label>
+        <select id="qlStatus">
+          <option value="Resolved">Resolved</option>
+          <option value="Pending Follow-up">Pending Follow-up</option>
+          <option value="Escalated to Manager">Escalated to Manager</option>
+          <option value="Monitoring">Monitoring</option>
+        </select>
+      </div>
+      <div class="validation-msg" id="qlValidationMsg">Please fill in Guest/Room, Type, and Description.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('quickLogModal')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-gold" onclick="submitQuickLog()" aria-label="Log incident">Log Incident</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     END SHIFT CONFIRMATION MODAL
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="endShiftModal" role="dialog" aria-modal="true" aria-labelledby="endShiftModalTitle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="endShiftModalTitle">End Shift</span>
+      <button class="modal-close" onclick="closeModal('endShiftModal')" aria-label="Close end shift modal">?</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text);margin-bottom:12px;">Are you sure you want to end this shift?</p>
+      <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:1.9;margin-bottom:0;">
+        <li>The shift summary will be saved to history.</li>
+        <li>Your handover notes will be passed to the next shift.</li>
+        <li>All session data (checklist, audit, notes, Night Log) will be cleared.</li>
+        <li>Your profile and shift history are never deleted.</li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('endShiftModal')" aria-label="Cancel end shift">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmEndShift()" aria-label="Confirm end shift">Yes, End Shift</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     APP SHELL — MAIN AREA
+----------------------------------------------------------- -->
+<div class="app">
+  <main class="main" id="mainArea">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">?</button>
+      <h1 class="topbar-title" id="topbarTitle">NIGHT DASHBOARD</h1>
+      <div class="topbar-clock" id="topbarClock" aria-live="polite" aria-atomic="true"></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('endShiftModal')" aria-label="End shift">?? End Shift</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content" id="mainContent">
+
+<!-- -----------------------------------------------------------
+     SECTION: DASHBOARD
+----------------------------------------------------------- -->
+<section class="section active" id="section-dashboard" aria-label="Night Dashboard">
+
+  <!-- Handover Banner -->
+  <div class="handover-banner hidden" id="handoverBanner">
+    <div class="handover-banner-icon">??</div>
+    <div class="handover-banner-content">
+      <div class="handover-banner-title">Incoming Handover from Previous Shift</div>
+      <div class="handover-banner-text" id="handoverBannerText"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="dismissHandoverBanner()" aria-label="Dismiss handover banner" style="flex-shrink:0;align-self:flex-start;">?</button>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid" id="dashStatGrid">
+    <div class="stat-card">
+      <div class="stat-value" id="statChecklist">0%</div>
+      <div class="stat-label">Checklist Progress</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statTime">0h 0m</div>
+      <div class="stat-label">Time on Shift</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statIncidents">0</div>
+      <div class="stat-label">Incidents Logged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statStreak">0</div>
+      <div class="stat-label" id="statStreakLabel">Shifts Recorded</div>
+    </div>
+  </div>
+
+  <!-- Lone Worker Safety -->
+  <div class="card lone-worker-card">
+    <div class="lone-worker-info">
+      <h3>??? Lone Worker Safety</h3>
+      <p>Check in regularly to confirm you are safe and well.</p>
+      <div id="lastCheckIn">Not yet checked in this shift</div>
+    </div>
+    <button class="btn btn-gold" id="checkInBtn" onclick="safetyCheckIn()" aria-label="Check in as safe">? I'm OK — Check In</button>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-grid">
+    <div class="quick-action-card" onclick="showSection('checklist', document.querySelector('[data-section=checklist]'))" role="button" tabindex="0" aria-label="Go to Shift Checklist">
+      <div class="quick-action-icon">?</div>
+      <div>
+        <div class="quick-action-title">Shift Checklist</div>
+        <div class="quick-action-desc">Pre-Audit and Post-Audit tasks</div>
+      </div>
+    </div>
+    <div class="quick-action-card" onclick="showSection('nightaudit', document.querySelector('[data-section=nightaudit]'))" role="button" tabindex="0" aria-label="Go to Night Audit">
+      <div class="quick-action-icon">??</div>
+      <div>
+        <div class="quick-action-title">Night Audit</div>
+        <div class="quick-action-desc">Step-by-step audit tracker</div>
+      </div>
+    </div>
+    <div class="quick-action-card" onclick="showSection('ai', document.querySelector('[data-section=ai]'))" role="button" tabindex="0" aria-label="Open AI Coach for payment scripts">
+      <div class="quick-action-icon">??</div>
+      <div>
+        <div class="quick-action-title">Card Payment Scripts</div>
+        <div class="quick-action-desc">AI Coach — billing &amp; payment guidance</div>
+      </div>
+    </div>
+    <div class="quick-action-card" onclick="showSection('notes', document.querySelector('[data-section=notes]'))" role="button" tabindex="0" aria-label="Log shift notes">
+      <div class="quick-action-icon">??</div>
+      <div>
+        <div class="quick-action-title">Log Shift Notes</div>
+        <div class="quick-action-desc">Notes &amp; handover for next shift</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tip Card -->
+  <div class="tip-card-dash" id="dashTip">
+    ?? <strong>Tonight's tip:</strong> A calm, friendly greeting sets the tone for every interaction — even at 3am.
+  </div>
+
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: CHECKLIST
+----------------------------------------------------------- -->
+<section class="section" id="section-checklist" aria-label="Shift Checklist">
+  <div class="flex-between mb-12">
+    <div>
+      <div class="section-heading">Shift Checklist</div>
+      <div class="section-sub">Work through your tasks. Required items are highlighted.</div>
+    </div>
+  </div>
+
+  <!-- Tab Buttons -->
+  <div class="checklist-tabs" role="tablist" aria-label="Checklist tabs">
+    <button class="tab-btn active" id="tabPreAudit" onclick="switchChecklistTab('preAudit')" role="tab" aria-selected="true" aria-controls="checklistItems">Pre-Audit</button>
+    <button class="tab-btn" id="tabPostAudit" onclick="switchChecklistTab('postAudit')" role="tab" aria-selected="false" aria-controls="checklistItems">Post-Audit</button>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-wrap mb-8">
+    <div class="progress-fill" id="checklistProgressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="checklistProgressLabel">0 of 0 complete</div>
+
+  <div class="mt-12" id="checklistItems" role="tabpanel">
+    <!-- Items injected by JS -->
+  </div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: NIGHT AUDIT
+----------------------------------------------------------- -->
+<section class="section" id="section-nightaudit" aria-label="Night Audit Tracker">
+  <div class="flex-between mb-12">
+    <div>
+      <div class="section-heading">Night Audit Tracker</div>
+      <div class="section-sub">Work through each step. Tick off as you go.</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="resetAudit()" aria-label="Reset all audit steps">? Reset All</button>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-wrap mb-8">
+    <div class="progress-fill green" id="auditProgressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="auditProgressLabel">0 of 0 complete</div>
+
+  <div class="mt-12" id="auditSteps">
+    <!-- Steps injected by JS -->
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-title" style="margin-bottom:10px;font-size:16px;">Audit Notes</div>
+    <textarea id="auditNotes" placeholder="Any notes or issues encountered during the audit…" rows="4" aria-label="Audit notes" oninput="onAuditNotesInput()"></textarea>
+  </div>
+</section>
