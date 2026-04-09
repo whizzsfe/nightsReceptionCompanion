@@ -1855,3 +1855,188 @@
     <textarea id="auditNotes" placeholder="Any notes or issues encountered during the audit…" rows="4" aria-label="Audit notes" oninput="onAuditNotesInput()"></textarea>
   </div>
 </section>
+
+<!-- -----------------------------------------------------------
+     SECTION: NOTES & HANDOVER
+----------------------------------------------------------- -->
+<section class="section" id="section-notes" aria-label="Notes and Shift Handover">
+  <div class="section-heading">Notes &amp; Shift Handover</div>
+  <div class="section-sub">Record what happened this shift and leave notes for the next team.</div>
+
+  <!-- Incoming handover (read-only) -->
+  <div class="incoming-panel" id="incomingHandoverPanel">
+    <div class="incoming-panel-title">?? Incoming Handover — Previous Shift</div>
+    <div class="incoming-panel-text" id="incomingHandoverText">
+      <span class="incoming-panel-empty">No incoming handover notes for this shift.</span>
+    </div>
+  </div>
+
+  <!-- Shift Notes -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Shift Notes</div>
+      <span style="font-size:12px;color:var(--muted);">Saved when Persist Data is ON</span>
+    </div>
+    <textarea id="shiftNotes" placeholder="Notes about this shift — guest interactions, issues, anything worth recording…" rows="6" aria-label="Shift notes" oninput="onShiftNotesInput()"></textarea>
+  </div>
+
+  <!-- Handover Notes -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Handover Notes for Next Shift</div>
+      <span style="font-size:12px;color:var(--muted);">Sent to the next shift on End Shift</span>
+    </div>
+    <textarea id="handoverNotes" placeholder="What does the next shift need to know? Pending tasks, VIP arrivals, outstanding issues…" rows="6" aria-label="Handover notes" oninput="onHandoverNotesInput()"></textarea>
+  </div>
+
+  <div class="flex-row">
+    <button class="btn btn-ghost" onclick="printHandover()" aria-label="Print handover sheet">??? Print Handover Sheet</button>
+  </div>
+
+  <!-- Print-only handover page -->
+  <div class="handover-print-page" id="handoverPrintPage">
+    <div class="handover-page-hero" id="printHotelName">Grand Hotel</div>
+    <div style="font-size:14px;margin-bottom:4px;"><strong>Night Shift Handover Sheet</strong></div>
+    <div style="font-size:13px;margin-bottom:16px;color:#444;" id="printHandoverMeta"></div>
+    <hr>
+    <h3 style="margin:14px 0 6px;">Shift Notes</h3>
+    <div id="printShiftNotes" style="font-size:14px;white-space:pre-wrap;"></div>
+    <h3 style="margin:14px 0 6px;">Handover Notes for Next Shift</h3>
+    <div id="printHandoverNotes" style="font-size:14px;white-space:pre-wrap;"></div>
+  </div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: MOTIVATION
+----------------------------------------------------------- -->
+<section class="section" id="section-motivation" aria-label="Shift Motivation">
+  <div class="section-heading">Shift Motivation</div>
+  <div class="section-sub">You are the heart of this hotel tonight — keep going.</div>
+
+  <!-- Quote Carousel -->
+  <div class="quote-card">
+    <div class="quote-text" id="quoteText">The night shift is where legends are made. Every call handled well, every guest reassured — that's excellence in action.</div>
+    <div class="quote-author" id="quoteAuthor">— Hotel Operations Wisdom</div>
+    <div class="mt-16">
+      <button class="btn btn-gold" onclick="nextQuote()" aria-label="Show next motivational quote">Next Quote ›</button>
+    </div>
+  </div>
+
+  <!-- Excellence Tips -->
+  <div class="section-heading" style="margin-bottom:12px;">Excellence Tips</div>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-icon">??</div>
+      <div class="tip-heading">Own Every Moment</div>
+      <div class="tip-body">Night guests have fewer people to turn to. When you solve a problem at 2am, you become the most important person in their stay.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">??</div>
+      <div class="tip-heading">Phone Etiquette</div>
+      <div class="tip-body">Answer within 3 rings. Greet warmly, state the hotel name, your name, and ask how you can help. End every call with a positive close.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">??</div>
+      <div class="tip-heading">Stay Calm Under Pressure</div>
+      <div class="tip-body">Take a breath before responding to any difficult situation. A measured, confident response defuses 90% of escalations before they start.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">???</div>
+      <div class="tip-heading">Document Everything</div>
+      <div class="tip-body">If it happened on your shift, log it. Clear, timely records protect you, your team, and the guest — even if nothing comes of it.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">??</div>
+      <div class="tip-heading">Handover Excellence</div>
+      <div class="tip-body">A great handover takes 5 minutes and saves the next shift hours of confusion. Leave notes you'd want to receive yourself.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">??</div>
+      <div class="tip-heading">The Little Extras</div>
+      <div class="tip-body">A welcome note, remembering a name, pre-empting a need — these are the moments guests describe to friends. You create them.</div>
+    </div>
+  </div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: AI COACH
+----------------------------------------------------------- -->
+<section class="section" id="section-ai" aria-label="AI Coach Aria">
+  <div class="ai-chat-container">
+
+    <!-- Chat Header -->
+    <div class="ai-chat-header">
+      <div class="ai-avatar-wrap" aria-hidden="true">??</div>
+      <div class="ai-header-info">
+        <div class="ai-name">Aria — AI Hospitality Coach</div>
+        <div class="ai-subtitle">Smart Defaults · Offline-ready · Hospitality specialist</div>
+      </div>
+      <span class="ai-status-badge gold" id="aiStatusBadge">Smart Defaults Active</span>
+      <button class="btn btn-ghost btn-sm" onclick="clearChat()" aria-label="Clear chat history">Clear</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chatMessages" aria-live="polite" aria-relevant="additions" role="log"></div>
+
+    <!-- Suggestion Chips -->
+    <div class="suggestion-chips" id="suggestionChips" aria-label="Suggested questions">
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about cash payment script">Guest wants to pay cash</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about declined card script">Card declined at check-in</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about noise complaint script">Noise complaint script</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about intoxicated guest script">Intoxicated guest at desk</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about late arrival script">Late arrival — no booking found</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about guest locked out script">Guest locked out at 3am</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about guest complaint handling">Handle a guest complaint</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about night audit errors">Night audit error — what to do</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about suspicious person protocol">Suspicious person in lobby</button>
+      <button class="chip" onclick="chipQuery(this)" aria-label="Ask about pre-auth billing">Pre-auth / billing query script</button>
+    </div>
+
+    <!-- Input Row -->
+    <div class="chat-input-row">
+      <textarea class="chat-textarea" id="chatInput" placeholder="Ask Aria anything about hotel operations…" rows="1" aria-label="Chat input" maxlength="500"></textarea>
+      <button class="btn btn-gold" onclick="sendChat()" aria-label="Send message">Send</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: SHIFT HISTORY
+----------------------------------------------------------- -->
+<section class="section" id="section-history" aria-label="Shift History">
+  <div class="flex-between mb-16">
+    <div>
+      <div class="section-heading">Shift History</div>
+      <div class="section-sub">A record of all shifts completed on this device.</div>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="clearHistory()" aria-label="Clear all shift history">?? Clear History</button>
+  </div>
+
+  <!-- Aggregate Stats -->
+  <div class="history-stats" id="historyStats">
+    <div class="history-stat-card">
+      <div class="history-stat-value" id="hStatShifts">0</div>
+      <div class="history-stat-label">Total Shifts</div>
+    </div>
+    <div class="history-stat-card">
+      <div class="history-stat-value" id="hStatAvgChecklist">—</div>
+      <div class="history-stat-label">Avg Checklist %</div>
+    </div>
+    <div class="history-stat-card">
+      <div class="history-stat-value" id="hStatIncidents">0</div>
+      <div class="history-stat-label">Total Incidents</div>
+    </div>
+    <div class="history-stat-card">
+      <div class="history-stat-value" id="hStatTopType" style="font-size:14px;padding-top:6px;">—</div>
+      <div class="history-stat-label">Most Common Type</div>
+    </div>
+  </div>
+
+  <!-- Entries -->
+  <div id="historyList"></div>
+  <div class="empty-state hidden" id="historyEmpty">
+    <div class="empty-state-icon">??</div>
+    <div class="empty-state-text">No shifts recorded yet.<br>Complete your first shift using the End Shift button.</div>
+  </div>
+</section>
