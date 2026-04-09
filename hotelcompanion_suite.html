@@ -2040,3 +2040,260 @@
     <div class="empty-state-text">No shifts recorded yet.<br>Complete your first shift using the End Shift button.</div>
   </div>
 </section>
+
+<!-- -----------------------------------------------------------
+     SECTION: NIGHT LOG
+----------------------------------------------------------- -->
+<section class="section" id="section-nightlog" aria-label="Night Log">
+
+  <!-- Start / Resume Screen -->
+  <div class="nightlog-start-screen" id="nightlogStart">
+    <div style="font-size:48px;margin-bottom:12px;">??</div>
+    <h2>Night Log</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">The sole incident log for your shift. Start a new shift or resume an existing one.</p>
+    <div class="form-group" style="text-align:left;max-width:320px;margin:0 auto 16px;">
+      <label for="nightlogLeaderName">Shift Leader Name</label>
+      <input type="text" id="nightlogLeaderName" placeholder="Your name" maxlength="60">
+    </div>
+    <div class="flex-row" style="justify-content:center;gap:10px;">
+      <button class="btn btn-gold" onclick="startNightlog(false)" aria-label="Start new shift log">Start New Shift</button>
+      <button class="btn btn-ghost" onclick="startNightlog(true)" aria-label="Resume existing shift log">Resume Shift</button>
+    </div>
+  </div>
+
+  <!-- Main Log UI (hidden until started) -->
+  <div id="nightlogMain" class="hidden">
+
+    <!-- Shift Info Bar -->
+    <div class="flex-between mb-16" style="flex-wrap:wrap;gap:10px;">
+      <div>
+        <div class="section-heading">Night Log</div>
+        <div class="section-sub">
+          Shift Leader: <strong id="nlLeaderDisplay">—</strong> &nbsp;|&nbsp; Started: <span id="nlStartTimeDisplay" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);">—</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="exportNightlogJSON()" aria-label="Export night log as JSON">?? Export JSON</button>
+    </div>
+
+    <!-- Floor Walk Grid -->
+    <div class="card mb-16">
+      <div class="card-header">
+        <div class="card-title">Floor Walk — All Clear</div>
+        <span style="font-size:12px;color:var(--muted);">Tap a floor to mark all clear</span>
+      </div>
+      <div class="floor-walk-grid" id="floorWalkGrid">
+        <div class="floor-btn" id="floorBtn-Ground" onclick="toggleFloorClear('Ground')" role="button" tabindex="0" aria-label="Toggle Ground floor all clear">
+          <div class="floor-btn-name">Ground</div>
+          <div class="floor-btn-status">Pending</div>
+          <div class="floor-btn-time" id="floorTime-Ground"></div>
+        </div>
+        <div class="floor-btn" id="floorBtn-First" onclick="toggleFloorClear('First')" role="button" tabindex="0" aria-label="Toggle First floor all clear">
+          <div class="floor-btn-name">First</div>
+          <div class="floor-btn-status">Pending</div>
+          <div class="floor-btn-time" id="floorTime-First"></div>
+        </div>
+        <div class="floor-btn" id="floorBtn-Second" onclick="toggleFloorClear('Second')" role="button" tabindex="0" aria-label="Toggle Second floor all clear">
+          <div class="floor-btn-name">Second</div>
+          <div class="floor-btn-status">Pending</div>
+          <div class="floor-btn-time" id="floorTime-Second"></div>
+        </div>
+        <div class="floor-btn" id="floorBtn-Third" onclick="toggleFloorClear('Third')" role="button" tabindex="0" aria-label="Toggle Third floor all clear">
+          <div class="floor-btn-name">Third</div>
+          <div class="floor-btn-status">Pending</div>
+          <div class="floor-btn-time" id="floorTime-Third"></div>
+        </div>
+        <div class="floor-btn" id="floorBtn-Roof" onclick="toggleFloorClear('Roof')" role="button" tabindex="0" aria-label="Toggle Roof all clear">
+          <div class="floor-btn-name">Roof</div>
+          <div class="floor-btn-status">Pending</div>
+          <div class="floor-btn-time" id="floorTime-Roof"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issue Entry Form -->
+    <div class="card mb-16">
+      <div class="card-title" style="margin-bottom:14px;">Log New Issue</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="nlTimestamp">Timestamp</label>
+          <input type="text" id="nlTimestamp" placeholder="e.g. 02:14" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label for="nlFloor">Floor</label>
+          <select id="nlFloor">
+            <option value="">— Select floor —</option>
+            <option value="Ground">Ground</option>
+            <option value="First">First</option>
+            <option value="Second">Second</option>
+            <option value="Third">Third</option>
+            <option value="Roof">Roof</option>
+            <option value="Reception">Reception</option>
+            <option value="Car Park">Car Park</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="nlCategory">Category</label>
+          <select id="nlCategory">
+            <option value="">— Select category —</option>
+            <option value="Noise Complaint">Noise Complaint</option>
+            <option value="Maintenance Issue">Maintenance Issue</option>
+            <option value="Guest Complaint">Guest Complaint</option>
+            <option value="Safety/Security">Safety / Security</option>
+            <option value="Billing Dispute">Billing Dispute</option>
+            <option value="Medical">Medical</option>
+            <option value="Lost &amp; Found">Lost &amp; Found</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="nlSeverity">Severity</label>
+          <select id="nlSeverity">
+            <option value="">— Select severity —</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="nlTitle">Issue Title</label>
+        <input type="text" id="nlTitle" placeholder="Short summary of the issue" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="nlDescription">Description</label>
+        <textarea id="nlDescription" placeholder="Full details of what happened…" rows="3" maxlength="1000"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="nlReporter">Reporter</label>
+        <input type="text" id="nlReporter" placeholder="Who reported this?" maxlength="60">
+      </div>
+      <div class="form-group">
+        <label for="nlPhoto">Photo (optional)</label>
+        <input type="file" id="nlPhoto" accept="image/*" aria-label="Attach a photo">
+        <div class="photo-preview-wrap hidden" id="nlPhotoPreviewWrap">
+          <img class="photo-preview-img" id="nlPhotoPreviewImg" src="" alt="Photo preview">
+          <button class="btn btn-ghost btn-sm mt-8" onclick="removeNlPhoto()" aria-label="Remove photo">Remove Photo</button>
+        </div>
+        <div class="validation-msg" id="nlPhotoWarning">?? Image is large (&gt;500 KB). Consider a smaller file.</div>
+      </div>
+      <div class="validation-msg" id="nlFormError">Please fill in Floor, Category, Severity, Title, and Description.</div>
+      <div class="mt-12">
+        <button class="btn btn-gold" onclick="addLogEntry()" aria-label="Add log entry">+ Add Entry</button>
+      </div>
+    </div>
+
+    <!-- Entries List -->
+    <div class="flex-between mb-8">
+      <div class="card-title">Logged Entries</div>
+      <span id="nlEntryCount" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">0 entries</span>
+    </div>
+    <div id="nightLogEntries">
+      <div class="empty-state" id="nlEntriesEmpty">
+        <div class="empty-state-icon">??</div>
+        <div class="empty-state-text">No entries yet. Log your first issue above.</div>
+      </div>
+    </div>
+
+  </div><!-- /nightlogMain -->
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: MONTHLY REPORT
+----------------------------------------------------------- -->
+<section class="section" id="section-reports" aria-label="Monthly Report">
+  <div class="section-heading">Monthly Report</div>
+  <div class="section-sub">Import Night Log JSON exports to generate analytics across multiple shifts.</div>
+
+  <div class="card mb-16">
+    <div class="card-title" style="margin-bottom:10px;">Import Shift JSON Files</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Select one or more <code>.json</code> files exported from the Night Log. Duplicate entries are automatically removed.</p>
+    <input type="file" id="reportFileInput" accept=".json" multiple aria-label="Import JSON shift files" onchange="importReportFiles(this.files)">
+    <div class="mt-8" id="reportFilesStatus" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></div>
+    <div class="mt-12 flex-row">
+      <button class="btn btn-ghost btn-sm" onclick="clearReportData()" aria-label="Clear all imported report data">? Clear All</button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="report-stat-grid" id="reportStatGrid">
+    <div class="stat-card">
+      <div class="stat-value" id="rStatShifts">0</div>
+      <div class="stat-label">Shifts Loaded</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="rStatEntries">0</div>
+      <div class="stat-label">Total Entries</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="rStatIssues">0</div>
+      <div class="stat-label">Issues</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="rStatAllClear">0%</div>
+      <div class="stat-label">All-Clear Coverage</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-grid" id="reportCharts">
+    <div class="chart-wrap">
+      <div class="chart-title">By Category</div>
+      <canvas id="chartCategory" height="200"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">By Floor</div>
+      <canvas id="chartFloor" height="200"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">By Severity</div>
+      <canvas id="chartSeverity" height="200"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">All-Clear Coverage by Shift</div>
+      <canvas id="chartAllClear" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Shift Summary Table -->
+  <div class="card mb-16" id="reportShiftTable" style="overflow-x:auto;">
+    <div class="card-title" style="margin-bottom:12px;">Shift Summary</div>
+    <table class="report-table" id="rShiftTableEl">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Leader</th>
+          <th>Issues</th>
+          <th>Floor Walks</th>
+          <th>All-Clears</th>
+        </tr>
+      </thead>
+      <tbody id="rShiftTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Filterable Entries Table -->
+  <div class="card" style="overflow-x:auto;">
+    <div class="card-header">
+      <div class="card-title">All Entries</div>
+      <input type="text" id="reportFilter" class="report-filter" placeholder="Filter by title, category, floor…" aria-label="Filter entries" oninput="filterReportEntries(this.value)" style="max-width:260px;">
+    </div>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Timestamp</th>
+          <th>Floor</th>
+          <th>Category</th>
+          <th>Severity</th>
+          <th>Title</th>
+        </tr>
+      </thead>
+      <tbody id="rEntriesTableBody"></tbody>
+    </table>
+    <div class="empty-state hidden" id="rEntriesEmpty">
+      <div class="empty-state-icon">??</div>
+      <div class="empty-state-text">No entries to display. Import JSON files above.</div>
+    </div>
+  </div>
+</section>
