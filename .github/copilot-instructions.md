@@ -656,11 +656,11 @@ Before considering the build complete, verify all of the following:
         window.HOTELCOMPANION_ITEMS = {
           version: 1,
           preAudit: [
-            { id: "pre_001", label: "Item label", required: false, dayRestriction: "every" },
+            { id: "pre_001", label: "Item label", notes: "• Bullet point guidance shown below the label", required: false, dayRestriction: "every" },
             // ...
           ],
           postAudit: [
-            { id: "post_001", label: "Item label", required: false, dayRestriction: "every" },
+            { id: "post_001", label: "Item label", notes: "", required: false, dayRestriction: "every" },
             // ...
           ],
           auditSteps: [
@@ -673,6 +673,7 @@ Before considering the build complete, verify all of the following:
           creation time and **never changed** — this is the key used to persist and
           retrieve checklist tick state, so it must survive reordering/insertion.
         - `label`: non-empty string.
+        - `notes` *(checklist items only)*: optional string of bullet-point guidance displayed below the label. Empty string if none.
         - `required` *(checklist items only)*: boolean — maps to "Required before continue?".
         - `dayRestriction` *(checklist items only)*: one of `"every"`, `"mon"`, `"tue"`,
           `"wed"`, `"thu"`, `"fri"`, `"sat"`, `"sun"`, `"last_night_of_month"`.
