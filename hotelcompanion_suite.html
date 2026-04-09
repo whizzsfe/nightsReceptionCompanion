@@ -2297,3 +2297,303 @@
     </div>
   </div>
 </section>
+
+<!-- -----------------------------------------------------------
+     SECTION: GROUP CHECK-IN
+----------------------------------------------------------- -->
+<section class="section" id="section-checkin" aria-label="Group Check-in">
+  <div class="flex-between mb-12">
+    <div>
+      <div class="section-heading">Group Check-in</div>
+      <div class="section-sub">Print-ready group arrival list.</div>
+    </div>
+    <button class="btn btn-gold" onclick="window.print()" aria-label="Print group check-in list">??? Print</button>
+  </div>
+
+  <div class="card mb-16">
+    <div class="checkin-controls">
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:160px;">
+        <label for="checkinDate">Date</label>
+        <input type="date" id="checkinDate" aria-label="Check-in date">
+      </div>
+      <div class="form-group" style="margin-bottom:0;flex:2;min-width:180px;">
+        <label for="checkinGroupName">Group Name</label>
+        <input type="text" id="checkinGroupName" placeholder="e.g. Smith Wedding Party" maxlength="80">
+      </div>
+      <div>
+        <label style="display:block;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Logo</label>
+        <input type="file" id="checkinLogoInput" accept="image/*" aria-label="Upload logo for print" onchange="loadCheckinLogo(this)">
+      </div>
+      <div>
+        <label style="display:block;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Orientation</label>
+        <div class="flex-row">
+          <button class="tab-btn active" id="orientPortrait" onclick="setCheckinOrientation('portrait')" aria-label="Portrait orientation">Portrait</button>
+          <button class="tab-btn" id="orientLandscape" onclick="setCheckinOrientation('landscape')" aria-label="Landscape orientation">Landscape</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <button class="btn btn-ghost" onclick="openModal('bulkImportModal')" aria-label="Bulk import guest names">?? Bulk Import</button>
+        <button class="btn btn-ghost btn-sm" onclick="addCheckinRow()" aria-label="Add guest row">+ Add Guest</button>
+      </div>
+    </div>
+    <img id="checkinLogoPreview" src="" alt="" style="max-height:50px;max-width:120px;object-fit:contain;display:none;margin-bottom:10px;">
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table class="checkin-table" id="checkinTable">
+      <thead>
+        <tr>
+          <th style="width:50px;">#</th>
+          <th>Guest Name</th>
+          <th>Room</th>
+          <th style="width:90px;">Checked In</th>
+          <th style="width:50px;"></th>
+        </tr>
+      </thead>
+      <tbody id="checkinBody">
+        <!-- Rows injected by JS -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Bulk Import Modal -->
+<div class="modal-overlay" id="bulkImportModal" role="dialog" aria-modal="true" aria-labelledby="bulkImportTitle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="bulkImportTitle">Bulk Import Guest Names</span>
+      <button class="modal-close" onclick="closeModal('bulkImportModal')" aria-label="Close bulk import">?</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Paste one guest name per line. Each name will be added as a new row.</p>
+      <textarea id="bulkImportText" placeholder="Alice Smith&#10;Bob Johnson&#10;Carol Williams" rows="8" aria-label="Paste guest names"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('bulkImportModal')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-gold" onclick="doBulkImport()" aria-label="Import names">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     SECTION: SIGN GENERATOR
+----------------------------------------------------------- -->
+<section class="section" id="section-signs" aria-label="Sign Generator">
+  <div class="flex-between mb-12">
+    <div>
+      <div class="section-heading">Sign Generator</div>
+      <div class="section-sub">Design and print ISO-style signs — A4 or A3.</div>
+    </div>
+    <button class="btn btn-gold" onclick="window.print()" aria-label="Print sign">??? Print Sign</button>
+  </div>
+
+  <div class="sign-layout">
+    <!-- Controls -->
+    <div class="sign-controls">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px;">Size &amp; Orientation</div>
+        <div class="flex-row mb-8">
+          <button class="tab-btn active" id="signSizeA4" onclick="setSignOption('size','A4')" aria-label="A4 size">A4</button>
+          <button class="tab-btn" id="signSizeA3" onclick="setSignOption('size','A3')" aria-label="A3 size">A3</button>
+        </div>
+        <div class="flex-row">
+          <button class="tab-btn active" id="signOrientP" onclick="setSignOption('orient','portrait')" aria-label="Portrait">Portrait</button>
+          <button class="tab-btn" id="signOrientL" onclick="setSignOption('orient','landscape')" aria-label="Landscape">Landscape</button>
+        </div>
+      </div>
+
+      <div class="card mt-8">
+        <div class="card-title" style="margin-bottom:12px;">Background</div>
+        <div class="colour-swatch-row" id="bgSwatchRow">
+          <!-- Injected by JS -->
+        </div>
+        <div class="form-group mt-8">
+          <label for="signBgCustom">Custom Colour</label>
+          <input type="color" id="signBgCustom" value="#1a1a1a" aria-label="Custom background colour" oninput="updateSignPreview()">
+        </div>
+        <div class="form-group">
+          <label for="signBgImage">Background Image</label>
+          <input type="file" id="signBgImage" accept="image/*" aria-label="Upload background image" onchange="loadSignBgImage(this)">
+        </div>
+        <div class="form-group">
+          <label for="signOverlay">Overlay Opacity <span id="signOverlayVal">50%</span></label>
+          <input type="range" id="signOverlay" min="0" max="100" value="50" aria-label="Overlay opacity" oninput="document.getElementById('signOverlayVal').textContent=this.value+'%';updateSignPreview()">
+        </div>
+      </div>
+
+      <div class="card mt-8">
+        <div class="card-title" style="margin-bottom:12px;">Logo</div>
+        <input type="file" id="signLogoInput" accept="image/*" aria-label="Upload sign logo" onchange="loadSignLogo(this)">
+        <img id="signLogoThumb" src="" alt="" style="max-width:80px;max-height:40px;object-fit:contain;display:none;margin-top:8px;border-radius:4px;">
+      </div>
+
+      <div class="card mt-8">
+        <div class="card-title" style="margin-bottom:12px;">Text &amp; Colours</div>
+        <div class="form-group">
+          <label for="signBodyText">Body Text</label>
+          <input type="text" id="signBodyText" placeholder="e.g. PLEASE DO NOT DISTURB" maxlength="80" oninput="updateSignPreview()">
+        </div>
+        <div class="form-group">
+          <label for="signBodyColour">Body Text Colour</label>
+          <input type="color" id="signBodyColour" value="#ffffff" aria-label="Body text colour" oninput="updateSignPreview()">
+        </div>
+        <div class="form-group">
+          <label for="signSubText">Sub-body Text</label>
+          <input type="text" id="signSubText" placeholder="Optional supporting text" maxlength="120" oninput="updateSignPreview()">
+        </div>
+        <div class="form-group">
+          <label for="signSubColour">Sub-body Text Colour</label>
+          <input type="color" id="signSubColour" value="#cccccc" aria-label="Sub-body text colour" oninput="updateSignPreview()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="sign-preview-outer">
+      <div class="card-title" style="margin-bottom:10px;">Preview</div>
+      <div class="sign-preview-frame" id="signPreviewFrame">
+        <div id="signPreview">
+          <div class="sign-overlay" id="signOverlayEl"></div>
+          <img class="sign-logo-preview" id="signLogoPreview" src="" alt="" style="display:none;">
+          <div class="sign-body-text" id="signBodyEl">PLEASE DO NOT DISTURB</div>
+          <div class="sign-sub-text" id="signSubEl"></div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Preview is approximate. Use Print for exact output.</p>
+    </div>
+  </div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: DAILY INFO BOARD
+----------------------------------------------------------- -->
+<section class="section" id="section-board" aria-label="Daily Information Board">
+  <div class="flex-between mb-12" style="flex-wrap:wrap;gap:10px;">
+    <div>
+      <div class="section-heading">Daily Info Board</div>
+      <div class="section-sub">7-day rolling occupancy &amp; operational data.</div>
+    </div>
+    <div class="flex-row">
+      <button class="btn btn-ghost btn-sm" onclick="resetBoard()" aria-label="Reset board data">? Reset</button>
+      <button class="btn btn-gold btn-sm" onclick="window.print()" aria-label="Print info board">??? Print</button>
+    </div>
+  </div>
+
+  <div class="board-top-row">
+    <div class="form-group" style="margin-bottom:0;">
+      <label for="boardDate" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Reference Date</label>
+      <input type="date" id="boardDate" aria-label="Board reference date" oninput="updateBoardHeaders()" style="width:180px;">
+    </div>
+    <div class="principle-widget" style="flex:1;max-width:320px;">
+      <div class="principle-label">Principle of the Day</div>
+      <div class="principle-text" id="principleText">Be Caring</div>
+    </div>
+  </div>
+
+  <!-- 7-Day Stats Grid -->
+  <div class="board-table-wrap">
+    <table class="board-table" id="boardStatsTable">
+      <thead>
+        <tr>
+          <th class="row-header">Metric</th>
+          <th id="bh0">Mon</th>
+          <th id="bh1">Tue</th>
+          <th id="bh2">Wed</th>
+          <th id="bh3">Thu</th>
+          <th id="bh4">Fri</th>
+          <th id="bh5">Sat</th>
+          <th id="bh6">Sun</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="row-header">Rooms Sold</td>
+          <td contenteditable="true" data-board="stats" data-row="0" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="0" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">Guests in House</td>
+          <td contenteditable="true" data-board="stats" data-row="1" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="1" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">Occupancy %</td>
+          <td contenteditable="true" data-board="stats" data-row="2" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="2" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">Room Revenue</td>
+          <td contenteditable="true" data-board="stats" data-row="3" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="3" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">Total Revenue</td>
+          <td contenteditable="true" data-board="stats" data-row="4" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="4" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">ADR</td>
+          <td contenteditable="true" data-board="stats" data-row="5" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="5" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">RevPAR</td>
+          <td contenteditable="true" data-board="stats" data-row="6" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="6" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">Arrivals</td>
+          <td contenteditable="true" data-board="stats" data-row="7" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="7" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">Departures</td>
+          <td contenteditable="true" data-board="stats" data-row="8" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="8" data-col="6"></td>
+        </tr>
+        <tr><td class="row-header">F&amp;B Covers</td>
+          <td contenteditable="true" data-board="stats" data-row="9" data-col="0"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="1"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="2"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="3"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="4"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="5"></td><td contenteditable="true" data-board="stats" data-row="9" data-col="6"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bottom Row: VIP / Staff / Principle -->
+  <div class="board-bottom-row">
+
+    <!-- VIP Guests -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">VIP Guests</div>
+      <table class="vip-table">
+        <thead><tr><th>Name</th><th>Code</th><th>Room</th></tr></thead>
+        <tbody id="vipTableBody">
+          <!-- 10 rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Staff Assignments -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">Staff Assignments</div>
+      <table class="staff-assign-table">
+        <thead><tr><th></th><th>AM</th><th>PM</th><th>Night</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Pool Responsible</td>
+            <td contenteditable="true" data-board="staff" data-row="0" data-col="0"></td>
+            <td contenteditable="true" data-board="staff" data-row="0" data-col="1"></td>
+            <td contenteditable="true" data-board="staff" data-row="0" data-col="2"></td>
+          </tr>
+          <tr>
+            <td class="row-label">Pool Tester</td>
+            <td contenteditable="true" data-board="staff" data-row="1" data-col="0"></td>
+            <td contenteditable="true" data-board="staff" data-row="1" data-col="1"></td>
+            <td contenteditable="true" data-board="staff" data-row="1" data-col="2"></td>
+          </tr>
+          <tr>
+            <td class="row-label">First Aider</td>
+            <td contenteditable="true" data-board="staff" data-row="2" data-col="0"></td>
+            <td contenteditable="true" data-board="staff" data-row="2" data-col="1"></td>
+            <td contenteditable="true" data-board="staff" data-row="2" data-col="2"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Special Notes -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">Special Notes / Info</div>
+      <textarea id="boardNotes" placeholder="Any special notes for the board…" rows="6" aria-label="Board special notes" oninput="onBoardInput()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;resize:vertical;outline:none;"></textarea>
+    </div>
+
+  </div>
+</section>
+
+    </div><!-- /content -->
+  </main><!-- /main -->
+</div><!-- /app -->
+
+<script>
+'use strict';
