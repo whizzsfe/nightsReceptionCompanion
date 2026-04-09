@@ -2597,3 +2597,433 @@
 
 <script>
 'use strict';
+// -------------------------------------------------------------
+// CHUNK 7 — STATE, NAVIGATION, PERSIST, CLOCK, PROFILE, BRAND
+// -------------------------------------------------------------
+
+// -- Section title map --
+const sectionTitles = {
+  dashboard:  'NIGHT DASHBOARD',
+  checklist:  'SHIFT CHECKLIST',
+  nightaudit: 'NIGHT AUDIT TRACKER',
+  notes:      'NOTES & SHIFT HANDOVER',
+  motivation: 'SHIFT MOTIVATION',
+  ai:         'AI COACH — ARIA',
+  history:    'SHIFT HISTORY',
+  nightlog:   'NIGHT LOG',
+  reports:    'MONTHLY REPORT',
+  checkin:    'GROUP CHECK-IN',
+  signs:      'SIGN GENERATOR',
+  board:      'DAILY INFO BOARD'
+};
+
+// -- State --
+let staffName    = '';
+let staffRole    = 'Front Desk Agent';
+let staffShift   = 'Night (10pm–6am)';
+let persistData  = false;
+let shiftStart   = null;
+let checkState   = {};        // { [itemId]: boolean }
+let auditState   = {};        // { [stepId]: boolean }
+let checklistTab = 'preAudit';
+let shiftHistory = [];
+let lastCheckInTime = null;
+let currentHotelName = 'Grand Hotel';
+let brandColour  = '#D4A843';
+let brandLogo    = null;
+
+// Night Log state
+let shiftLeader    = '';
+let shiftStartTime = null;
+let logEntries     = [];
+let floorWalkState = {};
+let nlPhotoBase64  = null;
+let nightlogActive = false;
+
+// Reports state
+let reportShifts  = [];
+let reportEntries = [];
+let allReportEntries = [];
+
+// -- Section routing --
+function showSection(id, navEl) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('section-' + id);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  else {
+    const el = document.querySelector('[data-section="' + id + '"]');
+    if (el) el.classList.add('active');
+  }
+
+  const title = document.getElementById('topbarTitle');
+  if (title) title.textContent = sectionTitles[id] || id.toUpperCase();
+
+  closeSidebar();
+  updateDashboardStats();
+}
+
+// -- Mobile sidebar --
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebarBackdrop');
+  sb.classList.toggle('open');
+  bd.classList.toggle('visible');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('visible');
+}
+
+// -- Modal helpers --
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('open');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+document.querySelectorAll && document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+
+// -- Live clock --
+function updateClock() {
+  const now = new Date();
+  const d = now.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+  const t = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const el = document.getElementById('topbarClock');
+  if (el) el.textContent = d + ' · ' + t;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// -- Shift timer --
+function updateShiftTimer() {
+  if (!shiftStart) return;
+  const mins = Math.floor((Date.now() - shiftStart) / 60000);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const el = document.getElementById('statTime');
+  if (el) el.textContent = h + 'h ' + m + 'm';
+}
+setInterval(updateShiftTimer, 60000);
+
+// -- Persist toggle --
+function togglePersist() {
+  persistData = !persistData;
+  localStorage.setItem('shiftCompanion_persist', persistData ? '1' : '0');
+  const btn = document.getElementById('persistToggle');
+  const desc = document.getElementById('persistDesc');
+  if (btn) { btn.classList.toggle('on', persistData); btn.setAttribute('aria-pressed', persistData); }
+  if (desc) desc.textContent = persistData ? 'On — saving session data' : 'Off — session only';
+  if (persistData) saveState();
+}
+
+// -- Save / Load state --
+function saveState() {
+  if (!persistData) return;
+  try {
+    localStorage.setItem('shiftCompanion_shiftNotes',     document.getElementById('shiftNotes')?.value || '');
+    localStorage.setItem('shiftCompanion_handoverNotes',  document.getElementById('handoverNotes')?.value || '');
+    localStorage.setItem('shiftCompanion_checklistState', JSON.stringify(checkState));
+    localStorage.setItem('shiftCompanion_auditState',     JSON.stringify(auditState));
+    localStorage.setItem('shiftCompanion_nightLogEntries', JSON.stringify(logEntries));
+    if (lastCheckInTime) localStorage.setItem('shiftCompanion_lastCheckIn', lastCheckInTime.toString());
+    localStorage.setItem('shiftCompanion_boardData', JSON.stringify(collectBoardData()));
+    if (nightlogActive) {
+      localStorage.setItem('shiftCompanion_nightlogLeader', shiftLeader);
+      localStorage.setItem('shiftCompanion_nightlogStart',  shiftStartTime ? shiftStartTime.toString() : '');
+      localStorage.setItem('shiftCompanion_floorWalkState', JSON.stringify(floorWalkState));
+    }
+  } catch(e) { console.warn('Save failed', e); }
+}
+
+function loadState() {
+  // Always-saved
+  staffName  = localStorage.getItem('shiftCompanion_staffName')  || '';
+  staffRole  = localStorage.getItem('shiftCompanion_staffRole')  || 'Front Desk Agent';
+  staffShift = localStorage.getItem('shiftCompanion_staffShift') || 'Night (10pm–6am)';
+  persistData = localStorage.getItem('shiftCompanion_persist') === '1';
+  const histRaw = localStorage.getItem('shiftCompanion_history');
+  if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
+  const pendingHandover = localStorage.getItem('shiftCompanion_pendingHandover') || '';
+  if (pendingHandover) {
+    const bannerText = document.getElementById('handoverBannerText');
+    const banner     = document.getElementById('handoverBanner');
+    const incoming   = document.getElementById('incomingHandoverText');
+    if (bannerText) bannerText.textContent = pendingHandover;
+    if (banner)     banner.classList.remove('hidden');
+    if (incoming)   incoming.textContent = pendingHandover;
+  } else {
+    const incoming = document.getElementById('incomingHandoverText');
+    if (incoming) incoming.innerHTML = '<span class="incoming-panel-empty">No incoming handover notes for this shift.</span>';
+  }
+
+  // Brand
+  currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || 'Grand Hotel';
+  brandColour      = localStorage.getItem('shiftCompanion_brandColour')    || '#D4A843';
+  brandLogo        = localStorage.getItem('shiftCompanion_brandLogo')      || null;
+
+  // Session (only restore if persist on)
+  if (persistData) {
+    const sn = localStorage.getItem('shiftCompanion_shiftNotes');
+    const hn = localStorage.getItem('shiftCompanion_handoverNotes');
+    if (sn && document.getElementById('shiftNotes'))    document.getElementById('shiftNotes').value    = sn;
+    if (hn && document.getElementById('handoverNotes')) document.getElementById('handoverNotes').value = hn;
+    const cs = localStorage.getItem('shiftCompanion_checklistState');
+    if (cs) { try { checkState = JSON.parse(cs); } catch(e){} }
+    const as = localStorage.getItem('shiftCompanion_auditState');
+    if (as) { try { auditState = JSON.parse(as); } catch(e){} }
+    const nl = localStorage.getItem('shiftCompanion_nightLogEntries');
+    if (nl) { try { logEntries = JSON.parse(nl); } catch(e){} }
+    const lci = localStorage.getItem('shiftCompanion_lastCheckIn');
+    if (lci) { lastCheckInTime = parseInt(lci, 10); updateCheckInDisplay(); }
+    const bd = localStorage.getItem('shiftCompanion_boardData');
+    if (bd) { try { loadBoardData(JSON.parse(bd)); } catch(e){} }
+    // Night log resume
+    const nlLeader = localStorage.getItem('shiftCompanion_nightlogLeader');
+    const nlStart  = localStorage.getItem('shiftCompanion_nightlogStart');
+    const nlFloor  = localStorage.getItem('shiftCompanion_floorWalkState');
+    if (nlLeader) {
+      shiftLeader    = nlLeader;
+      shiftStartTime = nlStart ? parseInt(nlStart, 10) : Date.now();
+      if (nlFloor) { try { floorWalkState = JSON.parse(nlFloor); } catch(e){} }
+      nightlogActive = true;
+    }
+  }
+
+  // Persist UI
+  const btn = document.getElementById('persistToggle');
+  const desc = document.getElementById('persistDesc');
+  if (btn) { btn.classList.toggle('on', persistData); btn.setAttribute('aria-pressed', persistData); }
+  if (desc) desc.textContent = persistData ? 'On — saving session data' : 'Off — session only';
+
+  shiftStart = shiftStart || Date.now();
+}
+
+// -- Dashboard stats --
+function updateDashboardStats() {
+  // Checklist %
+  const items = getActiveChecklistItems(checklistTab);
+  const total = items.length;
+  const done  = items.filter(it => checkState[it.id]).length;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  const el = document.getElementById('statChecklist');
+  if (el) el.textContent = pct + '%';
+
+  // Incidents
+  const issues = logEntries.filter(e => e.type === 'issue').length;
+  const iEl = document.getElementById('statIncidents');
+  if (iEl) iEl.textContent = issues;
+
+  // Streak
+  const streakEl  = document.getElementById('statStreak');
+  const streakLbl = document.getElementById('statStreakLabel');
+  if (streakEl) streakEl.textContent = shiftHistory.length;
+  if (streakLbl) streakLbl.textContent = shiftHistory.length === 1 ? 'First shift logged!' : 'Shifts Recorded';
+}
+
+// -- Sidebar staff card --
+function updateSidebarStaffCard() {
+  const name  = staffName || 'Night Receptionist';
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'NR';
+  const av = document.getElementById('staffAvatar');
+  const nm = document.getElementById('staffNameDisplay');
+  const rl = document.getElementById('staffRoleDisplay');
+  const sh = document.getElementById('staffShiftDisplay');
+  if (av) av.textContent = initials;
+  if (nm) nm.textContent = name;
+  if (rl) rl.textContent = staffRole;
+  if (sh) sh.textContent = staffShift;
+}
+
+// -- Profile modal --
+function saveProfile() {
+  staffName  = (document.getElementById('profileName')?.value  || '').trim();
+  staffRole  = document.getElementById('profileRole')?.value  || 'Front Desk Agent';
+  staffShift = document.getElementById('profileShift')?.value || 'Night (10pm–6am)';
+  if (!staffName) { alert('Please enter your name.'); return; }
+  localStorage.setItem('shiftCompanion_staffName',  staffName);
+  localStorage.setItem('shiftCompanion_staffRole',  staffRole);
+  localStorage.setItem('shiftCompanion_staffShift', staffShift);
+  updateSidebarStaffCard();
+  closeModal('profileModal');
+}
+
+// -- Safety check-in --
+function safetyCheckIn() {
+  lastCheckInTime = Date.now();
+  updateCheckInDisplay();
+  if (persistData) localStorage.setItem('shiftCompanion_lastCheckIn', lastCheckInTime.toString());
+  const btn = document.getElementById('checkInBtn');
+  if (btn) {
+    btn.textContent = '? Checked In!';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = '? I\'m OK — Check In'; btn.disabled = false; }, 2500);
+  }
+}
+function updateCheckInDisplay() {
+  const el = document.getElementById('lastCheckIn');
+  if (!el || !lastCheckInTime) return;
+  const d = new Date(lastCheckInTime);
+  el.textContent = 'Last check-in: ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+// -- Handover banner --
+function dismissHandoverBanner() {
+  const b = document.getElementById('handoverBanner');
+  if (b) b.classList.add('hidden');
+}
+
+// -- Brand customisation --
+const BRAND_PRESETS = [
+  '#D4A843','#C0392B','#1A3A5C','#1E5C3A','#5B2D8E',
+  '#C0651A','#2980B9','#8B0000','#008080','#6B4226',
+  '#3D3D3D','#9A7D0A','#C0546A','#00838F'
+];
+
+function initBrandSwatches() {
+  const grid = document.getElementById('brandSwatchGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  BRAND_PRESETS.forEach(colour => {
+    const sw = document.createElement('button');
+    sw.className = 'brand-swatch' + (colour.toLowerCase() === brandColour.toLowerCase() ? ' selected' : '');
+    sw.style.background = colour;
+    sw.setAttribute('aria-label', 'Select colour ' + colour);
+    sw.addEventListener('click', () => {
+      grid.querySelectorAll('.brand-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      document.getElementById('brandColourPicker').value = colour;
+      document.getElementById('brandHexInput').value     = colour;
+      updateBrandPreview(colour);
+    });
+    grid.appendChild(sw);
+  });
+}
+
+function updateBrandPreview(hex) {
+  const dot  = document.getElementById('brandPreviewDot');
+  const name = document.getElementById('brandPreviewName');
+  if (dot)  dot.style.background = hex;
+  if (name) name.textContent = document.getElementById('brandHotelNameInput')?.value || currentHotelName;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initBrandSwatches();
+
+  const picker = document.getElementById('brandColourPicker');
+  const hexIn  = document.getElementById('brandHexInput');
+  if (picker) picker.addEventListener('input', () => {
+    const v = picker.value;
+    if (hexIn) hexIn.value = v;
+    updateBrandPreview(v);
+  });
+  if (hexIn) hexIn.addEventListener('input', () => {
+    const v = hexIn.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { picker.value = v; updateBrandPreview(v); }
+  });
+  const nameInput = document.getElementById('brandHotelNameInput');
+  if (nameInput) nameInput.addEventListener('input', () => updateBrandPreview(picker?.value || brandColour));
+});
+
+function openBrandModal() {
+  initBrandSwatches();
+  const ni = document.getElementById('brandHotelNameInput');
+  const pi = document.getElementById('brandColourPicker');
+  const hi = document.getElementById('brandHexInput');
+  if (ni) ni.value = currentHotelName;
+  if (pi) pi.value = brandColour;
+  if (hi) hi.value = brandColour;
+  updateBrandPreview(brandColour);
+  if (brandLogo) {
+    const wrap = document.getElementById('logoPreviewWrap');
+    const img  = document.getElementById('logoPreviewImg');
+    if (wrap) wrap.style.display = 'block';
+    if (img)  img.src = brandLogo;
+  }
+  openModal('brandModal');
+}
+
+function cancelBrand() { closeModal('brandModal'); }
+
+function removeBrandLogo() {
+  brandLogo = null;
+  const wrap = document.getElementById('logoPreviewWrap');
+  const img  = document.getElementById('logoPreviewImg');
+  const si   = document.getElementById('sidebarLogoImg');
+  if (wrap) wrap.style.display = 'none';
+  if (img)  img.src = '';
+  if (si)   { si.src = ''; si.style.display = 'none'; }
+}
+
+function applyAndSaveBrand() {
+  const ni = document.getElementById('brandHotelNameInput');
+  const pi = document.getElementById('brandColourPicker');
+  if (ni) currentHotelName = ni.value.trim() || currentHotelName;
+  if (pi) brandColour = pi.value;
+
+  const logoInput = document.getElementById('brandLogoInput');
+  if (logoInput && logoInput.files && logoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      brandLogo = e.target.result;
+      localStorage.setItem('shiftCompanion_brandLogo', brandLogo);
+      const si = document.getElementById('sidebarLogoImg');
+      if (si) { si.src = brandLogo; si.style.display = 'block'; }
+    };
+    reader.readAsDataURL(logoInput.files[0]);
+  }
+
+  applyBrandColour(brandColour);
+  applyBrandName(currentHotelName);
+  localStorage.setItem('shiftCompanion_brandColour',    brandColour);
+  localStorage.setItem('shiftCompanion_brandHotelName', currentHotelName);
+  closeModal('brandModal');
+}
+
+function applyBrandColour(hex) {
+  const lighten = (h, p) => {
+    let r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+    r = Math.min(255, r + p); g = Math.min(255, g + p); b = Math.min(255, b + p);
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  };
+  const darken = (h, p) => {
+    let r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+    r = Math.max(0, r - p); g = Math.max(0, g - p); b = Math.max(0, b - p);
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  };
+  const root = document.documentElement;
+  root.style.setProperty('--gold',       hex);
+  root.style.setProperty('--gold-light', lighten(hex, 30));
+  root.style.setProperty('--gold-dim',   darken(hex, 40));
+}
+
+function applyBrandName(name) {
+  const el = document.getElementById('sidebarHotelName');
+  if (el) el.textContent = name;
+  const printName = document.getElementById('printHotelName');
+  if (printName) printName.textContent = name;
+}
+
+function applyBrandOnLoad() {
+  if (brandColour) applyBrandColour(brandColour);
+  if (currentHotelName) applyBrandName(currentHotelName);
+  if (brandLogo) {
+    const si = document.getElementById('sidebarLogoImg');
+    if (si) { si.src = brandLogo; si.style.display = 'block'; }
+  }
+}
+
+// Patch the nav "Customise" click to use our openBrandModal
+document.addEventListener('DOMContentLoaded', () => {
+  const custItem = document.querySelector('.nav-item[onclick*="brandModal"]');
+  if (custItem) { custItem.removeAttribute('onclick'); custItem.addEventListener('click', openBrandModal); }
+});
