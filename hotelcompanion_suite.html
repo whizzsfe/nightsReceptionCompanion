@@ -13,6 +13,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="hotelcompanion_items.js" onerror="console.info('hotelcompanion_items.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_scripts.js" onerror="console.info('hotelcompanion_scripts.js not found — using Smart Defaults.')"></script>
+  <!-- Sign generator: all 4 page variants declared statically. JS only sets data-sign-page on <body>. -->
+  <style id="signPrintPageStyle">
+    @page sign-a4-portrait  { size: A4 portrait;  margin: 0; }
+    @page sign-a4-landscape { size: A4 landscape; margin: 0; }
+    @page sign-a3-portrait  { size: A3 portrait;  margin: 0; }
+    @page sign-a3-landscape { size: A3 landscape; margin: 0; }
+    /* Default binding - overridden by data-sign-page attribute selectors in print CSS */
+    @media print { #signPaper { page: sign-a4-portrait; } }
+  </style>
   <style>
     /* --- ROOT VARIABLES --- */
     :root {
@@ -1157,43 +1166,44 @@
       border: 2px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
-      background: #fff;
+      background: #555;
+      padding: 8px;
+      display: block;
+      width: 100%;
+    }
+    /* Paper preview: transform-scale approach (matches physical print size).
+       Scale factor and margin-bottom are computed dynamically by updateSignScale()
+       based on the actual frame width — fills the available column. */
+    .sign-preview-wrap {
+      transform-origin: top center;
+      width: 100%;
       display: flex;
-      align-items: center;
       justify-content: center;
     }
-    #signPreview {
-      width: 100%;
-      min-height: 360px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px;
+    #signPaper {
       position: relative;
       overflow: hidden;
-      background: #1a1a1a;
-    }
-    .sign-overlay { position: absolute; inset: 0; pointer-events: none; }
-    .sign-body-text {
-      position: relative;
-      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-      font-weight: 700;
-      font-size: 32px;
-      color: #fff;
-      word-break: break-word;
-      margin-bottom: 8px;
+      flex-shrink: 0;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+      background: #ffffff;
     }
-    .sign-sub-text {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      font-size: 18px;
-      color: #fff;
-      word-break: break-word;
-    }
-    .sign-logo-preview { position: relative; z-index: 1; max-width: 120px; max-height: 60px; object-fit: contain; margin-bottom: 16px; }
+    /* Paper dimension classes (actual mm sizes for correct print output) */
+    #signPaper.a4.portrait  { width: 210mm; height: 297mm; }
+    #signPaper.a4.landscape { width: 297mm; height: 210mm; }
+    #signPaper.a3.portrait  { width: 297mm; height: 420mm; }
+    #signPaper.a3.landscape { width: 420mm; height: 297mm; }
+    /* Paper layer structure */
+    #signBgLayer  { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: 0; }
+    #signOvlLayer { position: absolute; inset: 0; z-index: 1; }
+    #signContent  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8%; text-align: center; gap: 4%; z-index: 2; }
+    #signLogoPreview { max-width: 35%; max-height: 20%; object-fit: contain; }
+    #signBodyEl { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; line-height: 1.2; word-break: break-word; color: #000; }
+    #signSubEl  { font-family: 'DM Sans', sans-serif; word-break: break-word; margin-top: 2%; color: #000; }
     .colour-swatch-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
     .colour-swatch {
       width: 26px;
@@ -1370,7 +1380,8 @@
       /* Sign Generator print */
       #section-signs .sign-controls { display: none; }
       #section-signs .sign-preview-outer { position: static; }
-      #signPreview { min-height: 200mm; }
+      .sign-preview-wrap { transform: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
+      #signPaper { box-shadow: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
 
       /* Daily Info Board print */
       #section-board { color: #000; }
@@ -1387,8 +1398,12 @@
       .principle-widget { border-color: #ccc; background: #f9f9f9; }
       .principle-text { color: #000; }
       @page { size: A4 landscape; margin: 8mm; }
-
       @page { margin: 12mm; }
+      /* Sign generator: data-sign-page attribute selects the correct pre-declared named page */
+      body[data-sign-page="a4-portrait"]  #signPaper { page: sign-a4-portrait;  }
+      body[data-sign-page="a4-landscape"] #signPaper { page: sign-a4-landscape; }
+      body[data-sign-page="a3-portrait"]  #signPaper { page: sign-a3-portrait;  }
+      body[data-sign-page="a3-landscape"] #signPaper { page: sign-a3-landscape; }
     }
 
     /* --- RESPONSIVE (<=768px) --- */
@@ -1575,7 +1590,8 @@
           <option value="Bell Staff">Bell Staff</option>
           <option value="Housekeeping Supervisor">Housekeeping Supervisor</option>
           <option value="Food &amp; Beverage">Food &amp; Beverage</option>
-          <option value="Night Auditor">Night Auditor</option>
+          <option value="Night Auditor" selected>Night Auditor</option>
+          <option value="Night Supervisor">Night Supervisor</option>
           <option value="Duty Manager">Duty Manager</option>
           <option value="New Hire/Trainee">New Hire / Trainee</option>
         </select>
@@ -1583,9 +1599,9 @@
       <div class="form-group">
         <label for="profileShift">Shift Type</label>
         <select id="profileShift">
-          <option value="Morning (6am–2pm)">Morning (6am–2pm)</option>
-          <option value="Afternoon (2pm–10pm)">Afternoon (2pm–10pm)</option>
-          <option value="Night (10pm–6am)" selected>Night (10pm–6am)</option>
+          <option value="Morning (6:30am–2pm)">Morning (6:30am–2pm)</option>
+          <option value="Afternoon (2pm–11pm)">Afternoon (2pm–11pm)</option>
+          <option value="Night (10:30pm–7am)" selected>Night (10:30pm–7am)</option>
           <option value="Split Shift">Split Shift</option>
         </select>
       </div>
@@ -2379,6 +2395,36 @@
   </div>
 </section>
 
+<!-- Sign Print Settings Modal -->
+<div class="modal-overlay" id="signPrintModal" role="dialog" aria-modal="true" aria-labelledby="signPrintModalTitle">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <span class="modal-title" id="signPrintModalTitle">🖨️ Print Sign — Check Your Settings</span>
+      <button class="modal-close" onclick="closeModal('signPrintModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Island, Chrome and Edge remember your last print settings. When the dialog opens, make sure these match:</p>
+      <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:14px;">
+          <span style="color:var(--muted);">Paper size</span>
+          <strong id="signPrintModalSize" style="color:var(--gold);font-family:'DM Mono',monospace;">A4</strong>
+          <span style="color:var(--muted);">Orientation</span>
+          <strong id="signPrintModalOrient" style="color:var(--gold);font-family:'DM Mono',monospace;">Portrait</strong>
+          <span style="color:var(--muted);">Scale</span>
+          <strong style="color:var(--gold);font-family:'DM Mono',monospace;">100%</strong>
+          <span style="color:var(--muted);">Margins</span>
+          <strong style="color:var(--gold);font-family:'DM Mono',monospace;">None</strong>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);">Tip: use <strong style="color:var(--text);">Save as PDF</strong> destination in Chrome for the most accurate output.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('signPrintModal')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-gold" onclick="closeModal('signPrintModal');setTimeout(()=>window.print(),80);" aria-label="Open print dialog">Open Print Dialog →</button>
+    </div>
+  </div>
+</div>
+
 <!-- Bulk Import Modal -->
 <div class="modal-overlay" id="bulkImportModal" role="dialog" aria-modal="true" aria-labelledby="bulkImportTitle">
   <div class="modal-box">
@@ -2406,8 +2452,9 @@
       <div class="section-heading">Sign Generator</div>
       <div class="section-sub">Design and print ISO-style signs — A4 or A3.</div>
     </div>
-    <button class="btn btn-gold" onclick="window.print()" aria-label="Print sign">🖨️ Print Sign</button>
+    <button class="btn btn-gold" onclick="printSign()" aria-label="Print sign">🖨️ Print Sign</button>
   </div>
+  <div id="signPrintHint" style="display:none;" aria-hidden="true"></div>
 
   <div class="sign-layout">
     <!-- Controls -->
@@ -2431,41 +2478,49 @@
         </div>
         <div class="form-group mt-8">
           <label for="signBgCustom">Custom Colour</label>
-          <input type="color" id="signBgCustom" value="#1a1a1a" aria-label="Custom background colour" oninput="updateSignPreview()">
+          <input type="color" id="signBgCustom" value="#ffffff" aria-label="Custom background colour" oninput="updateSignPreview()">
         </div>
         <div class="form-group">
           <label for="signBgImage">Background Image</label>
           <input type="file" id="signBgImage" accept="image/*" aria-label="Upload background image" onchange="loadSignBgImage(this)">
+          <button class="btn btn-ghost btn-sm" id="signBgRemoveBtn" style="display:none;margin-top:6px;" onclick="removeSignBgImage()" aria-label="Remove background image">✕ Remove Image</button>
         </div>
         <div class="form-group">
           <label for="signOverlay">Overlay Opacity <span id="signOverlayVal">50%</span></label>
           <input type="range" id="signOverlay" min="0" max="100" value="50" aria-label="Overlay opacity" oninput="document.getElementById('signOverlayVal').textContent=this.value+'%';updateSignPreview()">
+        </div>
+        <div class="form-group">
+          <label for="signOverlayColour">Overlay Colour</label>
+          <input type="color" id="signOverlayColour" value="#000000" aria-label="Overlay colour" oninput="updateSignPreview()">
         </div>
       </div>
 
       <div class="card mt-8">
         <div class="card-title" style="margin-bottom:12px;">Logo</div>
         <input type="file" id="signLogoInput" accept="image/*" aria-label="Upload sign logo" onchange="loadSignLogo(this)">
-        <img id="signLogoThumb" src="" alt="" style="max-width:80px;max-height:40px;object-fit:contain;display:none;margin-top:8px;border-radius:4px;">
+        <div id="signLogoThumbWrap" style="display:none;margin-top:8px;">
+          <img id="signLogoThumb" src="" alt="" style="max-width:80px;max-height:40px;object-fit:contain;border-radius:4px;display:block;">
+          <button class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="removeSignLogo()" aria-label="Remove logo">✕ Remove Logo</button>
+        </div>
       </div>
 
       <div class="card mt-8">
         <div class="card-title" style="margin-bottom:12px;">Text &amp; Colours</div>
         <div class="form-group">
           <label for="signBodyText">Body Text</label>
-          <input type="text" id="signBodyText" placeholder="e.g. PLEASE DO NOT DISTURB" maxlength="80" oninput="updateSignPreview()">
+          <input type="text" id="signBodyText" value="Authorized Personnel Only" maxlength="80" oninput="updateSignPreview()">
         </div>
         <div class="form-group">
           <label for="signBodyColour">Body Text Colour</label>
-          <input type="color" id="signBodyColour" value="#ffffff" aria-label="Body text colour" oninput="updateSignPreview()">
+          <input type="color" id="signBodyColour" value="#000000" aria-label="Body text colour" oninput="updateSignPreview()">
         </div>
         <div class="form-group">
           <label for="signSubText">Sub-body Text</label>
-          <input type="text" id="signSubText" placeholder="Optional supporting text" maxlength="120" oninput="updateSignPreview()">
+          <input type="text" id="signSubText" value="Please present ID at the front desk." maxlength="120" oninput="updateSignPreview()">
         </div>
         <div class="form-group">
           <label for="signSubColour">Sub-body Text Colour</label>
-          <input type="color" id="signSubColour" value="#cccccc" aria-label="Sub-body text colour" oninput="updateSignPreview()">
+          <input type="color" id="signSubColour" value="#000000" aria-label="Sub-body text colour" oninput="updateSignPreview()">
         </div>
       </div>
     </div>
@@ -2474,11 +2529,16 @@
     <div class="sign-preview-outer">
       <div class="card-title" style="margin-bottom:10px;">Preview</div>
       <div class="sign-preview-frame" id="signPreviewFrame">
-        <div id="signPreview">
-          <div class="sign-overlay" id="signOverlayEl"></div>
-          <img class="sign-logo-preview" id="signLogoPreview" src="" alt="" style="display:none;">
-          <div class="sign-body-text" id="signBodyEl">PLEASE DO NOT DISTURB</div>
-          <div class="sign-sub-text" id="signSubEl"></div>
+        <div class="sign-preview-wrap" id="signPreviewWrap">
+          <div id="signPaper" class="a4 portrait">
+            <div id="signBgLayer" style="display:none;"></div>
+            <div id="signOvlLayer" style="background:transparent;"></div>
+            <div id="signContent">
+              <img id="signLogoPreview" src="hotelLogo.jpg" alt="Logo" onload="signDefaultLogoLoaded()" onerror="this.style.display='none';">
+              <div id="signBodyEl">Authorized Personnel Only</div>
+              <div id="signSubEl">Please present ID at the front desk.</div>
+            </div>
+          </div>
         </div>
       </div>
       <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Preview is approximate. Use Print for exact output.</p>
@@ -2687,8 +2747,8 @@ const sectionTitles = {
 
 // -- State --
 let staffName    = '';
-let staffRole    = 'Front Desk Agent';
-let staffShift   = 'Night (10pm–6am)';
+let staffRole    = 'Night Auditor';
+let staffShift   = 'Night (10:30pm–7am)';
 let persistData  = false;
 let shiftStart   = null;
 let checkState   = {};        // { [itemId]: boolean }
@@ -2696,7 +2756,7 @@ let auditState   = {};        // { [stepId]: boolean }
 let checklistTab = 'preAudit';
 let shiftHistory = [];
 let lastCheckInTime = null;
-let currentHotelName = 'Grand Hotel';
+let currentHotelName = 'Lingfield Park Marriott Hotel & Country Club';
 let brandColour  = '#D4A843';
 let brandLogo    = null;
 
@@ -2728,6 +2788,13 @@ function showSection(id, navEl) {
 
   const title = document.getElementById('topbarTitle');
   if (title) title.textContent = sectionTitles[id] || id.toUpperCase();
+
+  // Sign generator: re-scale text when section becomes visible (paper has dimensions now)
+  // Also (re)apply the data-sign-page attribute so @page named rule is correct at print time
+  if (id === 'signs') {
+    document.body.dataset.signPage = `${signState.size.toLowerCase()}-${signState.orient}`;
+    requestAnimationFrame(() => requestAnimationFrame(autoScaleSignText));
+  }
 
   closeSidebar();
   updateDashboardStats();
@@ -2816,8 +2883,8 @@ function saveState() {
 function loadState() {
   // Always-saved
   staffName  = localStorage.getItem('shiftCompanion_staffName')  || '';
-  staffRole  = localStorage.getItem('shiftCompanion_staffRole')  || 'Front Desk Agent';
-  staffShift = localStorage.getItem('shiftCompanion_staffShift') || 'Night (10pm–6am)';
+  staffRole  = localStorage.getItem('shiftCompanion_staffRole')  || 'Night Auditor';
+  staffShift = localStorage.getItem('shiftCompanion_staffShift') || 'Night (10:30pm–7am)';
   persistData = localStorage.getItem('shiftCompanion_persist') === '1';
   const histRaw = localStorage.getItem('shiftCompanion_history');
   if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
@@ -2835,7 +2902,7 @@ function loadState() {
   }
 
   // Brand
-  currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || 'Grand Hotel';
+  currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || 'Lingfield Park Marriott Hotel & Country Club';
   brandColour      = localStorage.getItem('shiftCompanion_brandColour')    || '#D4A843';
   brandLogo        = localStorage.getItem('shiftCompanion_brandLogo')      || null;
 
@@ -2915,8 +2982,8 @@ function updateSidebarStaffCard() {
 // -- Profile modal --
 function saveProfile() {
   staffName  = (document.getElementById('profileName')?.value  || '').trim();
-  staffRole  = document.getElementById('profileRole')?.value  || 'Front Desk Agent';
-  staffShift = document.getElementById('profileShift')?.value || 'Night (10pm–6am)';
+  staffRole  = document.getElementById('profileRole')?.value  || 'Night Auditor';
+  staffShift = document.getElementById('profileShift')?.value || 'Night (10:30pm–7am)';
   if (!staffName) { alert('Please enter your name.'); return; }
   localStorage.setItem('shiftCompanion_staffName',  staffName);
   localStorage.setItem('shiftCompanion_staffRole',  staffRole);
@@ -4074,128 +4141,272 @@ function loadCheckinLogo(e) {
 }
 
 // -- Sign Generator --
-let signBgImage = null;
+let signBgImage   = null;
 let signLogoImage = null;
+const signState   = { size: 'A4', orient: 'portrait', bgColor: '#ffffff' };
+
+const SIGN_SWATCHES = [
+  { hex: '#ffffff', name: 'White',       light: true  },
+  { hex: '#000000', name: 'Black',       light: false },
+  { hex: '#334155', name: 'Slate 700',   light: false },
+  { hex: '#6b7280', name: 'Gray 500',    light: false },
+  { hex: '#b91c1c', name: 'Red 700',     light: false },
+  { hex: '#ef4444', name: 'Red 500',     light: false },
+  { hex: '#f97316', name: 'Orange 500',  light: false },
+  { hex: '#fbbf24', name: 'Amber 400',   light: true  },
+  { hex: '#fde047', name: 'Yellow 300',  light: true  },
+  { hex: '#84cc16', name: 'Lime 500',    light: false },
+  { hex: '#16a34a', name: 'Green 600',   light: false },
+  { hex: '#065f46', name: 'Emerald 800', light: false },
+  { hex: '#0d9488', name: 'Teal 600',    light: false },
+  { hex: '#22d3ee', name: 'Cyan 400',    light: true  },
+  { hex: '#0ea5e9', name: 'Sky 500',     light: false },
+  { hex: '#1d4ed8', name: 'Blue 700',    light: false },
+  { hex: '#4f46e5', name: 'Indigo 600',  light: false },
+  { hex: '#7c3aed', name: 'Violet 600',  light: false },
+  { hex: '#9333ea', name: 'Purple 600',  light: false },
+  { hex: '#ec4899', name: 'Pink 500',    light: false },
+];
+
+function initSignSwatches() {
+  const row = document.getElementById('bgSwatchRow');
+  if (!row) return;
+  row.innerHTML = '';
+  SIGN_SWATCHES.forEach(({ hex, name, light }) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'colour-swatch' + (hex === signState.bgColor ? ' selected' : '');
+    btn.style.background = hex;
+    btn.style.outline = light ? '1px solid #ccc' : 'none';
+    btn.setAttribute('aria-label', name);
+    btn.title = name;
+    btn.onclick = () => {
+      signState.bgColor = hex;
+      const customInput = document.getElementById('signBgCustom');
+      if (customInput) customInput.value = hex;
+      row.querySelectorAll('.colour-swatch').forEach(s => s.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateSignPreview();
+    };
+    row.appendChild(btn);
+  });
+}
 
 function updateSignPreview() {
-  const preview = document.getElementById('signPreview');
-  if (!preview) return;
+  const paper = document.getElementById('signPaper');
+  if (!paper) return;
 
-  const size       = document.getElementById('signSize')?.value      || 'a4';
-  const orient     = document.getElementById('signOrient')?.value    || 'portrait';
-  const bodyText   = document.getElementById('signBodyText')?.value  || '';
-  const bodyColour = document.getElementById('signBodyColour')?.value|| '#FFFFFF';
-  const subText    = document.getElementById('signSubText')?.value   || '';
-  const subColour  = document.getElementById('signSubColour')?.value || '#CCCCCC';
-  const bgColour   = document.getElementById('signBgColour')?.value  || '#111111';
-  const overlay    = document.getElementById('signOverlay')?.value   || '50';
+  const bgColor   = document.getElementById('signBgCustom')?.value   || signState.bgColor;
+  const bodyText  = document.getElementById('signBodyText')?.value   || 'Authorized Personnel Only';
+  const bodyColor = document.getElementById('signBodyColour')?.value || '#ffffff';
+  const subText   = document.getElementById('signSubText')?.value    || '';
+  const subColor  = document.getElementById('signSubColour')?.value  || '#cccccc';
+  const overlay   = parseInt(document.getElementById('signOverlay')?.value || '50');
 
-  const isLand  = orient === 'landscape';
-  const isA3    = size   === 'a3';
-  // Scale to fit preview container
-  const baseW   = isLand ? (isA3 ? 420 : 297) : (isA3 ? 297 : 210);
-  const baseH   = isLand ? (isA3 ? 297 : 210) : (isA3 ? 420 : 297);
-  const scAllow = Math.min(560 / baseW, 680 / baseH);
-  const pW = Math.round(baseW * scAllow);
-  const pH = Math.round(baseH * scAllow);
-
-  preview.style.width  = pW + 'px';
-  preview.style.height = pH + 'px';
-  preview.style.position = 'relative';
-  preview.style.overflow = 'hidden';
-  preview.style.background = bgColour;
+  // Update paper size/orientation classes
+  paper.className = signState.size.toLowerCase() + ' ' + signState.orient;
+  paper.style.background = bgColor;
 
   // Background image layer
-  preview.querySelectorAll('.sign-bg-layer,.sign-overlay-layer').forEach(el => el.remove());
-  if (signBgImage) {
-    const bgEl = document.createElement('div');
-    bgEl.className = 'sign-bg-layer';
-    Object.assign(bgEl.style, { position:'absolute', inset:'0', backgroundImage:`url(${signBgImage})`, backgroundSize:'cover', backgroundPosition:'center', zIndex:'0' });
-    preview.appendChild(bgEl);
-    const olEl = document.createElement('div');
-    olEl.className = 'sign-overlay-layer';
-    Object.assign(olEl.style, { position:'absolute', inset:'0', background:`rgba(0,0,0,${(parseInt(overlay)/100).toFixed(2)})`, zIndex:'1' });
-    preview.appendChild(olEl);
+  const bgLayer = document.getElementById('signBgLayer');
+  if (bgLayer) {
+    if (signBgImage) {
+      bgLayer.style.backgroundImage = `url('${signBgImage}')`;
+      bgLayer.style.display = 'block';
+    } else {
+      bgLayer.style.backgroundImage = '';
+      bgLayer.style.display = 'none';
+    }
   }
 
-  // Content layer
-  let contentEl = preview.querySelector('.sign-content-layer');
-  if (!contentEl) {
-    contentEl = document.createElement('div');
-    contentEl.className = 'sign-content-layer';
-    Object.assign(contentEl.style, { position:'absolute', inset:'0', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', zIndex:'2', padding:'5%', textAlign:'center', gap:'4%' });
-    preview.appendChild(contentEl);
-  }
-  contentEl.innerHTML = '';
-
-  if (signLogoImage) {
-    const logoEl = document.createElement('img');
-    logoEl.src = signLogoImage;
-    Object.assign(logoEl.style, { maxWidth:'35%', maxHeight:'20%', objectFit:'contain', marginBottom:'4%' });
-    contentEl.appendChild(logoEl);
+  // Overlay layer (only visible when bg image present)
+  const ovlHex = document.getElementById('signOverlayColour')?.value || '#000000';
+  const ovlLayer = document.getElementById('signOvlLayer');
+  if (ovlLayer) {
+    if (signBgImage) {
+      const r = parseInt(ovlHex.slice(1,3),16);
+      const g = parseInt(ovlHex.slice(3,5),16);
+      const b = parseInt(ovlHex.slice(5,7),16);
+      ovlLayer.style.background = `rgba(${r},${g},${b},${(overlay/100).toFixed(2)})`;
+    } else {
+      ovlLayer.style.background = 'transparent';
+    }
   }
 
-  if (bodyText) {
-    const t = document.createElement('div');
-    t.textContent = bodyText;
-    Object.assign(t.style, { color: bodyColour, fontSize: Math.round(pW * 0.07) + 'px', fontFamily:'Bebas Neue, sans-serif', letterSpacing:'2px', lineHeight:'1.2', wordBreak:'break-word' });
-    contentEl.appendChild(t);
+  // Logo
+  const logoEl = document.getElementById('signLogoPreview');
+  if (logoEl) {
+    if (signLogoImage) {
+      logoEl.src = signLogoImage;
+      logoEl.style.display = 'block';
+    }
+    // If null, leave as-is — removeSignLogo() already hid it
   }
 
-  if (subText) {
-    const s = document.createElement('div');
-    s.textContent = subText;
-    Object.assign(s.style, { color: subColour, fontSize: Math.round(pW * 0.035) + 'px', fontFamily:'DM Sans, sans-serif', marginTop:'2%', wordBreak:'break-word' });
-    contentEl.appendChild(s);
+  // Body text
+  const bodyEl = document.getElementById('signBodyEl');
+  if (bodyEl) {
+    bodyEl.textContent = bodyText;
+    bodyEl.style.color = bodyColor;
   }
+
+  // Sub text
+  const subEl = document.getElementById('signSubEl');
+  if (subEl) {
+    subEl.textContent = subText;
+    subEl.style.display = subText ? 'block' : 'none';
+    subEl.style.color = subColor;
+  }
+
+  // Update scale transform
+  updateSignScale();
+
+  // Auto-scale text to fill paper (double rAF ensures layout is computed)
+  requestAnimationFrame(() => requestAnimationFrame(autoScaleSignText));
+}
+
+function autoScaleSignText() {
+  const paper  = document.getElementById('signPaper');
+  const bodyEl = document.getElementById('signBodyEl');
+  const subEl  = document.getElementById('signSubEl');
+  if (!paper || !bodyEl) return;
+
+  const maxH = paper.clientHeight * 0.45;
+  const maxW = paper.clientWidth  * 0.85;
+
+  bodyEl.style.fontSize = '10px';
+  for (let size = 10; size <= 500; size += 2) {
+    bodyEl.style.fontSize = `${size}px`;
+    if (bodyEl.scrollHeight > maxH || bodyEl.scrollWidth > maxW) {
+      bodyEl.style.fontSize = `${size - 2}px`;
+      break;
+    }
+  }
+
+  if (subEl && subEl.style.display !== 'none') {
+    const mainSize = parseInt(bodyEl.style.fontSize, 10) || 48;
+    subEl.style.fontSize = `${Math.max(16, Math.round(mainSize * 0.45))}px`;
+  }
+}
+
+function updateSignScale() {
+  const wrap  = document.getElementById('signPreviewWrap');
+  const frame = document.getElementById('signPreviewFrame');
+  if (!wrap || !frame) return;
+
+  const isLandscape = signState.orient === 'landscape';
+  const isA3        = signState.size   === 'A3';
+
+  // Physical paper dimensions in mm → px at 96 dpi (1mm = 3.7795px)
+  const PX_PER_MM = 3.7795;
+  const mmW = isA3 ? (isLandscape ? 420 : 297) : (isLandscape ? 297 : 210);
+  const mmH = isA3 ? (isLandscape ? 297 : 420) : (isLandscape ? 210 : 297);
+  const pxW = mmW * PX_PER_MM;
+  const pxH = mmH * PX_PER_MM;
+
+  // Available width: frame inner width (minus 16px padding)
+  const availW = (frame.clientWidth || frame.offsetWidth) - 16;
+
+  // Available height: viewport minus topbar (60px), section heading area (~80px), and breathing room (32px)
+  const availH = window.innerHeight - 60 - 80 - 32;
+
+  // Use whichever constraint is tighter so the whole page is always visible
+  const scaleByW = availW > 0 ? availW / pxW : 1;
+  const scaleByH = availH > 0 ? availH / pxH : 1;
+  const scale = Math.min(scaleByW, scaleByH, 1); // never enlarge beyond 1:1
+
+  wrap.style.transform       = `scale(${scale})`;
+  wrap.style.transformOrigin = 'top center';
+  // Collapse the dead space left by the scale-down
+  wrap.style.marginBottom    = `${-(pxH * (1 - scale))}px`;
+  wrap.style.paddingBottom   = `0px`;
+}
+
+function setSignOption(type, value) {
+  if (type === 'size')   signState.size   = value;
+  if (type === 'orient') signState.orient = value;
+  // Update button active states
+  document.getElementById('signSizeA4')?.classList.toggle('active', signState.size   === 'A4');
+  document.getElementById('signSizeA3')?.classList.toggle('active', signState.size   === 'A3');
+  document.getElementById('signOrientP')?.classList.toggle('active', signState.orient === 'portrait');
+  document.getElementById('signOrientL')?.classList.toggle('active', signState.orient === 'landscape');
+  // Activate the matching CSS named-page selector so @page sign-* rule applies at print time
+  document.body.dataset.signPage = `${signState.size.toLowerCase()}-${signState.orient}`;
+  updateSignPreview();
 }
 
 function loadSignBgImage(e) {
-  const file = e.target.files[0]; if (!file) return;
+  const file = (e.target || e).files?.[0];
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = ev => { signBgImage = ev.target.result; updateSignPreview(); };
+  reader.onload = ev => {
+    signBgImage = ev.target.result;
+    const btn = document.getElementById('signBgRemoveBtn');
+    if (btn) btn.style.display = 'inline-flex';
+    updateSignPreview();
+  };
   reader.readAsDataURL(file);
+}
+
+function removeSignBgImage() {
+  signBgImage = null;
+  const input = document.getElementById('signBgImage');
+  if (input) input.value = '';
+  const btn = document.getElementById('signBgRemoveBtn');
+  if (btn) btn.style.display = 'none';
+  updateSignPreview();
+}
+
+function signDefaultLogoLoaded() {
+  // hotelLogo.jpg loaded successfully — show the remove button
+  const thumb = document.getElementById('signLogoThumb');
+  const wrap  = document.getElementById('signLogoThumbWrap');
+  if (thumb) thumb.src = 'hotelLogo.jpg';
+  if (wrap)  wrap.style.display = 'block';
 }
 
 function loadSignLogo(e) {
-  const file = e.target.files[0]; if (!file) return;
+  const file = (e.target || e).files?.[0];
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = ev => { signLogoImage = ev.target.result; updateSignPreview(); };
+  reader.onload = ev => {
+    signLogoImage = ev.target.result;
+    const thumb = document.getElementById('signLogoThumb');
+    const wrap  = document.getElementById('signLogoThumbWrap');
+    if (thumb) thumb.src = signLogoImage;
+    if (wrap)  wrap.style.display = 'block';
+    updateSignPreview();
+  };
   reader.readAsDataURL(file);
 }
 
-function setSignOption(sel) { updateSignPreview(); }
-function printSign() { window.print(); }
+function removeSignLogo() {
+  signLogoImage = null;
+  const input = document.getElementById('signLogoInput');
+  if (input) input.value = '';
+  const thumb = document.getElementById('signLogoThumb');
+  const wrap  = document.getElementById('signLogoThumbWrap');
+  if (thumb) thumb.src = '';
+  if (wrap)  wrap.style.display = 'none';
+  const logoEl = document.getElementById('signLogoPreview');
+  if (logoEl) { logoEl.src = ''; logoEl.style.display = 'none'; }
+  requestAnimationFrame(() => requestAnimationFrame(autoScaleSignText));
+}
 
-// Attach sign input listeners after DOM loaded
-document.addEventListener('DOMContentLoaded', () => {
-  ['signBgInput'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('change', loadSignBgImage);
-  });
-  const signLogoInput = document.getElementById('signLogoInput');
-  if (signLogoInput) signLogoInput.addEventListener('change', loadSignLogo);
+function printSign() {
+  // Chrome/Edge persist paper size in their own settings store and ignore @page { size }
+  // once a user has changed it. We can't override that — so show a modal with the
+  // exact settings to enter, then open the print dialog.
+  document.body.dataset.signPage = `${signState.size.toLowerCase()}-${signState.orient}`;
 
-  ['signSize','signOrient','signBodyColour','signSubColour','signBgColour','signOverlay'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('change', () => updateSignPreview());
-    if (el && el.tagName === 'INPUT' && el.type !== 'file') el.addEventListener('input', () => updateSignPreview());
-  });
-  ['signBodyText','signSubText'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', () => updateSignPreview());
-  });
+  const sizeEl   = document.getElementById('signPrintModalSize');
+  const orientEl = document.getElementById('signPrintModalOrient');
+  if (sizeEl)   sizeEl.textContent   = signState.size;
+  if (orientEl) orientEl.textContent = signState.orient.charAt(0).toUpperCase() + signState.orient.slice(1);
 
-  // Report file import
-  const rptInput = document.getElementById('rptFileInput');
-  if (rptInput) rptInput.addEventListener('change', handleReportFileChange);
+  openModal('signPrintModal');
+}
 
-  // Floor walk buttons
-  document.querySelectorAll('.floor-clear-btn').forEach(btn => {
-    const floor = btn.getAttribute('data-floor');
-    btn.addEventListener('click', () => toggleFloorClear(floor));
-  });
-});
 
 // -- Daily Info Board --
 function getPrinciple(date) {
@@ -4543,8 +4754,9 @@ function init() {
   // Brand swatches
   initBrandSwatches();
 
-  // Sign generator default preview
-  setTimeout(updateSignPreview, 100);
+  // Sign generator swatches and initial preview state (scaling runs when section is first opened)
+  initSignSwatches();
+  updateSignPreview();
 
   // Show first section
   showSection('dashboard', document.querySelector('[data-section=dashboard]'));
@@ -4619,6 +4831,16 @@ function init() {
 
   // Wire sign print
   document.getElementById('printSignBtn')?.addEventListener('click', printSign);
+
+  // Re-scale sign text when window resizes (scale factor changes)
+  let _signResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(_signResizeTimer);
+    _signResizeTimer = setTimeout(() => {
+      updateSignScale();
+      requestAnimationFrame(() => requestAnimationFrame(autoScaleSignText));
+    }, 150);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);
