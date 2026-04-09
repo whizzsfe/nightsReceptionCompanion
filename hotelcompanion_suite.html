@@ -1152,7 +1152,6 @@
 
     /* --- SIGN GENERATOR --- */
     .sign-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: flex-start; }
-    .sign-controls { }
     .sign-preview-outer { position: sticky; top: calc(var(--topbar-h) + 24px); }
     .sign-preview-frame {
       border: 2px solid var(--border);
@@ -1234,7 +1233,7 @@
     .board-input { width: 100%; background: transparent; border: none; text-align: center; color: var(--text); font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 5px 3px; }
     .board-input.today { color: var(--gold-light); font-weight: 600; }
     .board-input:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.06); }
-    .board-input::-webkit-outer-spin-button, .board-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .board-input::-webkit-outer-spin-button, .board-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
     .board-input[type=number] { -moz-appearance: textfield; }
 
     .board-mid-row { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
@@ -1246,7 +1245,7 @@
     .board-info-table td.info-label { background: var(--card2); font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; padding: 4px 8px; font-weight: 600; }
     .board-info-input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 4px 6px; }
     .board-info-input:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.06); }
-    .board-info-input::-webkit-outer-spin-button, .board-info-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .board-info-input::-webkit-outer-spin-button, .board-info-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
     .board-info-input[type=number] { -moz-appearance: textfield; }
 
     .vip-table { width: 100%; border-collapse: collapse; font-size: 12px; }
