@@ -754,73 +754,8 @@
     .check-item-main { flex: 1; min-width: 0; }
     .check-label { font-size: 14px; color: var(--text); line-height: 1.4; }
     .check-notes { font-size: 12px; color: var(--muted); margin-top: 4px; white-space: pre-line; }
+    .check-time { font-size: 11px; color: var(--gold); font-family: 'DM Mono', monospace; margin-top: 3px; display: block; }
     .check-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
-    .night-audit-cta {
-      background: linear-gradient(135deg, rgba(212,168,67,0.1), rgba(212,168,67,0.04));
-      border: 1px solid rgba(212,168,67,0.35);
-      border-radius: var(--radius-lg);
-      padding: 18px 20px;
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-    .night-audit-cta:hover { border-color: var(--gold); background: rgba(212,168,67,0.1); }
-    .night-audit-cta-icon { font-size: 28px; }
-    .night-audit-cta-text h3 { color: var(--gold); margin-bottom: 3px; }
-    .night-audit-cta-text p { font-size: 13px; color: var(--muted); }
-
-    /* --- NIGHT AUDIT --- */
-    .audit-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--card);
-      margin-bottom: 8px;
-      transition: all var(--transition);
-      cursor: pointer;
-    }
-    .audit-step:hover { border-color: rgba(212,168,67,0.3); }
-    .audit-step.done { opacity: 0.5; }
-    .audit-step.done .audit-step-label { text-decoration: line-through; color: var(--muted); }
-    .audit-step-num {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      background: var(--card2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      flex-shrink: 0;
-      transition: all var(--transition);
-    }
-    .audit-step.done .audit-step-num { background: var(--green); border-color: var(--green); color: var(--black); }
-    .audit-step-main { flex: 1; min-width: 0; }
-    .audit-step-label { font-size: 14px; color: var(--text); font-weight: 500; }
-    .audit-step-notes-input {
-      margin-top: 8px;
-      width: 100%;
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      padding: 7px 10px;
-      resize: vertical;
-      min-height: 58px;
-      outline: none;
-    }
-    .audit-step-notes-input:focus { border-color: var(--gold); }
 
     /* --- NOTES & HANDOVER --- */
     .incoming-panel {
@@ -1721,9 +1656,7 @@
     <div class="nav-item" data-section="checklist" onclick="showSection('checklist',this)" role="button" tabindex="0" aria-label="Shift Checklist">
       <span class="nav-icon">✓</span> Shift Checklist
     </div>
-    <div class="nav-item" data-section="nightaudit" onclick="showSection('nightaudit',this)" role="button" tabindex="0" aria-label="Night Audit">
-      <span class="nav-icon">🧾</span> Night Audit
-    </div>
+
     <div class="nav-item" data-section="nightlog" onclick="showSection('nightlog',this)" role="button" tabindex="0" aria-label="Night Log">
       <span class="nav-icon">📋</span> Night Log
     </div>
@@ -2010,14 +1943,7 @@
         <div class="quick-action-desc">Pre-Audit and Post-Audit tasks</div>
       </div>
     </div>
-    <div class="quick-action-card" onclick="showSection('nightaudit', document.querySelector('[data-section=nightaudit]'))" role="button" tabindex="0" aria-label="Go to Night Audit">
-      <div class="quick-action-icon">🧾</div>
-      <div>
-        <div class="quick-action-title">Night Audit</div>
-        <div class="quick-action-desc">Step-by-step audit tracker</div>
-      </div>
-    </div>
-    <div class="quick-action-card" onclick="showSection('ai', document.querySelector('[data-section=ai]'))" role="button" tabindex="0" aria-label="Open AI Coach for payment scripts">
+<div class="quick-action-card" onclick="showSection('ai', document.querySelector('[data-section=ai]'))" role="button" tabindex="0" aria-label="Open AI Coach for payment scripts">
       <div class="quick-action-icon">💳</div>
       <div>
         <div class="quick-action-title">Card Payment Scripts</div>
@@ -2078,30 +2004,7 @@
 <!-- -----------------------------------------------------------
      SECTION: NIGHT AUDIT
 ----------------------------------------------------------- -->
-<section class="section" id="section-nightaudit" aria-label="Night Audit Tracker">
-  <div class="flex-between mb-12">
-    <div>
-      <div class="section-heading">Night Audit Tracker</div>
-      <div class="section-sub">Work through each step. Tick off as you go.</div>
-    </div>
-    <button class="btn btn-ghost btn-sm" onclick="resetAudit()" aria-label="Reset all audit steps">↺ Reset All</button>
-  </div>
 
-  <!-- Progress Bar -->
-  <div class="progress-wrap mb-8">
-    <div class="progress-fill green" id="auditProgressFill" style="width:0%"></div>
-  </div>
-  <div class="progress-label" id="auditProgressLabel">0 of 0 complete</div>
-
-  <div class="mt-12" id="auditSteps">
-    <!-- Steps injected by JS -->
-  </div>
-
-  <div class="card mt-16">
-    <div class="card-title" style="margin-bottom:10px;font-size:16px;">Audit Notes</div>
-    <textarea id="auditNotes" placeholder="Any notes or issues encountered during the audit…" rows="4" aria-label="Audit notes" oninput="onAuditNotesInput()"></textarea>
-  </div>
-</section>
 
 <!-- -----------------------------------------------------------
      SECTION: NOTES & HANDOVER
@@ -2923,7 +2826,6 @@ const SHIFT_BASE_FOLDER = 'shiftLogs';
 const sectionTitles = {
   dashboard:  'NIGHT DASHBOARD',
   checklist:  'SHIFT CHECKLIST',
-  nightaudit: 'NIGHT AUDIT TRACKER',
   notes:      'NOTES & SHIFT HANDOVER',
   motivation: 'SHIFT MOTIVATION',
   ai:         'AI COACH — ARIA',
@@ -2940,8 +2842,7 @@ let staffRole    = 'Night Auditor';
 let staffShift   = 'Night (10:30pm–7am)';
 let persistData  = true;
 let shiftStart   = null;
-let checkState   = {};        // { [itemId]: boolean }
-let auditState   = {};        // { [stepId]: boolean }
+let checkState   = {};        // { [itemId]: false | ISO-timestamp-string }
 let checklistTab = 'preAudit';
 let shiftHistory = [];
 let lastCheckInTime = null;
@@ -3055,7 +2956,6 @@ function saveState() {
     localStorage.setItem('shiftCompanion_handoverTaxis',  document.getElementById('handoverTaxis')?.value || '');
     localStorage.setItem('shiftCompanion_wakeUpCalls',    document.getElementById('wakeUpCalls')?.value || '');
     localStorage.setItem('shiftCompanion_checklistState', JSON.stringify(checkState));
-    localStorage.setItem('shiftCompanion_auditState',     JSON.stringify(auditState));
     localStorage.setItem('shiftCompanion_nightLogEntries', JSON.stringify(logEntries));
     if (lastCheckInTime) localStorage.setItem('shiftCompanion_lastCheckIn', lastCheckInTime.toString());
     localStorage.setItem('shiftCompanion_boardData', JSON.stringify(collectBoardData()));
@@ -3096,8 +2996,6 @@ function loadState() {
     if (wuc && document.getElementById('wakeUpCalls'))    document.getElementById('wakeUpCalls').value    = wuc;
     const cs = localStorage.getItem('shiftCompanion_checklistState');
     if (cs) { try { checkState = JSON.parse(cs); } catch(e){} }
-    const as = localStorage.getItem('shiftCompanion_auditState');
-    if (as) { try { auditState = JSON.parse(as); } catch(e){} }
     const nl = localStorage.getItem('shiftCompanion_nightLogEntries');
     if (nl) { try { logEntries = JSON.parse(nl); } catch(e){} }
     const lci = localStorage.getItem('shiftCompanion_lastCheckIn');
@@ -3367,7 +3265,7 @@ const DEFAULT_PRE_AUDIT = [
   { id:'pre_014', label:'Log any out-of-order rooms in the PMS', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_015', label:'Set night rate / DND status on switchboard', notes:'', required:false, dayRestriction:'every' },
   { id:'pre_016', label:'Confirm lone worker check-in protocol is understood', notes:'', required:true,  dayRestriction:'every' },
-  { id:'pre_017', label:'Run Night Audit at 03:01', notes:'• Navigate to Night Audit Tracker\n• Follow all steps in sequence\n• Do not skip posting or reconciliation', required:true,  dayRestriction:'every', isAuditCta:true }
+  { id:'pre_017', label:'Run Night Audit at 03:01', notes:'Automated by PMS — confirm it has completed.', required:true,  dayRestriction:'every' }
 ];
 
 const DEFAULT_POST_AUDIT = [
@@ -3438,20 +3336,6 @@ function renderChecklist(tab) {
   items.forEach((item, idx) => {
     const applies = itemAppliestoday(item);
 
-    // Night Audit CTA card (last pre-audit item with isAuditCta flag)
-    if (item.isAuditCta) {
-      const cta = document.createElement('div');
-      cta.className = 'night-audit-cta';
-      cta.setAttribute('role', 'button');
-      cta.setAttribute('tabindex', '0');
-      cta.setAttribute('aria-label', 'Go to Night Audit Tracker');
-      cta.innerHTML = '<div class="night-audit-cta-icon">🧾</div><div class="night-audit-cta-text"><h3>Run Night Audit</h3><p>Navigate to the Night Audit Tracker to run the step-by-step audit procedure.</p></div><span style="color:var(--gold);font-size:18px;">›</span>';
-      cta.addEventListener('click', () => showSection('nightaudit', document.querySelector('[data-section=nightaudit]')));
-      cta.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') cta.click(); });
-      container.appendChild(cta);
-      return;
-    }
-
     const div = document.createElement('div');
     div.className = 'check-item' + (checkState[item.id] ? ' done' : '') + (item.required ? ' required-item' : '') + (!applies ? ' greyed-out' : '');
     div.setAttribute('role', 'checkbox');
@@ -3464,6 +3348,7 @@ function renderChecklist(tab) {
       <div class="check-box ${checked ? 'checked' : ''}" aria-hidden="true">${checked ? '?' : ''}</div>
       <div class="check-item-main">
         <div class="check-label">${escapeHtml(item.label)}</div>
+        ${checked ? `<span class="check-time">✓ ${new Date(checked).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>` : ''}
         ${item.notes ? `<div class="check-notes">${escapeHtml(item.notes)}</div>` : ''}
         <div class="check-badges">
           ${item.required ? '<span class="badge badge-gold">Required</span>' : ''}
@@ -3481,7 +3366,7 @@ function renderChecklist(tab) {
 }
 
 function toggleCheck(id, tab) {
-  checkState[id] = !checkState[id];
+  checkState[id] = checkState[id] ? false : new Date().toISOString();
   renderChecklist(tab || checklistTab);
   updateDashboardStats();
   saveState();
@@ -3489,7 +3374,7 @@ function toggleCheck(id, tab) {
 
 function updateChecklistProgress(tab) {
   const items   = getActiveChecklistItems(tab);
-  const visible = items.filter(it => !it.isAuditCta);
+  const visible = items;
   const total   = visible.length;
   const done    = visible.filter(it => checkState[it.id]).length;
   const pct     = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -3507,86 +3392,6 @@ function switchChecklistTab(tab) {
   document.getElementById('tabPostAudit')?.setAttribute('aria-selected', tab === 'postAudit');
   renderChecklist(tab);
 }
-
-// -- Night Audit --
-const DEFAULT_AUDIT_STEPS = [
-  { id:'audit_001', label:'Post all room and package charges in the PMS' },
-  { id:'audit_002', label:'Run the night audit / end-of-day procedure in the PMS' },
-  { id:'audit_003', label:'Verify all room rates match the rate plan — check exceptions' },
-  { id:'audit_004', label:'Post all F&B charges from restaurant / bar journals' },
-  { id:'audit_005', label:'Reconcile all card terminal batches to the PMS totals' },
-  { id:'audit_006', label:'Void any test or error transactions after authorisation' },
-  { id:'audit_007', label:'Print the Revenue/Manager report and review for anomalies' },
-  { id:'audit_008', label:'Print the Accounts Receivable / City Ledger report' },
-  { id:'audit_009', label:'Print the No-Show report and action any guaranteed bookings' },
-  { id:'audit_010', label:'Print the Guest Ledger report and check folios are correct' },
-  { id:'audit_011', label:'Print the Trial Balance / Daily Summary report' },
-  { id:'audit_012', label:'Check and reconcile advance deposit ledger' },
-  { id:'audit_013', label:'Transfer all check-out folios to the city ledger or zero them' },
-  { id:'audit_014', label:'Print the Housekeeping discrepancy report and resolve conflicts' },
-  { id:'audit_015', label:'Run the statistical report (occupancy, ADR, RevPAR)' },
-  { id:'audit_016', label:'File all printed reports in the shift folder' },
-  { id:'audit_017', label:'Update the Daily Information Board data' },
-  { id:'audit_018', label:'Confirm PMS date has rolled to the new business day' }
-];
-
-function getAuditSteps() {
-  return (window.HOTELCOMPANION_ITEMS && Array.isArray(window.HOTELCOMPANION_ITEMS.auditSteps))
-    ? window.HOTELCOMPANION_ITEMS.auditSteps
-    : DEFAULT_AUDIT_STEPS;
-}
-
-function renderAuditSteps() {
-  const container = document.getElementById('auditSteps');
-  if (!container) return;
-  container.innerHTML = '';
-  const steps = getAuditSteps();
-  steps.forEach((step, idx) => {
-    const done = !!auditState[step.id];
-    const div = document.createElement('div');
-    div.className = 'audit-step' + (done ? ' done' : '');
-    div.setAttribute('role', 'checkbox');
-    div.setAttribute('aria-checked', done ? 'true' : 'false');
-    div.setAttribute('tabindex', '0');
-    div.setAttribute('aria-label', step.label);
-    div.innerHTML = `
-      <div class="audit-step-num" aria-hidden="true">${done ? '?' : (idx + 1)}</div>
-      <div class="audit-step-main">
-        <div class="audit-step-label">${escapeHtml(step.label)}</div>
-      </div>
-    `;
-    div.addEventListener('click', () => toggleAuditStep(step.id));
-    div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAuditStep(step.id); } });
-    container.appendChild(div);
-  });
-  updateAuditProgress();
-}
-
-function toggleAuditStep(id) {
-  auditState[id] = !auditState[id];
-  renderAuditSteps();
-  saveState();
-}
-
-function updateAuditProgress() {
-  const steps = getAuditSteps();
-  const total = steps.length;
-  const done  = steps.filter(s => auditState[s.id]).length;
-  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
-  const fill  = document.getElementById('auditProgressFill');
-  const label = document.getElementById('auditProgressLabel');
-  if (fill)  fill.style.width = pct + '%';
-  if (label) label.textContent = done + ' of ' + total + ' complete';
-}
-
-function resetAudit() {
-  if (!confirm('Reset all audit step checkboxes?')) return;
-  auditState = {};
-  renderAuditSteps();
-  saveState();
-}
-
-function onAuditNotesInput() { saveState(); }
 
 // -- Notes / Handover --
 function onShiftNotesInput()    { saveState(); }
@@ -4661,7 +4466,6 @@ function renderHistory() {
       const wu      = s.wakeUpCalls    || '';
       const issues  = s.incidentCount ?? 0;
       const clPct   = s.checklistPct ?? 0;
-      const auditPct= s.auditPct     ?? 0;
       return `
         <div class="history-entry">
           <div class="history-entry-header">
@@ -4677,7 +4481,6 @@ function renderHistory() {
           </div>
           <div class="history-stats">
             <span>Checklist: <strong>${clPct}%</strong></span>
-            <span>Audit: <strong>${auditPct}%</strong></span>
             <span>Incidents: <strong>${issues}</strong></span>
           </div>
           <div class="history-detail hidden">
@@ -4812,26 +4615,19 @@ function confirmEndShift() {
   // Collect current state for saving
   const handoverEl = document.getElementById('handoverNotes');
   const shiftEl    = document.getElementById('shiftNotes');
-  const auditEl    = document.getElementById('auditNotes');
 
   const handoverNotes  = handoverEl?.value || '';
   const shiftNotes    = shiftEl?.value    || '';
-  const auditNotes    = auditEl?.value    || '';
   const breakfastBags = document.getElementById('breakfastBags')?.value || '';
   const handoverTaxis = document.getElementById('handoverTaxis')?.value || '';
   const wakeUpCalls   = document.getElementById('wakeUpCalls')?.value   || '';
 
   // Checklist % 
-  const preItems  = getActiveChecklistItems('preAudit').filter(i => !i.isAuditCta);
+  const preItems  = getActiveChecklistItems('preAudit');
   const postItems = getActiveChecklistItems('postAudit');
   const allItems  = [...preItems, ...postItems];
   const done      = allItems.filter(i => checkState[i.id]).length;
   const clPct     = allItems.length > 0 ? Math.round((done / allItems.length) * 100) : 0;
-
-  // Audit %
-  const asteps = getAuditSteps();
-  const adone  = asteps.filter(s => auditState[s.id]).length;
-  const auditPct = asteps.length > 0 ? Math.round((adone / asteps.length) * 100) : 0;
 
   // Build history entry
   const entry = {
@@ -4844,9 +4640,7 @@ function confirmEndShift() {
     breakfastBags,
     handoverTaxis,
     wakeUpCalls,
-    auditNotes,
     checklistPct:  clPct,
-    auditPct,
     incidentCount: logEntries.filter(e => e.type === 'issue').length,
     incidents:     logEntries.filter(e => e.type === 'issue')
   };
@@ -4866,7 +4660,7 @@ function confirmEndShift() {
     'shiftCompanion_shiftNotes', 'shiftCompanion_handoverNotes',
     'shiftCompanion_breakfastBags', 'shiftCompanion_handoverTaxis', 'shiftCompanion_wakeUpCalls',
     'shiftCompanion_lastCheckIn', 'shiftCompanion_nightLogEntries',
-    'shiftCompanion_checklistState', 'shiftCompanion_auditState',
+    'shiftCompanion_checklistState',
     'shiftCompanion_boardData', 'shiftCompanion_shiftStart',
     'shiftCompanion_nlLeader', 'shiftCompanion_nlStartTime',
     'shiftCompanion_nightlogActive', 'shiftCompanion_floorWalkState'
@@ -4875,7 +4669,6 @@ function confirmEndShift() {
 
   // Reset in-memory session state
   checkState        = {};
-  auditState        = {};
   logEntries        = [];
   floorWalkState    = {};
   nlPhotoBase64     = null;
@@ -4886,7 +4679,6 @@ function confirmEndShift() {
   lastCheckInTime   = null;
   if (shiftEl)    shiftEl.value    = '';
   if (handoverEl) handoverEl.value = '';
-  if (auditEl)    auditEl?.value != null && (auditEl.value = '');
   ['breakfastBags','handoverTaxis','wakeUpCalls'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
@@ -4901,7 +4693,6 @@ function confirmEndShift() {
   closeModal('endShiftModal');
 
   renderChecklist('preAudit');
-  renderAuditSteps();
   renderHistory();
   renderNightLogEntries();
   updateDashboardStats();
@@ -4997,7 +4788,6 @@ function buildSessionSnapshot() {
     handoverTaxis:  document.getElementById('handoverTaxis')?.value || '',
     wakeUpCalls:    document.getElementById('wakeUpCalls')?.value   || '',
     checklistState: { ...checkState },
-    auditState:     { ...auditState },
     logEntries:     JSON.parse(JSON.stringify(logEntries)),
     floorWalkState: { ...floorWalkState },
     nightlogActive,
@@ -5188,7 +4978,6 @@ async function resumeShiftFromFile() {
 function restoreSessionSnapshot(data) {
   shiftStart      = data.shiftStart     || Date.now();
   checkState      = data.checklistState || {};
-  auditState      = data.auditState     || {};
   logEntries      = data.logEntries     || [];
   floorWalkState  = data.floorWalkState || {};
   nightlogActive  = data.nightlogActive || false;
@@ -5222,7 +5011,6 @@ function restoreSessionSnapshot(data) {
 
   renderChecklist('preAudit');
   renderChecklist('postAudit');
-  renderAuditSteps();
   renderNightLogEntries();
   updateDashboardStats();
   updateCheckInDisplay();
@@ -5310,17 +5098,13 @@ function init() {
   // Restore textarea values
   const sn = persistData ? (localStorage.getItem('shiftCompanion_shiftNotes')    || '') : '';
   const hn = persistData ? (localStorage.getItem('shiftCompanion_handoverNotes') || '') : '';
-  const an = persistData ? (localStorage.getItem('shiftCompanion_auditNotes')    || '') : '';
   const shiftEl    = document.getElementById('shiftNotes');
   const handoverEl = document.getElementById('handoverNotes');
-  const auditEl    = document.getElementById('auditNotes');
   if (shiftEl)    shiftEl.value    = sn;
   if (handoverEl) handoverEl.value = hn;
-  if (auditEl)    auditEl.value    = an;
 
   // Render dynamic sections
   renderChecklist('preAudit');
-  renderAuditSteps();
   renderHistory();
   renderNightLogEntries();
 
@@ -5371,9 +5155,6 @@ function init() {
   // Wire checklist tab buttons
   document.getElementById('tabPreAudit')?.addEventListener('click',  () => switchChecklistTab('preAudit'));
   document.getElementById('tabPostAudit')?.addEventListener('click', () => switchChecklistTab('postAudit'));
-
-  // Wire audit reset
-  document.getElementById('auditResetBtn')?.addEventListener('click', resetAudit);
 
   // Wire end-shift confirm button
   document.getElementById('confirmEndShiftBtn')?.addEventListener('click', confirmEndShift);
