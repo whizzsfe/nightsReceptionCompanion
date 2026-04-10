@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   DELIVERY VERSION: A
   RATIONALE: Single file distributed via OneDrive sync folder, opened via file:// on company PCs. Offline-first, no server required.
 --><!DOCTYPE html>
@@ -1080,17 +1080,6 @@
     .history-entry-body pre { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); white-space: pre-wrap; }
 
     /* --- NIGHT LOG --- */
-    .nightlog-start-screen {
-      max-width: 440px;
-      margin: 40px auto;
-      text-align: center;
-    }
-    .nightlog-start-screen h2 {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 28px;
-      letter-spacing: 0.06em;
-      margin-bottom: 6px;
-    }
     .floor-walk-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -1418,7 +1407,6 @@
       .handover-page-hero { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
 
       /* Night Log print */
-      #section-nightlog .nightlog-start-screen { display: none; }
 
       /* Group Check-in print */
       #section-checkin { color: #000; }
@@ -2269,24 +2257,6 @@
 ----------------------------------------------------------- -->
 <section class="section" id="section-nightlog" aria-label="Night Log">
 
-  <!-- Start / Resume Screen -->
-  <div class="nightlog-start-screen" id="nightlogStart">
-    <div style="font-size:48px;margin-bottom:12px;">📋</div>
-    <h2>Night Log</h2>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">The sole incident log for your shift. Start a new shift or resume an existing one.</p>
-    <div class="form-group" style="text-align:left;max-width:320px;margin:0 auto 16px;">
-      <label for="nightlogLeaderName">Shift Leader Name</label>
-      <input type="text" id="nightlogLeaderName" placeholder="Your name" maxlength="60">
-    </div>
-    <div class="flex-row" style="justify-content:center;gap:10px;">
-      <button class="btn btn-gold" onclick="startNightlog(false)" aria-label="Start new shift log">Start New Shift</button>
-      <button class="btn btn-ghost" onclick="startNightlog(true)" aria-label="Resume existing shift log">Resume Shift</button>
-    </div>
-  </div>
-
-  <!-- Main Log UI (hidden until started) -->
-  <div id="nightlogMain" class="hidden">
-
     <!-- Shift Info Bar -->
     <div class="flex-between mb-16" style="flex-wrap:wrap;gap:10px;">
       <div>
@@ -2418,7 +2388,7 @@
       </div>
     </div>
 
-  </div><!-- /nightlogMain -->
+
 </section>
 
 <!-- -----------------------------------------------------------
@@ -2851,12 +2821,9 @@ let brandColour  = '#D4A843';
 let brandLogo    = null;
 
 // Night Log state
-let shiftLeader    = '';
-let shiftStartTime = null;
 let logEntries     = [];
 let floorWalkState = {};
 let nlPhotoBase64  = null;
-let nightlogActive = false;
 
 // -- Section routing --
 function showSection(id, navEl) {
@@ -2959,11 +2926,7 @@ function saveState() {
     localStorage.setItem('shiftCompanion_nightLogEntries', JSON.stringify(logEntries));
     if (lastCheckInTime) localStorage.setItem('shiftCompanion_lastCheckIn', lastCheckInTime.toString());
     localStorage.setItem('shiftCompanion_boardData', JSON.stringify(collectBoardData()));
-    if (nightlogActive) {
-      localStorage.setItem('shiftCompanion_nightlogLeader', shiftLeader);
-      localStorage.setItem('shiftCompanion_nightlogStart',  shiftStartTime ? shiftStartTime.toString() : '');
-      localStorage.setItem('shiftCompanion_floorWalkState', JSON.stringify(floorWalkState));
-    }
+    localStorage.setItem('shiftCompanion_floorWalkState', JSON.stringify(floorWalkState));
   } catch(e) { console.warn('Save failed', e); }
 }
 
@@ -3002,16 +2965,8 @@ function loadState() {
     if (lci) { lastCheckInTime = parseInt(lci, 10); updateCheckInDisplay(); }
     const bd = localStorage.getItem('shiftCompanion_boardData');
     if (bd) { try { loadBoardData(JSON.parse(bd)); } catch(e){} }
-    // Night log resume
-    const nlLeader = localStorage.getItem('shiftCompanion_nightlogLeader');
-    const nlStart  = localStorage.getItem('shiftCompanion_nightlogStart');
-    const nlFloor  = localStorage.getItem('shiftCompanion_floorWalkState');
-    if (nlLeader) {
-      shiftLeader    = nlLeader;
-      shiftStartTime = nlStart ? parseInt(nlStart, 10) : Date.now();
-      if (nlFloor) { try { floorWalkState = JSON.parse(nlFloor); } catch(e){} }
-      nightlogActive = true;
-    }
+    const nlFloor = localStorage.getItem('shiftCompanion_floorWalkState');
+    if (nlFloor) { try { floorWalkState = JSON.parse(nlFloor); } catch(e){} }
   }
 
   // Persist UI
@@ -3675,20 +3630,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // -- Night Log --
 
-function startNightlog() {
-  const name = (document.getElementById('nlLeaderName')?.value || '').trim();
-  if (!name) { alert('Please enter your name to start the log.'); return; }
-  shiftLeader    = name;
-  shiftStartTime = new Date().toISOString();
-  nightlogActive = true;
-  document.getElementById('nlStartScreen')?.classList.add('hidden');
-  document.getElementById('nlMainUi')?.classList.remove('hidden');
-  renderNightLogEntries();
-  saveState();
-}
-
 function toggleFloorClear(floor) {
-  if (!nightlogActive) return;
   floorWalkState[floor] = !floorWalkState[floor];
   const btn = document.querySelector(`.floor-clear-btn[data-floor="${floor}"]`);
   if (btn) {
@@ -3712,8 +3654,6 @@ function generateEntryId() {
 }
 
 function addLogEntry() {
-  if (!nightlogActive) { alert('Please start the log first.'); return; }
-
   const floor    = document.getElementById('nlFloor')?.value    || '';
   const category = document.getElementById('nlCategory')?.value || '';
   const severity = document.getElementById('nlSeverity')?.value || 'medium';
@@ -3728,7 +3668,7 @@ function addLogEntry() {
   const entry = {
     id: generateEntryId(), type: 'issue', timestamp: new Date().toISOString(),
     floor, category, severity, title, description: desc,
-    reporter: reporter || shiftLeader,
+    reporter: reporter || staffName,
     imageBase64: nlPhotoBase64 || null, rectified: false
   };
 
@@ -3751,6 +3691,11 @@ function addLogEntry() {
 }
 
 function renderNightLogEntries() {
+  const ldEl = document.getElementById('nlLeaderDisplay');
+  const stEl = document.getElementById('nlStartTimeDisplay');
+  if (ldEl) ldEl.textContent = staffName || '—';
+  if (stEl) stEl.textContent = shiftStart ? new Date(shiftStart).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+
   const list = document.getElementById('nlEntriesList');
   if (!list) return;
   if (logEntries.length === 0) {
@@ -3812,14 +3757,14 @@ function formatTime(iso) {
 function exportNightlogJSON() {
   const data = {
     schemaVersion: 1,
-    shiftId:       shiftStartTime || new Date().toISOString(),
-    shiftLeader:   shiftLeader,
+    shiftId:       new Date(shiftStart || Date.now()).toISOString(),
+    shiftLeader:   staffName,
     exportedAt:    new Date().toISOString(),
     entries:       logEntries
   };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
-  const fn   = 'nightlog-' + (shiftStartTime || new Date().toISOString()).slice(0,10) + '.json';
+  const fn   = 'nightlog-' + new Date(shiftStart || Date.now()).toISOString().slice(0,10) + '.json';
   if (window.showSaveFilePicker) {
     window.showSaveFilePicker({ suggestedName: fn, types:[{ description:'JSON', accept:{'application/json':['.json']} }] })
       .then(h => h.createWritable()).then(w => { w.write(blob); return w; }).then(w => w.close())
@@ -3893,21 +3838,10 @@ function submitQuickLog() {
     alert('Please fill in Guest/Room, Type, and Description.'); return;
   }
 
-  // Require a profile name before auto-starting the night log
-  if (!nightlogActive) {
-    if (!staffName) {
-      closeModal('quickLogModal');
-      openModal('profileModal');
-      return;
-    }
-    shiftLeader    = staffName;
-    shiftStartTime = shiftStartTime || new Date().toISOString();
-    nightlogActive = true;
-    // Update Night Log section UI so entries are immediately visible on navigation
-    document.getElementById('nlStartScreen')?.classList.add('hidden');
-    document.getElementById('nlMainUi')?.classList.remove('hidden');
-    const nlNameInput = document.getElementById('nlLeaderName');
-    if (nlNameInput) nlNameInput.value = shiftLeader;
+  if (!staffName) {
+    closeModal('quickLogModal');
+    openModal('profileModal');
+    return;
   }
 
   const entry = {
@@ -4672,8 +4606,8 @@ function confirmEndShift() {
     'shiftCompanion_lastCheckIn', 'shiftCompanion_nightLogEntries',
     'shiftCompanion_checklistState',
     'shiftCompanion_boardData', 'shiftCompanion_shiftStart',
-    'shiftCompanion_nlLeader', 'shiftCompanion_nlStartTime',
-    'shiftCompanion_nightlogActive', 'shiftCompanion_floorWalkState'
+    'shiftCompanion_nightlogLeader', 'shiftCompanion_nightlogStart',
+    'shiftCompanion_floorWalkState'
   ];
   sessionKeys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
 
@@ -4682,9 +4616,6 @@ function confirmEndShift() {
   logEntries        = [];
   floorWalkState    = {};
   nlPhotoBase64     = null;
-  nightlogActive    = false;
-  shiftLeader       = staffName;
-  shiftStartTime    = null;
   shiftStart        = Date.now();
   lastCheckInTime   = null;
   if (shiftEl)    shiftEl.value    = '';
@@ -4693,12 +4624,6 @@ function confirmEndShift() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-
-  // Reset Night Log UI
-  document.getElementById('nlStartScreen')?.classList.remove('hidden');
-  document.getElementById('nlMainUi')?.classList.add('hidden');
-  const nlLeaderInput = document.getElementById('nlLeaderName');
-  if (nlLeaderInput) nlLeaderInput.value = staffName || '';
 
   closeModal('endShiftModal');
 
@@ -4800,9 +4725,6 @@ function buildSessionSnapshot() {
     checklistState: { ...checkState },
     logEntries:     JSON.parse(JSON.stringify(logEntries)),
     floorWalkState: { ...floorWalkState },
-    nightlogActive,
-    nightlogLeader: shiftLeader    || '',
-    nightlogStart:  shiftStartTime || null,
     boardData:      collectBoardData(),
     lastCheckInTime: lastCheckInTime || null,
   };
@@ -4990,9 +4912,6 @@ function restoreSessionSnapshot(data) {
   checkState      = data.checklistState || {};
   logEntries      = data.logEntries     || [];
   floorWalkState  = data.floorWalkState || {};
-  nightlogActive  = data.nightlogActive || false;
-  shiftLeader     = data.nightlogLeader || data.staffName || '';
-  shiftStartTime  = data.nightlogStart  || null;
   lastCheckInTime = data.lastCheckInTime || null;
 
   const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
@@ -5010,13 +4929,6 @@ function restoreSessionSnapshot(data) {
       });
       updateBoardHeaders();
     } catch {}
-  }
-
-  if (nightlogActive) {
-    document.getElementById('nightlogStart')?.classList.add('hidden');
-    document.getElementById('nightlogMain')?.classList.remove('hidden');
-    const nlName = document.getElementById('nightlogLeaderName');
-    if (nlName) nlName.value = shiftLeader;
   }
 
   renderChecklist('preAudit');
@@ -5121,15 +5033,6 @@ function init() {
   // Board
   initBoard();
 
-  // Night log resume
-  if (nightlogActive && shiftLeader) {
-    document.getElementById('nlStartScreen')?.classList.add('hidden');
-    document.getElementById('nlMainUi')?.classList.remove('hidden');
-  } else {
-    const nlLeaderInput = document.getElementById('nlLeaderName');
-    if (nlLeaderInput && !nlLeaderInput.value) nlLeaderInput.value = staffName || '';
-  }
-
   // Incoming handover banner
   const pendingHandover = (() => { try { return localStorage.getItem('shiftCompanion_pendingHandover'); } catch { return null; } })();
   if (pendingHandover) {
@@ -5211,9 +5114,6 @@ function init() {
 
   // Wire remove photo
   document.getElementById('nlPhotoRemoveBtn')?.addEventListener('click', removeNlPhoto);
-
-  // Wire start nightlog
-  document.getElementById('nlStartBtn')?.addEventListener('click', startNightlog);
 
   // Wire sign print
   document.getElementById('printSignBtn')?.addEventListener('click', printSign);
