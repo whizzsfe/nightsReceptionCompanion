@@ -246,6 +246,15 @@
     }
     .save-toggle-row { display: flex; align-items: center; justify-content: space-between; }
     .save-toggle-desc { font-size: 11px; color: var(--muted); }
+    /* Auto-save sidebar widget */
+    .autosave-wrap { padding: 10px 20px 14px; border-top: 1px solid var(--border); }
+    .autosave-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+    .autosave-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .autosave-desc { font-size: 11px; color: var(--muted); }
+    .autosave-desc.active { color: var(--green); }
+    .btn-autosave { font-size: 10px; padding: 3px 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 4px; cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s; }
+    .btn-autosave:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-autosave:focus { outline: 2px solid var(--gold); }
     .toggle-pill {
       width: 40px;
       height: 22px;
@@ -1715,6 +1724,9 @@
     <div class="nav-item" data-section="nightaudit" onclick="showSection('nightaudit',this)" role="button" tabindex="0" aria-label="Night Audit">
       <span class="nav-icon">🧾</span> Night Audit
     </div>
+    <div class="nav-item" data-section="nightlog" onclick="showSection('nightlog',this)" role="button" tabindex="0" aria-label="Night Log">
+      <span class="nav-icon">📋</span> Night Log
+    </div>
     <div class="nav-item" data-section="notes" onclick="showSection('notes',this)" role="button" tabindex="0" aria-label="Notes and Handover">
       <span class="nav-icon">📝</span> Notes &amp; Handover
     </div>
@@ -1732,12 +1744,6 @@
     <div class="tools-divider"></div>
     <div class="nav-section-label">Tools</div>
 
-    <div class="nav-item" data-section="nightlog" onclick="showSection('nightlog',this)" role="button" tabindex="0" aria-label="Night Log">
-      <span class="nav-icon">📋</span> Night Log
-    </div>
-    <div class="nav-item" data-section="reports" onclick="showSection('reports',this)" role="button" tabindex="0" aria-label="Monthly Report">
-      <span class="nav-icon">📊</span> Monthly Report
-    </div>
     <div class="nav-item" data-section="checkin" onclick="showSection('checkin',this)" role="button" tabindex="0" aria-label="Group Check-in">
       <span class="nav-icon">👥</span> Group Check-in
     </div>
@@ -1760,6 +1766,15 @@
     <div class="save-toggle-row">
       <span class="save-toggle-desc" id="persistDesc">Off — session only</span>
       <button class="toggle-pill" id="persistToggle" onclick="togglePersist()" aria-label="Toggle data persistence" aria-pressed="false"></button>
+    </div>
+  </div>
+
+  <!-- Auto-save to OneDrive folder -->
+  <div class="autosave-wrap">
+    <div class="autosave-label">Shift Auto-save</div>
+    <div class="autosave-row">
+      <span class="autosave-desc" id="autoSaveDesc">Not configured</span>
+      <button class="btn-autosave" id="autoSaveSetupBtn" onclick="setupAutoSaveFolder()" aria-label="Configure auto-save folder">Set folder</button>
     </div>
   </div>
 </aside>
@@ -2016,6 +2031,13 @@
         <div class="quick-action-desc">Notes &amp; handover for next shift</div>
       </div>
     </div>
+    <div class="quick-action-card" onclick="resumeShiftFromFile()" role="button" tabindex="0" aria-label="Resume a saved shift session from another device">
+      <div class="quick-action-icon">📂</div>
+      <div>
+        <div class="quick-action-title">Resume Shift from File</div>
+        <div class="quick-action-desc">Load a session saved on another device</div>
+      </div>
+    </div>
   </div>
 
   <!-- Tip Card -->
@@ -2236,13 +2258,32 @@
 <!-- -----------------------------------------------------------
      SECTION: SHIFT HISTORY
 ----------------------------------------------------------- -->
-<section class="section" id="section-history" aria-label="Shift History">
+<section class="section" id="section-history" aria-label="Shift History and Reports">
   <div class="flex-between mb-16">
     <div>
-      <div class="section-heading">Shift History</div>
-      <div class="section-sub">A record of all shifts completed on this device.</div>
+      <div class="section-heading">Shift History &amp; Reports</div>
+      <div class="section-sub">Shift records from this device and OneDrive folder.</div>
     </div>
-    <button class="btn btn-danger btn-sm" onclick="clearHistory()" aria-label="Clear all shift history">🗑 Clear History</button>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm no-print" onclick="loadHistoryFromFolder()" aria-label="Sync history from OneDrive folder">📁 Sync from Folder</button>
+      <button class="btn btn-ghost btn-sm no-print" onclick="window.print()" aria-label="Print shift history report">🖨️ Print Report</button>
+      <button class="btn btn-danger btn-sm no-print" onclick="clearHistory()" id="clearHistoryBtn" aria-label="Clear all shift history">🗑 Clear</button>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="card mb-16 no-print" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+    <div class="form-group" style="margin-bottom:0;flex:1;min-width:140px;">
+      <label for="histFilterMonth">Month</label>
+      <select id="histFilterMonth" onchange="renderHistory()" aria-label="Filter by month">
+        <option value="">All months</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0;flex:1;min-width:140px;">
+      <label for="histFilterStaff">Staff</label>
+      <input type="text" id="histFilterStaff" placeholder="Name…" maxlength="60" oninput="renderHistory()" aria-label="Filter by staff name">
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="clearHistoryFilters()" aria-label="Clear filters">✕ Clear filters</button>
   </div>
 
   <!-- Aggregate Stats -->
@@ -2265,11 +2306,58 @@
     </div>
   </div>
 
-  <!-- Entries -->
+  <!-- Charts (populated from night log entries across all shifts) -->
+  <div class="chart-grid" id="historyCharts">
+    <div class="chart-wrap">
+      <div class="chart-title">Issues by Category</div>
+      <canvas id="chartCategory" height="200"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Issues by Floor</div>
+      <canvas id="chartFloor" height="200"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Issues by Severity</div>
+      <canvas id="chartSeverity" height="200"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Floor Walk Results</div>
+      <canvas id="chartAllClear" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Shift list -->
   <div id="historyList"></div>
   <div class="empty-state hidden" id="historyEmpty">
     <div class="empty-state-icon">📂</div>
-    <div class="empty-state-text">No shifts recorded yet.<br>Complete your first shift using the End Shift button.</div>
+    <div class="empty-state-text">No shifts recorded yet.<br>Complete a shift using the End Shift button, or sync from your OneDrive folder.</div>
+  </div>
+
+  <!-- All incidents table -->
+  <div class="card mt-16" id="histEntriesCard" style="overflow-x:auto;">
+    <div class="card-header">
+      <div class="card-title">All Incidents</div>
+      <input type="text" id="histEntriesFilter" placeholder="Filter by title, category, floor…"
+             style="max-width:260px;" oninput="filterHistoryEntries()" aria-label="Filter incident entries">
+    </div>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Staff</th>
+          <th>Floor</th>
+          <th>Category</th>
+          <th>Severity</th>
+          <th>Title</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="histEntriesBody"></tbody>
+    </table>
+    <div class="empty-state hidden" id="histEntriesEmpty">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-text">No incident entries found. Incidents logged during a shift appear here after End Shift.</div>
+    </div>
   </div>
 </section>
 
@@ -2428,106 +2516,6 @@
     </div>
 
   </div><!-- /nightlogMain -->
-</section>
-
-<!-- -----------------------------------------------------------
-     SECTION: MONTHLY REPORT
------------------------------------------------------------ -->
-<section class="section" id="section-reports" aria-label="Monthly Report">
-  <div class="section-heading">Monthly Report</div>
-  <div class="section-sub">Import Night Log JSON exports to generate analytics across multiple shifts.</div>
-
-  <div class="card mb-16">
-    <div class="card-title" style="margin-bottom:10px;">Import Shift JSON Files</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Select one or more <code>.json</code> files exported from the Night Log. Duplicate entries are automatically removed.</p>
-    <input type="file" id="reportFileInput" accept=".json" multiple aria-label="Import JSON shift files" onchange="importReportFiles(this.files)">
-    <div class="mt-8" id="reportFilesStatus" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></div>
-    <div class="mt-12 flex-row">
-      <button class="btn btn-ghost btn-sm" onclick="clearReportData()" aria-label="Clear all imported report data">✕ Clear All</button>
-    </div>
-  </div>
-
-  <!-- Stat Cards -->
-  <div class="report-stat-grid" id="reportStatGrid">
-    <div class="stat-card">
-      <div class="stat-value" id="rStatShifts">0</div>
-      <div class="stat-label">Shifts Loaded</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value" id="rStatEntries">0</div>
-      <div class="stat-label">Total Entries</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value" id="rStatIssues">0</div>
-      <div class="stat-label">Issues</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value" id="rStatAllClear">0%</div>
-      <div class="stat-label">All-Clear Coverage</div>
-    </div>
-  </div>
-
-  <!-- Charts -->
-  <div class="chart-grid" id="reportCharts">
-    <div class="chart-wrap">
-      <div class="chart-title">By Category</div>
-      <canvas id="chartCategory" height="200"></canvas>
-    </div>
-    <div class="chart-wrap">
-      <div class="chart-title">By Floor</div>
-      <canvas id="chartFloor" height="200"></canvas>
-    </div>
-    <div class="chart-wrap">
-      <div class="chart-title">By Severity</div>
-      <canvas id="chartSeverity" height="200"></canvas>
-    </div>
-    <div class="chart-wrap">
-      <div class="chart-title">All-Clear Coverage by Shift</div>
-      <canvas id="chartAllClear" height="200"></canvas>
-    </div>
-  </div>
-
-  <!-- Shift Summary Table -->
-  <div class="card mb-16" id="reportShiftTable" style="overflow-x:auto;">
-    <div class="card-title" style="margin-bottom:12px;">Shift Summary</div>
-    <table class="report-table" id="rShiftTableEl">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Leader</th>
-          <th>Issues</th>
-          <th>Floor Walks</th>
-          <th>All-Clears</th>
-        </tr>
-      </thead>
-      <tbody id="rShiftTableBody"></tbody>
-    </table>
-  </div>
-
-  <!-- Filterable Entries Table -->
-  <div class="card" style="overflow-x:auto;">
-    <div class="card-header">
-      <div class="card-title">All Entries</div>
-      <input type="text" id="reportFilter" class="report-filter" placeholder="Filter by title, category, floor…" aria-label="Filter entries" oninput="filterReportEntries(this.value)" style="max-width:260px;">
-    </div>
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Timestamp</th>
-          <th>Floor</th>
-          <th>Category</th>
-          <th>Severity</th>
-          <th>Title</th>
-        </tr>
-      </thead>
-      <tbody id="rEntriesTableBody"></tbody>
-    </table>
-    <div class="empty-state hidden" id="rEntriesEmpty">
-      <div class="empty-state-icon">📋</div>
-      <div class="empty-state-text">No entries to display. Import JSON files above.</div>
-    </div>
-  </div>
 </section>
 
 <!-- -----------------------------------------------------------
@@ -2925,6 +2913,12 @@
 // CHUNK 7 — STATE, NAVIGATION, PERSIST, CLOCK, PROFILE, BRAND
 // -------------------------------------------------------------
 
+// =============================================================
+// SITE CONFIGURATION — edit this line to rename the OneDrive folder
+// =============================================================
+const SHIFT_BASE_FOLDER = 'shiftLogs';
+// =============================================================
+
 // -- Section title map --
 const sectionTitles = {
   dashboard:  'NIGHT DASHBOARD',
@@ -2933,9 +2927,8 @@ const sectionTitles = {
   notes:      'NOTES & SHIFT HANDOVER',
   motivation: 'SHIFT MOTIVATION',
   ai:         'AI COACH — ARIA',
-  history:    'SHIFT HISTORY',
+  history:    'SHIFT HISTORY & REPORTS',
   nightlog:   'NIGHT LOG',
-  reports:    'MONTHLY REPORT',
   checkin:    'GROUP CHECK-IN',
   signs:      'SIGN GENERATOR',
   board:      'DAILY INFO BOARD'
@@ -2945,7 +2938,7 @@ const sectionTitles = {
 let staffName    = '';
 let staffRole    = 'Night Auditor';
 let staffShift   = 'Night (10:30pm–7am)';
-let persistData  = false;
+let persistData  = true;
 let shiftStart   = null;
 let checkState   = {};        // { [itemId]: boolean }
 let auditState   = {};        // { [stepId]: boolean }
@@ -2963,11 +2956,6 @@ let logEntries     = [];
 let floorWalkState = {};
 let nlPhotoBase64  = null;
 let nightlogActive = false;
-
-// Reports state
-let reportShifts  = [];
-let reportEntries = [];
-let allReportEntries = [];
 
 // -- Section routing --
 function showSection(id, navEl) {
@@ -3084,7 +3072,7 @@ function loadState() {
   staffName  = localStorage.getItem('shiftCompanion_staffName')  || '';
   staffRole  = localStorage.getItem('shiftCompanion_staffRole')  || 'Night Auditor';
   staffShift = localStorage.getItem('shiftCompanion_staffShift') || 'Night (10:30pm–7am)';
-  persistData = localStorage.getItem('shiftCompanion_persist') === '1';
+  persistData = localStorage.getItem('shiftCompanion_persist') !== '0';
   const histRaw = localStorage.getItem('shiftCompanion_history');
   if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
   // pendingHandover kept in localStorage for history reference only — no banner shown
@@ -4133,63 +4121,6 @@ function submitQuickLog() {
   const qlType = document.getElementById('qlType'); if (qlType) qlType.selectedIndex = 0;
 }
 
-// -- Monthly Report --
-function handleReportFileChange(e) {
-  const files = Array.from(e.target.files);
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = evt => {
-      try {
-        const data = JSON.parse(evt.target.result);
-        if (data.schemaVersion !== 1 || !Array.isArray(data.entries)) {
-          alert('File "' + file.name + '" does not match the expected Night Log format.'); return;
-        }
-        // Deduplicate by entry id
-        const existingIds = new Set(allReportEntries.map(e => e.id));
-        data.entries.forEach(en => { if (!existingIds.has(en.id)) allReportEntries.push(en); });
-        const existingShifts = new Set(reportShifts.map(s => s.shiftId));
-        if (!existingShifts.has(data.shiftId)) {
-          reportShifts.push({ shiftId: data.shiftId, shiftLeader: data.shiftLeader, exportedAt: data.exportedAt, entryCount: data.entries.length });
-        }
-        renderReports();
-      } catch { alert('Could not parse "' + file.name + '". Please check it is a valid Night Log JSON file.'); }
-    };
-    reader.readAsText(file);
-  });
-  e.target.value = '';
-}
-
-function renderReports() {
-  // Stat cards
-  const issues = allReportEntries.filter(e => e.type === 'issue');
-  const walks  = allReportEntries.filter(e => e.type === 'floor_walk');
-  const hi     = issues.filter(e => e.severity === 'high').length;
-  const resolved = issues.filter(e => e.rectified).length;
-
-  const setCard = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  setCard('rptTotalShifts',   reportShifts.length);
-  setCard('rptTotalIssues',   issues.length);
-  setCard('rptHighSeverity',  hi);
-  setCard('rptFloorWalks',    walks.length);
-
-  // Charts
-  renderBarChart('chartCategory',  countBy(issues, 'category'),  'Issues by Category');
-  renderBarChart('chartFloor',     countBy(issues, 'floor'),     'Issues by Floor');
-  renderBarChart('chartSeverity',  countBy(issues, 'severity'),  'Issues by Severity');
-  renderBarChart('chartAllClear',  { 'All Clear': walks.filter(w=>w.allClear).length, 'Issues Found': walks.filter(w=>!w.allClear).length }, 'Floor Walk Results');
-
-  // Shift summary table
-  const tbody = document.querySelector('#rptShiftsTable tbody');
-  if (tbody) {
-    tbody.innerHTML = reportShifts.map(s => {
-      const issued = allReportEntries.filter(e => e.type === 'issue');
-      return `<tr><td>${formatDate(s.shiftId)}</td><td>${escapeHtml(s.shiftLeader||'—')}</td><td>${s.entryCount}</td></tr>`;
-    }).join('');
-  }
-
-  renderReportEntries('');
-}
-
 function countBy(arr, key) {
   return arr.reduce((acc, item) => { const v = item[key]||'Unknown'; acc[v]=(acc[v]||0)+1; return acc; }, {});
 }
@@ -4255,49 +4186,6 @@ function renderBarChart(canvasId, data, title) {
   ctx.strokeStyle = '#2A2A2A';
   ctx.lineWidth   = 1;
   ctx.beginPath(); ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, pad.top + usableH); ctx.stroke();
-}
-
-function renderReportEntries(filter) {
-  const tbody = document.querySelector('#rptEntriesTable tbody');
-  if (!tbody) return;
-  const lower = (filter||'').toLowerCase();
-  const rows  = allReportEntries.filter(e => e.type === 'issue').filter(e => {
-    if (!lower) return true;
-    return [e.category, e.floor, e.severity, e.title, e.description, e.reporter]
-      .some(v => (v||'').toLowerCase().includes(lower));
-  });
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No entries match your search.</td></tr>'; return;
-  }
-  tbody.innerHTML = rows.map(e => `
-    <tr>
-      <td>${formatTime(e.timestamp)}</td>
-      <td>${escapeHtml(e.floor||'—')}</td>
-      <td>${escapeHtml(e.category||'—')}</td>
-      <td><span class="badge badge-${e.severity==='high'?'red':e.severity==='medium'?'gold':'muted'}">${e.severity||'—'}</span></td>
-      <td>${escapeHtml(e.title||'—')}</td>
-      <td><span class="badge ${e.rectified?'badge-green':'badge-muted'}">${e.rectified?'Resolved':'Pending'}</span></td>
-    </tr>`).join('');
-}
-
-function filterReportEntries() {
-  const val = document.getElementById('rptFilter')?.value || '';
-  renderReportEntries(val);
-}
-
-function clearReportData() {
-  if (!confirm('Clear all imported report data?')) return;
-  reportShifts = []; reportEntries = []; allReportEntries = [];
-  const tbody1 = document.querySelector('#rptShiftsTable tbody');
-  const tbody2 = document.querySelector('#rptEntriesTable tbody');
-  if (tbody1) tbody1.innerHTML = '';
-  if (tbody2) tbody2.innerHTML = '';
-  ['rptTotalShifts','rptTotalIssues','rptHighSeverity','rptFloorWalks'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.textContent = '0';
-  });
-  ['chartCategory','chartFloor','chartSeverity','chartAllClear'].forEach(id => {
-    const canvas = document.getElementById(id); if (canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
-  });
 }
 
 // -- Group Check-in --
@@ -4726,59 +4614,149 @@ function renderHistory() {
   const empty = document.getElementById('historyEmpty');
   if (!list) return;
 
-  if (shiftHistory.length === 0) {
-    list.innerHTML  = '';
+  // Populate month filter dropdown
+  const monthSel = document.getElementById('histFilterMonth');
+  if (monthSel) {
+    const months = [...new Set(shiftHistory.map(s => {
+      try { const d = new Date(s.date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; } catch { return null; }
+    }).filter(Boolean))].sort().reverse();
+    const current = monthSel.value;
+    monthSel.innerHTML = '<option value="">All months</option>' +
+      months.map(m => {
+        const [y, mo] = m.split('-');
+        const label = new Date(y, parseInt(mo)-1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        return `<option value="${m}" ${m === current ? 'selected' : ''}>${label}</option>`;
+      }).join('');
+  }
+
+  // Apply filters
+  const filterMonth = document.getElementById('histFilterMonth')?.value || '';
+  const filterStaff = (document.getElementById('histFilterStaff')?.value || '').toLowerCase();
+  const filtered = shiftHistory.filter(s => {
+    if (filterStaff && !(s.staffName || '').toLowerCase().includes(filterStaff)) return false;
+    if (filterMonth) {
+      try {
+        const d = new Date(s.date);
+        const sm = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if (sm !== filterMonth) return false;
+      } catch { return false; }
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
     if (empty) empty.classList.remove('hidden');
-    updateHistoryStats();
+  } else {
+    if (empty) empty.classList.add('hidden');
+    list.innerHTML = [...filtered].reverse().map(s => {
+      const idx     = shiftHistory.indexOf(s);
+      const date    = s.date       || '—';
+      const staff   = s.staffName  || '—';
+      const role    = s.staffRole  || '—';
+      const hn      = s.handoverNotes  || '';
+      const sn      = s.shiftNotes     || '';
+      const bb      = s.breakfastBags  || '';
+      const tx      = s.handoverTaxis  || '';
+      const wu      = s.wakeUpCalls    || '';
+      const issues  = s.incidentCount ?? 0;
+      const clPct   = s.checklistPct ?? 0;
+      const auditPct= s.auditPct     ?? 0;
+      return `
+        <div class="history-entry">
+          <div class="history-entry-header">
+            <div>
+              <span class="history-staff">${escapeHtml(staff)}</span>
+              <span class="history-role">${escapeHtml(role)}</span>
+            </div>
+            <div class="history-meta">
+              <span>${escapeHtml(date)}</span>
+              <button class="btn btn-ghost btn-sm" onclick="loadHandoverFromHistory(${idx})" aria-label="Load handover from this shift">📋 Load Handover</button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">▼ Details</button>
+            </div>
+          </div>
+          <div class="history-stats">
+            <span>Checklist: <strong>${clPct}%</strong></span>
+            <span>Audit: <strong>${auditPct}%</strong></span>
+            <span>Incidents: <strong>${issues}</strong></span>
+          </div>
+          <div class="history-detail hidden">
+            ${sn ? `<div class="history-section-label">Shift Notes</div><div class="history-section-body">${escapeHtml(sn)}</div>` : ''}
+            ${hn ? `<div class="history-section-label">Handover Notes</div><div class="history-section-body">${escapeHtml(hn)}</div>` : ''}
+            ${(bb || tx || wu) ? `<div class="history-section-label">Breakfast Bags / Taxis / Wake-up Calls</div><div class="history-section-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div><em style="color:var(--muted);font-size:11px">Breakfast Bags</em><br>${escapeHtml(bb) || '<span style="color:var(--muted)">—</span>'}</div>
+              <div><em style="color:var(--muted);font-size:11px">Taxis</em><br>${escapeHtml(tx) || '<span style="color:var(--muted)">—</span>'}</div>
+              <div><em style="color:var(--muted);font-size:11px">Wake-up Calls</em><br>${escapeHtml(wu) || '<span style="color:var(--muted)">—</span>'}</div>
+            </div>` : ''}
+            ${!sn && !hn && !bb && !tx && !wu ? '<p style="color:var(--muted)">No notes recorded.</p>' : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  updateHistoryStats(filtered);
+  renderHistoryCharts(filtered);
+  renderHistoryEntries();
+}
+
+function clearHistoryFilters() {
+  const ms = document.getElementById('histFilterMonth'); if (ms) ms.value = '';
+  const sf = document.getElementById('histFilterStaff'); if (sf) sf.value = '';
+  renderHistory();
+}
+
+function renderHistoryCharts(filteredShifts) {
+  const allIssues = [];
+  (filteredShifts || shiftHistory).forEach(s => {
+    (s.incidents || []).forEach(e => { if (e.type === 'issue' || !e.type) allIssues.push({ ...e, _shiftDate: s.date }); });
+  });
+  renderBarChart('chartCategory', countBy(allIssues, 'category'),  'Issues by Category');
+  renderBarChart('chartFloor',    countBy(allIssues, 'floor'),     'Issues by Floor');
+  renderBarChart('chartSeverity', countBy(allIssues, 'severity'),  'Issues by Severity');
+  const acData = {
+    'No Incidents': (filteredShifts || shiftHistory).filter(s => (s.incidentCount||0) === 0).length,
+    'Had Incidents': (filteredShifts || shiftHistory).filter(s => (s.incidentCount||0) > 0).length,
+  };
+  renderBarChart('chartAllClear', acData, 'Shifts: Incidents vs Clear');
+}
+
+function renderHistoryEntries() {
+  const tbody = document.getElementById('histEntriesBody');
+  const empty = document.getElementById('histEntriesEmpty');
+  if (!tbody) return;
+  const filter = (document.getElementById('histEntriesFilter')?.value || '').toLowerCase();
+
+  const rows = [];
+  shiftHistory.forEach(s => {
+    (s.incidents || []).forEach(e => rows.push({ ...e, _shiftDate: s.date, _staffName: s.staffName }));
+  });
+
+  const filteredRows = rows.filter(e => {
+    if (!filter) return true;
+    return [e.category, e.floor, e.severity, e.title, e.description, e._staffName, e._shiftDate]
+      .some(v => (v||'').toLowerCase().includes(filter));
+  });
+
+  if (filteredRows.length === 0) {
+    tbody.innerHTML = '';
+    if (empty) empty.classList.remove('hidden');
     return;
   }
   if (empty) empty.classList.add('hidden');
+  tbody.innerHTML = filteredRows.map(e => `
+    <tr>
+      <td style="white-space:nowrap">${escapeHtml(e._shiftDate||'—')}</td>
+      <td>${escapeHtml(e._staffName||'—')}</td>
+      <td>${escapeHtml(e.floor||'—')}</td>
+      <td>${escapeHtml(e.category||'—')}</td>
+      <td><span class="badge badge-${e.severity==='high'?'red':e.severity==='medium'?'gold':'muted'}">${e.severity||'—'}</span></td>
+      <td>${escapeHtml(e.title||'—')}</td>
+      <td><span class="badge ${e.rectified?'badge-green':'badge-muted'}">${e.rectified?'Resolved':'Pending'}</span></td>
+    </tr>`).join('');
+}
 
-  list.innerHTML = [...shiftHistory].reverse().map((s, revIdx) => {
-    const idx = shiftHistory.length - 1 - revIdx;
-    const date    = s.date     || '—';
-    const staff   = s.staffName  || '—';
-    const role    = s.staffRole  || '—';
-    const hn      = s.handoverNotes  || '';
-    const sn      = s.shiftNotes      || '';
-    const bb      = s.breakfastBags   || '';
-    const tx      = s.handoverTaxis   || '';
-    const wu      = s.wakeUpCalls     || '';
-    const issues  = s.incidentCount ?? 0;
-    const clPct   = s.checklistPct ?? 0;
-    const auditPct= s.auditPct     ?? 0;
-    return `
-      <div class="history-entry">
-        <div class="history-entry-header">
-          <div>
-            <span class="history-staff">${escapeHtml(staff)}</span>
-            <span class="history-role">${escapeHtml(role)}</span>
-          </div>
-          <div class="history-meta">
-            <span>${escapeHtml(date)}</span>
-            <button class="btn btn-ghost btn-sm" onclick="loadHandoverFromHistory(${idx})" aria-label="Load handover from this shift">📋 Load Handover</button>
-            <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">▼ Details</button>
-          </div>
-        </div>
-        <div class="history-stats">
-          <span>Checklist: <strong>${clPct}%</strong></span>
-          <span>Audit: <strong>${auditPct}%</strong></span>
-          <span>Incidents: <strong>${issues}</strong></span>
-        </div>
-        <div class="history-detail hidden">
-          ${sn  ? `<div class="history-section-label">Shift Notes</div><div class="history-section-body">${escapeHtml(sn)}</div>` : ''}
-          ${hn  ? `<div class="history-section-label">Handover Notes</div><div class="history-section-body">${escapeHtml(hn)}</div>` : ''}
-          ${(bb || tx || wu) ? `<div class="history-section-label">Breakfast Bags / Taxis / Wake-up Calls</div><div class="history-section-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-            <div><em style="color:var(--muted);font-size:11px">Breakfast Bags</em><br>${escapeHtml(bb) || '<span style="color:var(--muted)">—</span>'}</div>
-            <div><em style="color:var(--muted);font-size:11px">Taxis</em><br>${escapeHtml(tx) || '<span style="color:var(--muted)">—</span>'}</div>
-            <div><em style="color:var(--muted);font-size:11px">Wake-up Calls</em><br>${escapeHtml(wu) || '<span style="color:var(--muted)">—</span>'}</div>
-          </div>` : ''}
-          ${!sn && !hn && !bb && !tx && !wu ? '<p style="color:var(--muted)">No notes recorded.</p>' : ''}
-        </div>
-      </div>`;
-  }).join('');
-
-  updateHistoryStats();
+function filterHistoryEntries() {
+  renderHistoryEntries();
 }
 
 function toggleHistoryDetail(btn) {
@@ -4788,30 +4766,30 @@ function toggleHistoryDetail(btn) {
   btn.textContent = detail.classList.contains('hidden') ? '? Details' : '? Hide';
 }
 
-function updateHistoryStats() {
-  const total = shiftHistory.length;
-  document.getElementById('histTotalShifts')?.setAttribute('data-val', total);
+function updateHistoryStats(filtered) {
+  const set   = filtered || shiftHistory;
+  const total = set.length;
   const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  setEl('histTotalShifts', total);
+  setEl('hStatShifts', total);
 
   if (total === 0) {
-    setEl('histAvgChecklist',  '—');
-    setEl('histTotalIncidents','—');
-    setEl('histCommonType',    '—');
+    setEl('hStatAvgChecklist',  '—');
+    setEl('hStatIncidents',     '—');
+    setEl('hStatTopType',       '—');
     return;
   }
-  const avgCl   = Math.round(shiftHistory.reduce((a,s) => a + (s.checklistPct||0), 0) / total);
-  const totalInc = shiftHistory.reduce((a,s) => a + (s.incidentCount||0), 0);
-  setEl('histAvgChecklist',   avgCl + '%');
-  setEl('histTotalIncidents', totalInc);
+  const avgCl    = Math.round(set.reduce((a,s) => a + (s.checklistPct||0), 0) / total);
+  const totalInc = set.reduce((a,s) => a + (s.incidentCount||0), 0);
+  setEl('hStatAvgChecklist', avgCl + '%');
+  setEl('hStatIncidents',    totalInc);
 
   // Most common incident category
   const catMap = {};
-  shiftHistory.forEach(s => (s.incidents||[]).forEach(e => {
+  set.forEach(s => (s.incidents||[]).forEach(e => {
     if (e.category) catMap[e.category] = (catMap[e.category]||0)+1;
   }));
   const top = Object.entries(catMap).sort((a,b) => b[1]-a[1])[0];
-  setEl('histCommonType', top ? top[0] : '—');
+  setEl('hStatTopType', top ? top[0] : '—');
 }
 
 function loadHandoverFromHistory(idx) {
@@ -4876,6 +4854,7 @@ function confirmEndShift() {
   // Save to history (always)
   shiftHistory.push(entry);
   try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
+  exportCompletedShift(entry);  // write to OneDrive folder + delete session file (no-op if not configured)
 
   // Write handover for next user
   if (handoverNotes) {
@@ -4942,6 +4921,386 @@ function showHandoverBanner(text) {
   if (incoming) incoming.textContent = text;
 }
 
+// =============================================================
+// STREAM 4: SHIFT AUTO-SAVE & CROSS-DEVICE RESUME
+// File System Access API + IndexedDB for folder handle persistence
+// =============================================================
+
+// -- IndexedDB helpers (store FileSystemDirectoryHandle across page loads) --
+function openShiftDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('shiftCompanionDB', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+async function getStoredFolderHandle() {
+  try {
+    const db = await openShiftDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('handles', 'readonly');
+      tx.objectStore('handles').get('shiftFolder').onsuccess = e => res(e.target.result || null);
+      tx.onerror = e => rej(e.target.error);
+    });
+  } catch { return null; }
+}
+async function storeFolderHandle(handle) {
+  try {
+    const db = await openShiftDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').put(handle, 'shiftFolder');
+      tx.oncomplete = () => res();
+      tx.onerror = e => rej(e.target.error);
+    });
+  } catch {}
+}
+
+// -- Folder structure: <root>/shiftLogs/YYYY/YYYY-MM MMM/ --
+async function getShiftMonthFolder(rootHandle) {
+  const now    = new Date();
+  const year   = now.getFullYear().toString();
+  const mm     = String(now.getMonth() + 1).padStart(2, '0');
+  const mon    = now.toLocaleDateString('en-GB', { month: 'short' }); // "Apr"
+  const monthFolder = `${year}-${mm} ${mon}`;                         // "2026-04 Apr"
+
+  const base = await rootHandle.getDirectoryHandle(SHIFT_BASE_FOLDER, { create: true });
+  const yr   = await base.getDirectoryHandle(year, { create: true });
+  const mo   = await yr.getDirectoryHandle(monthFolder, { create: true });
+  return mo;
+}
+
+// -- Write JSON to a named file in a directory handle --
+async function writeToFolder(dirHandle, filename, obj) {
+  const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+  const writable   = await fileHandle.createWritable();
+  await writable.write(JSON.stringify(obj, null, 2));
+  await writable.close();
+}
+
+// -- Build a full in-progress session snapshot --
+function buildSessionSnapshot() {
+  const id = 'shift_' + (shiftStart || Date.now());
+  return {
+    schemaVersion:  1,
+    type:           'shift_session',
+    shiftId:        id,
+    savedAt:        new Date().toISOString(),
+    staffName,
+    staffRole,
+    staffShift,
+    shiftStart:     shiftStart || Date.now(),
+    shiftNotes:     document.getElementById('shiftNotes')?.value    || '',
+    handoverNotes:  document.getElementById('handoverNotes')?.value || '',
+    breakfastBags:  document.getElementById('breakfastBags')?.value || '',
+    handoverTaxis:  document.getElementById('handoverTaxis')?.value || '',
+    wakeUpCalls:    document.getElementById('wakeUpCalls')?.value   || '',
+    checklistState: { ...checkState },
+    auditState:     { ...auditState },
+    logEntries:     JSON.parse(JSON.stringify(logEntries)),
+    floorWalkState: { ...floorWalkState },
+    nightlogActive,
+    nightlogLeader: shiftLeader    || '',
+    nightlogStart:  shiftStartTime || null,
+    boardData:      collectBoardData(),
+    lastCheckInTime: lastCheckInTime || null,
+  };
+}
+
+// -- Stable filenames --
+function _dateStamp(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function _timeStamp(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}${pad(d.getMinutes())}`;
+}
+function sessionFilename() {
+  const d = new Date(shiftStart || Date.now());
+  return `shift_session_${_dateStamp(d)}T${_timeStamp(d)}.json`;
+}
+function completedShiftFilename() {
+  const d = new Date(shiftStart || Date.now());
+  return `shift_${_dateStamp(d)}T${_timeStamp(d)}.json`;
+}
+
+// -- Auto-save state --
+let autoSaveInterval     = null;
+let autoSaveFolderHandle = null;
+
+// -- Update sidebar widget text --
+function updateAutoSaveStatus(active, lastSaved) {
+  const desc = document.getElementById('autoSaveDesc');
+  if (!desc) return;
+  if (!active) {
+    desc.textContent = 'Not configured';
+    desc.classList.remove('active');
+  } else {
+    desc.textContent = lastSaved ? `Saved ${lastSaved}` : 'Active';
+    desc.classList.add('active');
+  }
+}
+
+// -- Single auto-save write --
+async function autoSaveTick() {
+  if (!autoSaveFolderHandle) return;
+  try {
+    const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      const req = await autoSaveFolderHandle.requestPermission({ mode: 'readwrite' });
+      if (req !== 'granted') { updateAutoSaveStatus(false); return; }
+    }
+    const dir = await getShiftMonthFolder(autoSaveFolderHandle);
+    await writeToFolder(dir, sessionFilename(), buildSessionSnapshot());
+    const now = new Date();
+    const t   = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    updateAutoSaveStatus(true, t);
+  } catch(e) {
+    console.warn('Auto-save tick failed:', e);
+  }
+}
+
+function startAutoSaveInterval() {
+  if (autoSaveInterval) clearInterval(autoSaveInterval);
+  autoSaveInterval = setInterval(autoSaveTick, 5 * 60 * 1000);
+  autoSaveTick(); // immediate first save
+}
+function stopAutoSaveInterval() {
+  if (autoSaveInterval) { clearInterval(autoSaveInterval); autoSaveInterval = null; }
+}
+
+// -- Silently load + merge history from folder on startup --
+async function silentlyLoadHistory(rootHandle) {
+  try {
+    const files = [];
+    await scanDirForShiftFiles(rootHandle, files);
+    if (files.length === 0) return;
+
+    const existingIds = new Set(shiftHistory.map(s => s._shiftId).filter(Boolean));
+    let added = 0;
+    for (const text of files) {
+      try {
+        const data = JSON.parse(text);
+        if (data.schemaVersion !== 1 || data.type !== 'shift' || !data.shift) continue;
+        if (existingIds.has(data.shiftId)) continue;
+        existingIds.add(data.shiftId);
+        shiftHistory.push({ ...data.shift, _shiftId: data.shiftId });
+        added++;
+      } catch {}
+    }
+    if (added > 0) {
+      shiftHistory.sort((a, b) => new Date(b.date||0) - new Date(a.date||0));
+      try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
+      renderHistory();
+    }
+  } catch {}  // fully silent on startup
+}
+
+// -- Init: restore handle from IDB, start interval, load history --
+async function initAutoSave() {
+  if (!window.showDirectoryPicker) return; // API unavailable
+  const handle = await getStoredFolderHandle();
+  if (!handle) return;
+  autoSaveFolderHandle = handle;
+  try {
+    const perm = await handle.queryPermission({ mode: 'readwrite' });
+    if (perm === 'granted') {
+      startAutoSaveInterval();
+      updateAutoSaveStatus(true, null);
+      silentlyLoadHistory(handle);  // fire-and-forget
+    } else {
+      const desc = document.getElementById('autoSaveDesc');
+      if (desc) { desc.textContent = 'Re-authorise required'; }
+    }
+  } catch {}
+}
+
+// -- "Set folder" button handler --
+async function setupAutoSaveFolder() {
+  if (!window.showDirectoryPicker) {
+    alert('Your browser does not support the File System Access API.\nAuto-save is unavailable.'); return;
+  }
+  try {
+    const handle = await showDirectoryPicker({ mode: 'readwrite', id: 'shiftAutoSave' });
+    autoSaveFolderHandle = handle;
+    await storeFolderHandle(handle);
+    startAutoSaveInterval();
+    updateAutoSaveStatus(true, null);
+    alert(`Auto-save folder set: ${handle.name}\nShift files will be written to ${handle.name}/${SHIFT_BASE_FOLDER}/YYYY/YYYY-MM MMM/`);
+  } catch(e) {
+    if (e.name !== 'AbortError') console.warn('Folder setup failed:', e);
+  }
+}
+
+// -- Export completed shift JSON at End Shift --
+async function exportCompletedShift(entry) {
+  if (!autoSaveFolderHandle) return;
+  try {
+    const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      const req = await autoSaveFolderHandle.requestPermission({ mode: 'readwrite' });
+      if (req !== 'granted') return;
+    }
+    const dir = await getShiftMonthFolder(autoSaveFolderHandle);
+    const payload = {
+      schemaVersion: 1,
+      type:          'shift',
+      shiftId:       'shift_' + (shiftStart || Date.now()),
+      exportedAt:    new Date().toISOString(),
+      shift:         entry,
+    };
+    await writeToFolder(dir, completedShiftFilename(), payload);
+    // Delete in-progress session file now that shift is complete
+    try { await dir.removeEntry(sessionFilename()); } catch {}
+  } catch(e) {
+    console.warn('Completed shift export failed:', e);
+  }
+}
+
+// -- Resume Shift from File (Dashboard button) --
+async function resumeShiftFromFile() {
+  if (!window.showOpenFilePicker) {
+    alert('Your browser does not support the File System Access API.'); return;
+  }
+  try {
+    const [fileHandle] = await showOpenFilePicker({
+      types: [{ description: 'Shift Session JSON', accept: { 'application/json': ['.json'] } }],
+      multiple: false,
+    });
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    let data;
+    try { data = JSON.parse(text); } catch { alert('File is not valid JSON.'); return; }
+    if (data.schemaVersion !== 1 || data.type !== 'shift_session') {
+      alert('This does not appear to be a shift session file.\nOnly files named shift_session_….json can be resumed here.'); return;
+    }
+    const savedAt = new Date(data.savedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    if (!confirm(`Resume shift for ${data.staffName || 'Unknown'}, last saved at ${savedAt}?\n\nThis will replace your current in-progress session.`)) return;
+    restoreSessionSnapshot(data);
+  } catch(e) {
+    if (e.name !== 'AbortError') alert('Could not open file: ' + e.message);
+  }
+}
+
+// -- Restore in-memory state from a session snapshot --
+function restoreSessionSnapshot(data) {
+  shiftStart      = data.shiftStart     || Date.now();
+  checkState      = data.checklistState || {};
+  auditState      = data.auditState     || {};
+  logEntries      = data.logEntries     || [];
+  floorWalkState  = data.floorWalkState || {};
+  nightlogActive  = data.nightlogActive || false;
+  shiftLeader     = data.nightlogLeader || data.staffName || '';
+  shiftStartTime  = data.nightlogStart  || null;
+  lastCheckInTime = data.lastCheckInTime || null;
+
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  setVal('shiftNotes',    data.shiftNotes);
+  setVal('handoverNotes', data.handoverNotes);
+  setVal('breakfastBags', data.breakfastBags);
+  setVal('handoverTaxis', data.handoverTaxis);
+  setVal('wakeUpCalls',   data.wakeUpCalls);
+
+  if (data.boardData) {
+    try {
+      Object.keys(data.boardData).forEach(key => {
+        const el = document.querySelector('#section-board [data-board-input="' + key + '"]');
+        if (el) el.value = data.boardData[key];
+      });
+      updateBoardHeaders();
+    } catch {}
+  }
+
+  if (nightlogActive) {
+    document.getElementById('nightlogStart')?.classList.add('hidden');
+    document.getElementById('nightlogMain')?.classList.remove('hidden');
+    const nlName = document.getElementById('nightlogLeaderName');
+    if (nlName) nlName.value = shiftLeader;
+  }
+
+  renderChecklist('preAudit');
+  renderChecklist('postAudit');
+  renderAuditSteps();
+  renderNightLogEntries();
+  updateDashboardStats();
+  updateCheckInDisplay();
+  if (persistData) saveState();
+
+  alert('Shift session restored.');
+  showSection('dashboard', document.querySelector('[data-section=dashboard]'));
+}
+
+// -- Manual "Sync from Folder" button (History section) --
+async function loadHistoryFromFolder() {
+  if (!window.showDirectoryPicker) {
+    alert('Your browser does not support the File System Access API.'); return;
+  }
+  // Reuse stored handle if available; prompt only if not
+  let rootHandle = autoSaveFolderHandle;
+  if (!rootHandle) {
+    try {
+      rootHandle = await showDirectoryPicker({ mode: 'readwrite', id: 'shiftAutoSave' });
+      autoSaveFolderHandle = rootHandle;
+      await storeFolderHandle(rootHandle);
+      startAutoSaveInterval();
+      updateAutoSaveStatus(true, null);
+    } catch(e) {
+      if (e.name !== 'AbortError') alert('Could not open folder: ' + e.message);
+      return;
+    }
+  } else {
+    // Re-request permission if needed (requires user gesture — button click qualifies)
+    try {
+      const perm = await rootHandle.queryPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') {
+        const req = await rootHandle.requestPermission({ mode: 'readwrite' });
+        if (req !== 'granted') { alert('Permission to access the folder was denied.'); return; }
+      }
+    } catch {}
+  }
+
+  const files = [];
+  await scanDirForShiftFiles(rootHandle, files);
+  if (files.length === 0) {
+    alert('No completed shift files found in this folder or its subfolders.'); return;
+  }
+
+  const existingIds = new Set(shiftHistory.map(s => s._shiftId).filter(Boolean));
+  let added = 0;
+  for (const text of files) {
+    try {
+      const data = JSON.parse(text);
+      if (data.schemaVersion !== 1 || data.type !== 'shift' || !data.shift) continue;
+      if (existingIds.has(data.shiftId)) continue;
+      existingIds.add(data.shiftId);
+      shiftHistory.push({ ...data.shift, _shiftId: data.shiftId });
+      added++;
+    } catch {}
+  }
+  shiftHistory.sort((a, b) => new Date(b.date||0) - new Date(a.date||0));
+  try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
+  renderHistory();
+  alert(`Sync complete. ${added} new shift${added !== 1 ? 's' : ''} added. (${files.length - added} already present.)`);
+}
+
+// -- Recursively scan directory for completed shift JSON files --
+async function scanDirForShiftFiles(dirHandle, results) {
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind === 'directory') {
+      await scanDirForShiftFiles(handle, results);
+    } else if (
+      handle.kind === 'file' &&
+      name.endsWith('.json') &&
+      name.startsWith('shift_') &&
+      !name.startsWith('shift_session_')
+    ) {
+      try { results.push(await (await handle.getFile()).text()); } catch {}
+    }
+  }
+}
+
 // -- INIT --
 function init() {
   loadState();
@@ -4998,6 +5357,9 @@ function init() {
   initSignSwatches();
   updateSignPreview();
 
+  // Start auto-save and silently load history from OneDrive folder
+  initAutoSave();
+
   // Show first section
   showSection('dashboard', document.querySelector('[data-section=dashboard]'));
 
@@ -5049,13 +5411,6 @@ function init() {
   document.querySelectorAll('#section-board [data-board-key], #section-board [data-board-input]').forEach(el => {
     el.addEventListener('input', onBoardInput);
   });
-
-  // Wire report filter
-  const rptFilter = document.getElementById('rptFilter');
-  if (rptFilter) rptFilter.addEventListener('input', filterReportEntries);
-
-  // Wire report clear
-  document.getElementById('clearReportBtn')?.addEventListener('click', clearReportData);
 
   // Wire export night log
   document.getElementById('exportNightlogBtn')?.addEventListener('click', exportNightlogJSON);
