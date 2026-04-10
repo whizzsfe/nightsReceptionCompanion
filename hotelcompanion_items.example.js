@@ -1,6 +1,6 @@
 // hotelcompanion_items.example.js
 // Default checklist and audit content for the Night Receptionist Companion Suite.
-// Copy this file and rename to hotelcompanion_items.example.js to use as a starter,
+// Copy this file and rename to hotelcompanion_items.js to use as a starter,
 // or use hotelcompanion_editor.html to customise and export hotelcompanion_items.js.
 //
 // Schema fields:

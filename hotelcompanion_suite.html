@@ -2985,8 +2985,8 @@ function loadState() {
 
 // -- Dashboard stats --
 function updateDashboardStats() {
-  // Checklist %
-  const items = getActiveChecklistItems(checklistTab);
+  // Checklist % — only count items that apply today
+  const items = getActiveChecklistItems(checklistTab).filter(it => itemAppliestoday(it));
   const total = items.length;
   const done  = items.filter(it => checkState[it.id]).length;
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -3293,17 +3293,24 @@ function renderChecklist(tab) {
   container.innerHTML = '';
 
   const items = getActiveChecklistItems(tab);
-  items.forEach((item, idx) => {
-    const applies = itemAppliestoday(item);
+  const todayItems = items.filter(item => itemAppliestoday(item));
 
+  if (todayItems.length === 0) {
+    container.innerHTML = '<p class="empty-state" style="text-align:center;color:var(--muted);padding:32px;">No tasks for today.</p>';
+    updateChecklistProgress(tab);
+    return;
+  }
+
+  todayItems.forEach((item) => {
     const div = document.createElement('div');
-    div.className = 'check-item' + (checkState[item.id] ? ' done' : '') + (item.required ? ' required-item' : '') + (!applies ? ' greyed-out' : '');
+    div.className = 'check-item' + (checkState[item.id] ? ' done' : '') + (item.required ? ' required-item' : '');
     div.setAttribute('role', 'checkbox');
     div.setAttribute('aria-checked', checkState[item.id] ? 'true' : 'false');
     div.setAttribute('tabindex', '0');
     div.setAttribute('aria-label', item.label);
 
     const checked = checkState[item.id];
+    const isRestricted = item.dayRestriction && item.dayRestriction !== 'every';
     div.innerHTML = `
       <div class="check-box ${checked ? 'checked' : ''}" aria-hidden="true">${checked ? '?' : ''}</div>
       <div class="check-item-main">
@@ -3312,7 +3319,7 @@ function renderChecklist(tab) {
         ${item.notes ? `<div class="check-notes">${escapeHtml(item.notes)}</div>` : ''}
         <div class="check-badges">
           ${item.required ? '<span class="badge badge-gold">Required</span>' : ''}
-          ${!applies && item.dayRestriction !== 'every' ? `<span class="badge badge-muted">${DAY_RESTRICTION_LABELS[item.dayRestriction] || item.dayRestriction}</span>` : ''}
+          ${isRestricted ? `<span class="badge badge-muted">${DAY_RESTRICTION_LABELS[item.dayRestriction] || item.dayRestriction}</span>` : ''}
         </div>
       </div>
     `;
@@ -3333,10 +3340,9 @@ function toggleCheck(id, tab) {
 }
 
 function updateChecklistProgress(tab) {
-  const items   = getActiveChecklistItems(tab);
-  const visible = items;
-  const total   = visible.length;
-  const done    = visible.filter(it => checkState[it.id]).length;
+  const items   = getActiveChecklistItems(tab).filter(it => itemAppliestoday(it));
+  const total   = items.length;
+  const done    = items.filter(it => checkState[it.id]).length;
   const pct     = total > 0 ? Math.round((done / total) * 100) : 0;
   const fill    = document.getElementById('checklistProgressFill');
   const label   = document.getElementById('checklistProgressLabel');
