@@ -1408,6 +1408,11 @@
 
       /* Night Log print */
 
+      /* History charts — white background on print */
+      .chart-wrap { background: #fff !important; border-color: #ccc !important; }
+      .chart-title { color: #333 !important; }
+      .chart-grid { break-inside: avoid; }
+
       /* Group Check-in print */
       #section-checkin { color: #000; }
       #section-checkin .checkin-controls { display: none; }
@@ -3947,6 +3952,91 @@ function renderBarChart(canvasId, data, title) {
   ctx.lineWidth   = 1;
   ctx.beginPath(); ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, pad.top + usableH); ctx.stroke();
 }
+
+// -- Chart print helpers --
+// Redraw all history charts with light colours before printing, restore dark after
+const CHART_IDS = ['chartCategory','chartFloor','chartSeverity','chartAllClear'];
+function recolorChartsForPrint(forPrint) {
+  CHART_IDS.forEach(id => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    // Paint over existing canvas with new bg
+    ctx.fillStyle = forPrint ? '#ffffff' : '#1E1E1E';
+    ctx.fillRect(0, 0, W, H);
+  });
+  // Re-render with appropriate theme by triggering a full chart redraw
+  if (forPrint) {
+    renderHistoryChartsThemed(true);
+  } else {
+    renderHistoryCharts(getFilteredShifts());
+  }
+}
+function getFilteredShifts() {
+  const month = document.getElementById('histFilterMonth')?.value || '';
+  const staff = (document.getElementById('histFilterStaff')?.value || '').trim().toLowerCase();
+  return shiftHistory.filter(s => {
+    if (month && !s.date?.startsWith(month)) return false;
+    if (staff && !(s.staffName || '').toLowerCase().includes(staff)) return false;
+    return true;
+  });
+}
+function renderHistoryChartsThemed(lightMode) {
+  const filtered = getFilteredShifts();
+  const allIssues = filtered.flatMap(s => (s.logEntries || []).filter(e => e.type === 'issue'));
+  const countBy = (arr, key) => arr.reduce((acc, e) => { const v = e[key] || 'Unknown'; acc[v] = (acc[v]||0)+1; return acc; }, {});
+  renderBarChartThemed('chartCategory', countBy(allIssues,'category'), 'Issues by Category', lightMode);
+  renderBarChartThemed('chartFloor',    countBy(allIssues,'floor'),    'Issues by Floor',     lightMode);
+  renderBarChartThemed('chartSeverity', countBy(allIssues,'severity'), 'Issues by Severity',  lightMode);
+  const acData = { 'With Incidents': filtered.filter(s=>(s.logEntries||[]).some(e=>e.type==='issue')).length, 'All Clear': filtered.filter(s=>!(s.logEntries||[]).some(e=>e.type==='issue')).length };
+  renderBarChartThemed('chartAllClear', acData, 'Shifts: Incidents vs Clear', lightMode);
+}
+function renderBarChartThemed(canvasId, data, title, lightMode) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx  = canvas.getContext('2d');
+  const keys = Object.keys(data);
+  const vals = keys.map(k => data[k]);
+  const max  = Math.max(...vals, 1);
+  const W = canvas.width, H = canvas.height;
+  const pad  = { top:30, right:16, bottom:60, left:40 };
+  const barW = Math.max(20, Math.floor((W - pad.left - pad.right) / Math.max(keys.length,1) - 8));
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = lightMode ? '#ffffff' : '#1E1E1E';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = lightMode ? '#111111' : '#F0EDE8';
+  ctx.font = 'bold 11px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(title, W/2, 18);
+  const usableW = W - pad.left - pad.right;
+  const usableH = H - pad.top  - pad.bottom;
+  const step    = usableW / Math.max(keys.length, 1);
+  keys.forEach((k, i) => {
+    const bh = Math.round((vals[i] / max) * usableH);
+    const bx = pad.left + i * step + (step - barW) / 2;
+    const by = pad.top  + usableH - bh;
+    ctx.fillStyle = lightMode ? '#B8861A' : '#D4A843';
+    ctx.fillRect(Math.round(bx), by, barW, bh);
+    ctx.fillStyle = lightMode ? '#111111' : '#F0EDE8';
+    ctx.font = '10px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(vals[i], bx + barW/2, by - 4);
+    ctx.save();
+    ctx.translate(bx + barW/2, H - pad.bottom + 8);
+    ctx.rotate(-0.4);
+    ctx.fillStyle = lightMode ? '#444444' : '#888880';
+    ctx.font = '9px DM Sans, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(k.length > 12 ? k.slice(0,12)+'…' : k, 0, 0);
+    ctx.restore();
+  });
+  ctx.strokeStyle = lightMode ? '#cccccc' : '#2A2A2A';
+  ctx.lineWidth   = 1;
+  ctx.beginPath(); ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, pad.top + usableH); ctx.stroke();
+}
+window.addEventListener('beforeprint', () => recolorChartsForPrint(true));
+window.addEventListener('afterprint',  () => recolorChartsForPrint(false));
 
 // -- Group Check-in --
 function addCheckinRow(name) {
