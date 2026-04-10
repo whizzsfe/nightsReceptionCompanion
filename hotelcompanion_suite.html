@@ -661,6 +661,21 @@
       letter-spacing: 0.08em;
     }
 
+    /* Auto-save nudge card on dashboard */
+    .autosave-nudge {
+      border-color: rgba(212,168,67,0.45);
+      background: rgba(212,168,67,0.07);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .autosave-nudge h3 { color: var(--gold); margin-bottom: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.04em; }
+    .autosave-nudge p { font-size: 13px; color: var(--muted); margin: 0; }
+    .autosave-nudge-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
     .lone-worker-card {
       border-color: rgba(74,144,217,0.3);
       background: rgba(74,144,217,0.06);
@@ -1914,6 +1929,18 @@
     <div class="stat-card">
       <div class="stat-value" id="statStreak">0</div>
       <div class="stat-label" id="statStreakLabel">Shifts Recorded</div>
+    </div>
+  </div>
+
+  <!-- Auto-save Folder Nudge (shown when not configured) -->
+  <div class="card autosave-nudge" id="autoSaveNudgeCard" style="display:none" role="note" aria-label="Auto-save not configured">
+    <div>
+      <h3>💾 Set Up Shift Auto-Save</h3>
+      <p>Save shift files automatically to your OneDrive folder so nothing is lost if the browser closes mid-shift.<br>Only needs to be done once per device.</p>
+    </div>
+    <div class="autosave-nudge-actions">
+      <button class="btn btn-gold" onclick="setupAutoSaveFolder()" aria-label="Choose a folder for auto-saving shift files">Choose Folder</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('autoSaveNudgeCard').style.display='none'" aria-label="Dismiss auto-save prompt">Not now</button>
     </div>
   </div>
 
@@ -4921,11 +4948,27 @@ async function silentlyLoadHistory(rootHandle) {
   } catch {}  // fully silent on startup
 }
 
+// -- Show / hide the dashboard nudge card --
+function showAutoSaveNudge(show, reauth) {
+  const card = document.getElementById('autoSaveNudgeCard');
+  if (!card) return;
+  if (!show) { card.style.display = 'none'; return; }
+  if (reauth) {
+    card.querySelector('h3').textContent = '🔑 Re-authorise Auto-Save Folder';
+    card.querySelector('p').textContent = 'The auto-save folder needs permission to be re-granted. Click the button below to continue saving shift files.';
+    card.querySelector('.btn-gold').textContent = 'Re-authorise';
+  }
+  card.style.display = '';
+}
+
 // -- Init: restore handle from IDB, start interval, load history --
 async function initAutoSave() {
   if (!window.showDirectoryPicker) return; // API unavailable
   const handle = await getStoredFolderHandle();
-  if (!handle) return;
+  if (!handle) {
+    showAutoSaveNudge(true, false); // first-use nudge
+    return;
+  }
   autoSaveFolderHandle = handle;
   try {
     const perm = await handle.queryPermission({ mode: 'readwrite' });
@@ -4936,6 +4979,7 @@ async function initAutoSave() {
     } else {
       const desc = document.getElementById('autoSaveDesc');
       if (desc) { desc.textContent = 'Re-authorise required'; }
+      showAutoSaveNudge(true, true); // re-auth nudge
     }
   } catch {}
 }
@@ -4951,6 +4995,7 @@ async function setupAutoSaveFolder() {
     await storeFolderHandle(handle);
     startAutoSaveInterval();
     updateAutoSaveStatus(true, null);
+    showAutoSaveNudge(false); // dismiss nudge
     alert(`Auto-save folder set: ${handle.name}\nShift files will be written to ${handle.name}/${SHIFT_BASE_FOLDER}/YYYY/YYYY-MM MMM/`);
   } catch(e) {
     if (e.name !== 'AbortError') console.warn('Folder setup failed:', e);
