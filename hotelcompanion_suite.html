@@ -3521,8 +3521,32 @@ function escapeHtml(str) {
 }
 
 // -------------------------------------------------------------
-// CHUNK 9 — AI COACH (ARIA)
+// CHUNK 8b — MOTIVATION (QUOTE CAROUSEL)
 // -------------------------------------------------------------
+
+const QUOTES = [
+  { text: 'The night shift is where legends are made. Every call handled well, every guest reassured — that\'s excellence in action.', author: 'Hotel Operations Wisdom' },
+  { text: 'You are not just covering a shift. You are the guardian of every guest\'s experience until morning.', author: 'Night Audit Philosophy' },
+  { text: 'Professionalism is doing your best work even when no one is watching. On nights, that\'s every hour.', author: 'Hospitality Insight' },
+  { text: 'The guest who wakes at 3am frightened, in pain, or confused — you are the person they call. Be ready. Be calm. Be kind.', author: 'Front Office Principle' },
+  { text: 'A smooth handover is the last great act of a good shift. Leave the next person better prepared than you were.', author: 'Nights Best Practice' },
+  { text: 'Every complaint is an opportunity. Handle it well tonight and that guest becomes your loudest advocate tomorrow.', author: 'Guest Relations Wisdom' },
+  { text: 'The quiet hours are not empty hours. Use them to prepare, to learn, and to be ready for what comes next.', author: 'Night Shift Mentality' },
+  { text: 'Excellence is not a single act — it is the sum of every small decision you make across an entire shift.', author: 'Hotel Leadership Insight' },
+];
+
+let currentQuoteIndex = 0;
+
+function nextQuote() {
+  currentQuoteIndex = (currentQuoteIndex + 1) % QUOTES.length;
+  const q = QUOTES[currentQuoteIndex];
+  const textEl   = document.getElementById('quoteText');
+  const authorEl = document.getElementById('quoteAuthor');
+  if (textEl)   textEl.textContent   = q.text;
+  if (authorEl) authorEl.textContent = '— ' + q.author;
+}
+
+
 
 const BUILT_IN_REPLIES = [
   { keywords:['guest wants to pay cash','paying cash','cash payment','cash only'],
