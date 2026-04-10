@@ -17,7 +17,7 @@ window.HOTELCOMPANION_ITEMS = {
   version: 1,
 
   // Pre-Audit checklist — tasks performed on arrival up to (but not including) running the night audit.
-  // The final item (Run Night Audit) is rendered as a call-to-action navigating to the Night Audit Tracker.
+  // Tick each item as you go. The final item (Run Night Audit at 0301) is a plain required tick — PMS runs the audit automatically.
   preAudit: [
     {
       id: "pre_001", label: "Receive Handover from Day Team", required: true, dayRestriction: "every",
@@ -243,21 +243,5 @@ window.HOTELCOMPANION_ITEMS = {
       id: "post_038", label: "Banking", required: true, dayRestriction: "every",
       notes: "• Do a D100 end of shift and sign it.\n• Match to FreedomPay."
     }
-  ],
-
-  // Night Audit Tracker steps — the step-by-step audit procedure (not checklist items).
-  auditSteps: [
-    { id: "audit_001", label: "Close out all pending check-ins" },
-    { id: "audit_002", label: "Post all outstanding room charges" },
-    { id: "audit_003", label: "Process no-shows" },
-    { id: "audit_004", label: "Run Night Audit in PMS" },
-    { id: "audit_005", label: "Verify new date is showing correctly in PMS" },
-    { id: "audit_006", label: "Card terminal batch close run" },
-    { id: "audit_007", label: "Review discrepancy report" },
-    { id: "audit_008", label: "Check for any credit limit breaches" },
-    { id: "audit_009", label: "Post any city ledger or direct bill charges" },
-    { id: "audit_010", label: "Print / save manager's report" },
-    { id: "audit_011", label: "Print arrivals list for next day" },
-    { id: "audit_012", label: "Note any audit exceptions in handover" }
   ]
 };

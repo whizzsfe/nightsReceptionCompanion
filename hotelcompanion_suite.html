@@ -3893,11 +3893,21 @@ function submitQuickLog() {
     alert('Please fill in Guest/Room, Type, and Description.'); return;
   }
 
-  // Ensure night log is active enough to accept entries
+  // Require a profile name before auto-starting the night log
   if (!nightlogActive) {
-    shiftLeader    = staffName || 'Night Team';
+    if (!staffName) {
+      closeModal('quickLogModal');
+      openModal('profileModal');
+      return;
+    }
+    shiftLeader    = staffName;
     shiftStartTime = shiftStartTime || new Date().toISOString();
     nightlogActive = true;
+    // Update Night Log section UI so entries are immediately visible on navigation
+    document.getElementById('nlStartScreen')?.classList.add('hidden');
+    document.getElementById('nlMainUi')?.classList.remove('hidden');
+    const nlNameInput = document.getElementById('nlLeaderName');
+    if (nlNameInput) nlNameInput.value = shiftLeader;
   }
 
   const entry = {
