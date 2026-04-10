@@ -2867,7 +2867,17 @@ function closeSidebar() {
 // -- Modal helpers --
 function openModal(id) {
   const m = document.getElementById(id);
-  if (m) m.classList.add('open');
+  if (!m) return;
+  // Pre-populate profile modal with current values every time it opens
+  if (id === 'profileModal') {
+    const nameEl  = document.getElementById('profileName');
+    const roleEl  = document.getElementById('profileRole');
+    const shiftEl = document.getElementById('profileShift');
+    if (nameEl)  nameEl.value  = staffName  || '';
+    if (roleEl)  roleEl.value  = staffRole  || 'Night Auditor';
+    if (shiftEl) shiftEl.value = staffShift || 'Night (10:30pm–7am)';
+  }
+  m.classList.add('open');
 }
 function closeModal(id) {
   const m = document.getElementById(id);
