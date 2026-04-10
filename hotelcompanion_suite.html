@@ -840,6 +840,65 @@
     /* Handover print page (hidden on screen) */
     .handover-print-page { display: none; }
 
+    /* --- HANDOVER FORM --- */
+    .handover-form {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-top: 12px;
+    }
+    .handover-form-header {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .handover-form-logo { width: 72px; height: auto; object-fit: contain; border-radius: 4px; }
+    .handover-form-title { font-family: 'Bebas Neue', cursive; font-size: 22px; letter-spacing: 0.06em; color: var(--gold); }
+    .handover-form-meta { font-size: 13px; color: var(--muted); line-height: 1.8; text-align: right; }
+    .handover-meta-label { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--muted); }
+    .handover-form-section {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: var(--card2);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .handover-form-section-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+    }
+    .handover-form-section textarea {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: none;
+      width: 100%;
+      outline: none;
+    }
+    .handover-form-section textarea:focus { outline: 2px solid var(--gold); border-radius: 3px; background: rgba(212,168,67,0.04); }
+    .handover-main-notes { margin-bottom: 10px; }
+    .handover-main-notes textarea { min-height: 140px; }
+    .handover-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .handover-breakfast-section textarea,
+    .handover-taxis-section textarea,
+    .handover-wakeup-section textarea { min-height: 80px; }
+
+
+
     /* --- MOTIVATION --- */
     .quote-card {
       background: linear-gradient(135deg, var(--card), var(--card2));
@@ -1369,6 +1428,49 @@
 
       /* Handover print page */
       .handover-print-page { display: block !important; }
+
+      /* Handover form — print clean */
+      #section-notes .section-heading,
+      #section-notes .section-sub { display: none !important; }
+      #section-notes .flex-between { display: none !important; }
+      #section-notes .no-print { display: none !important; }
+      .handover-form {
+        background: #fff !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .handover-form-header {
+        border-bottom: 2px solid #ccc !important;
+        margin-bottom: 10px !important;
+        padding-bottom: 8px !important;
+      }
+      .handover-form-title { color: #000 !important; font-size: 18px !important; }
+      .handover-form-meta { color: #333 !important; font-size: 11px !important; }
+      .handover-meta-label { color: #555 !important; }
+      .handover-form-section {
+        background: #f9f9f9 !important;
+        border-color: #ccc !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .handover-form-section-title { color: #333 !important; }
+      .handover-form-section textarea {
+        color: #000 !important;
+        background: transparent !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        color-scheme: light !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .handover-form-section textarea::placeholder { color: transparent !important; }
+      .handover-main-notes textarea { min-height: 200px !important; }
+      .handover-breakfast-section textarea,
+      .handover-taxis-section textarea,
+      .handover-wakeup-section textarea { min-height: 100px !important; }
+      @page handover-page { size: A4 portrait; margin: 12mm; }
+      #section-notes .handover-form { page: handover-page; }
       .handover-page-hero { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
 
       /* Night Log print */
@@ -1402,8 +1504,10 @@
       #signPaper { box-shadow: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
 
       /* Daily Info Board print */
-      /* Single @page rule — A3 landscape, 8mm margin works with "Minimum" printer margins */
-      @page { size: A3 landscape; margin: 8mm; }
+      /* Named page for A3 landscape — overrides the default @page only when #section-board is printed */
+      @page board-page { size: A3 landscape; margin: 8mm; }
+      @page { size: A4 portrait; margin: 12mm; }
+      #section-board { page: board-page; }
       /* Hide UI chrome */
       #section-board .flex-between { display: none !important; }
       #section-board .section-sub { display: none !important; }
@@ -1852,16 +1956,6 @@
 ----------------------------------------------------------- -->
 <section class="section active" id="section-dashboard" aria-label="Night Dashboard">
 
-  <!-- Handover Banner -->
-  <div class="handover-banner hidden" id="handoverBanner">
-    <div class="handover-banner-icon">📋</div>
-    <div class="handover-banner-content">
-      <div class="handover-banner-title">Incoming Handover from Previous Shift</div>
-      <div class="handover-banner-text" id="handoverBannerText"></div>
-    </div>
-    <button class="btn btn-ghost btn-sm" onclick="dismissHandoverBanner()" aria-label="Dismiss handover banner" style="flex-shrink:0;align-self:flex-start;">×</button>
-  </div>
-
   <!-- Stat Cards -->
   <div class="stat-grid" id="dashStatGrid">
     <div class="stat-card">
@@ -1991,50 +2085,57 @@
      SECTION: NOTES & HANDOVER
 ----------------------------------------------------------- -->
 <section class="section" id="section-notes" aria-label="Notes and Shift Handover">
-  <div class="section-heading">Notes &amp; Shift Handover</div>
-  <div class="section-sub">Record what happened this shift and leave notes for the next team.</div>
-
-  <!-- Incoming handover (read-only) -->
-  <div class="incoming-panel" id="incomingHandoverPanel">
-    <div class="incoming-panel-title">📋 Incoming Handover — Previous Shift</div>
-    <div class="incoming-panel-text" id="incomingHandoverText">
-      <span class="incoming-panel-empty">No incoming handover notes for this shift.</span>
+  <div class="flex-between mb-12">
+    <div>
+      <div class="section-heading">Notes &amp; Handover</div>
+      <div class="section-sub no-print">Shift notes are for your own reference. The handover form below is for the morning team — fill it in and print before you leave.</div>
     </div>
+    <button class="btn btn-gold no-print" onclick="printHandover()" aria-label="Print handover sheet">🖨️ Print Handover Sheet</button>
   </div>
 
-  <!-- Shift Notes -->
-  <div class="card">
+  <!-- Shift Notes — internal, not printed -->
+  <div class="card no-print">
     <div class="card-header">
       <div class="card-title">Shift Notes</div>
-      <span style="font-size:12px;color:var(--muted);">Saved when Persist Data is ON</span>
+      <span style="font-size:12px;color:var(--muted);">Internal — not printed</span>
     </div>
-    <textarea id="shiftNotes" placeholder="Notes about this shift — guest interactions, issues, anything worth recording…" rows="6" aria-label="Shift notes" oninput="onShiftNotesInput()"></textarea>
+    <textarea id="shiftNotes" placeholder="Notes about this shift — guest interactions, issues, anything worth recording…" rows="5" aria-label="Shift notes" oninput="onShiftNotesInput()"></textarea>
   </div>
 
-  <!-- Handover Notes -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Handover Notes for Next Shift</div>
-      <span style="font-size:12px;color:var(--muted);">Sent to the next shift on End Shift</span>
+  <!-- Handover Form — printed for morning team -->
+  <div class="handover-form" id="handoverFormCard">
+
+    <div class="handover-form-header">
+      <img src="hotelLogo.jpg" class="handover-form-logo" alt="Hotel logo" onerror="this.style.display='none'">
+      <div class="handover-form-title">Front Office Nights — Morning Handover</div>
+      <div class="handover-form-meta">
+        <div><span class="handover-meta-label">Date:</span> <span id="handoverPrintDate"></span></div>
+        <div><span class="handover-meta-label">Staff:</span> <span id="handoverPrintStaff"></span></div>
+      </div>
     </div>
-    <textarea id="handoverNotes" placeholder="What does the next shift need to know? Pending tasks, VIP arrivals, outstanding issues…" rows="6" aria-label="Handover notes" oninput="onHandoverNotesInput()"></textarea>
-  </div>
 
-  <div class="flex-row">
-    <button class="btn btn-ghost" onclick="printHandover()" aria-label="Print handover sheet">🖨️ Print Handover Sheet</button>
-  </div>
+    <div class="handover-form-section handover-main-notes">
+      <div class="handover-form-section-title">Handover Notes</div>
+      <textarea id="handoverNotes" placeholder="Key information for the morning team — outstanding issues, VIPs, follow-ups, anything that needs action…" aria-label="Handover notes" oninput="onHandoverNotesInput()"></textarea>
+    </div>
 
-  <!-- Print-only handover page -->
-  <div class="handover-print-page" id="handoverPrintPage">
-    <div class="handover-page-hero" id="printHotelName">Grand Hotel</div>
-    <div style="font-size:14px;margin-bottom:4px;"><strong>Night Shift Handover Sheet</strong></div>
-    <div style="font-size:13px;margin-bottom:16px;color:#444;" id="printHandoverMeta"></div>
-    <hr>
-    <h3 style="margin:14px 0 6px;">Shift Notes</h3>
-    <div id="printShiftNotes" style="font-size:14px;white-space:pre-wrap;"></div>
-    <h3 style="margin:14px 0 6px;">Handover Notes for Next Shift</h3>
-    <div id="printHandoverNotes" style="font-size:14px;white-space:pre-wrap;"></div>
-  </div>
+    <div class="handover-form-row">
+      <div class="handover-form-section handover-breakfast-section">
+        <div class="handover-form-section-title">Breakfast Bags</div>
+        <textarea id="breakfastBags" placeholder="Room numbers / names requiring breakfast bags…" aria-label="Breakfast bags" oninput="onHandoverFieldInput()"></textarea>
+      </div>
+      <div class="handover-form-section handover-taxis-section">
+        <div class="handover-form-section-title">Taxis</div>
+        <textarea id="handoverTaxis" placeholder="Booked taxis — time, name, destination…" aria-label="Taxis" oninput="onHandoverFieldInput()"></textarea>
+      </div>
+      <div class="handover-form-section handover-wakeup-section">
+        <div class="handover-form-section-title">Wake-up Calls</div>
+        <textarea id="wakeUpCalls" placeholder="Room / name / time…" aria-label="Wake-up calls" oninput="onHandoverFieldInput()"></textarea>
+      </div>
+    </div>
+
+  </div><!-- /handover-form -->
+
 </section>
 
 <!-- -----------------------------------------------------------
@@ -2962,6 +3063,9 @@ function saveState() {
   try {
     localStorage.setItem('shiftCompanion_shiftNotes',     document.getElementById('shiftNotes')?.value || '');
     localStorage.setItem('shiftCompanion_handoverNotes',  document.getElementById('handoverNotes')?.value || '');
+    localStorage.setItem('shiftCompanion_breakfastBags',  document.getElementById('breakfastBags')?.value || '');
+    localStorage.setItem('shiftCompanion_handoverTaxis',  document.getElementById('handoverTaxis')?.value || '');
+    localStorage.setItem('shiftCompanion_wakeUpCalls',    document.getElementById('wakeUpCalls')?.value || '');
     localStorage.setItem('shiftCompanion_checklistState', JSON.stringify(checkState));
     localStorage.setItem('shiftCompanion_auditState',     JSON.stringify(auditState));
     localStorage.setItem('shiftCompanion_nightLogEntries', JSON.stringify(logEntries));
@@ -2983,18 +3087,7 @@ function loadState() {
   persistData = localStorage.getItem('shiftCompanion_persist') === '1';
   const histRaw = localStorage.getItem('shiftCompanion_history');
   if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
-  const pendingHandover = localStorage.getItem('shiftCompanion_pendingHandover') || '';
-  if (pendingHandover) {
-    const bannerText = document.getElementById('handoverBannerText');
-    const banner     = document.getElementById('handoverBanner');
-    const incoming   = document.getElementById('incomingHandoverText');
-    if (bannerText) bannerText.textContent = pendingHandover;
-    if (banner)     banner.classList.remove('hidden');
-    if (incoming)   incoming.textContent = pendingHandover;
-  } else {
-    const incoming = document.getElementById('incomingHandoverText');
-    if (incoming) incoming.innerHTML = '<span class="incoming-panel-empty">No incoming handover notes for this shift.</span>';
-  }
+  // pendingHandover kept in localStorage for history reference only — no banner shown
 
   // Brand
   currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || 'Lingfield Park Marriott Hotel & Country Club';
@@ -3003,10 +3096,16 @@ function loadState() {
 
   // Session (only restore if persist on)
   if (persistData) {
-    const sn = localStorage.getItem('shiftCompanion_shiftNotes');
-    const hn = localStorage.getItem('shiftCompanion_handoverNotes');
-    if (sn && document.getElementById('shiftNotes'))    document.getElementById('shiftNotes').value    = sn;
-    if (hn && document.getElementById('handoverNotes')) document.getElementById('handoverNotes').value = hn;
+    const sn  = localStorage.getItem('shiftCompanion_shiftNotes');
+    const hn  = localStorage.getItem('shiftCompanion_handoverNotes');
+    const bb  = localStorage.getItem('shiftCompanion_breakfastBags');
+    const htx = localStorage.getItem('shiftCompanion_handoverTaxis');
+    const wuc = localStorage.getItem('shiftCompanion_wakeUpCalls');
+    if (sn  && document.getElementById('shiftNotes'))     document.getElementById('shiftNotes').value     = sn;
+    if (hn  && document.getElementById('handoverNotes'))  document.getElementById('handoverNotes').value  = hn;
+    if (bb  && document.getElementById('breakfastBags'))  document.getElementById('breakfastBags').value  = bb;
+    if (htx && document.getElementById('handoverTaxis'))  document.getElementById('handoverTaxis').value  = htx;
+    if (wuc && document.getElementById('wakeUpCalls'))    document.getElementById('wakeUpCalls').value    = wuc;
     const cs = localStorage.getItem('shiftCompanion_checklistState');
     if (cs) { try { checkState = JSON.parse(cs); } catch(e){} }
     const as = localStorage.getItem('shiftCompanion_auditState');
@@ -3504,14 +3603,14 @@ function onAuditNotesInput() { saveState(); }
 // -- Notes / Handover --
 function onShiftNotesInput()    { saveState(); }
 function onHandoverNotesInput() { saveState(); }
+function onHandoverFieldInput() { saveState(); }
 
 function printHandover() {
-  const meta = document.getElementById('printHandoverMeta');
-  const psn  = document.getElementById('printShiftNotes');
-  const phn  = document.getElementById('printHandoverNotes');
-  if (meta) meta.textContent = 'Staff: ' + (staffName || '—') + ' · ' + staffRole + ' · ' + new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
-  if (psn)  psn.textContent  = document.getElementById('shiftNotes')?.value    || '(No shift notes)';
-  if (phn)  phn.textContent  = document.getElementById('handoverNotes')?.value || '(No handover notes)';
+  // Update the date/staff meta in the form header before printing
+  const dateEl  = document.getElementById('handoverPrintDate');
+  const staffEl = document.getElementById('handoverPrintStaff');
+  if (dateEl)  dateEl.textContent  = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  if (staffEl) staffEl.textContent = (staffName || '—') + (staffRole ? ' · ' + staffRole : '');
   window.print();
 }
 
@@ -4640,8 +4739,11 @@ function renderHistory() {
     const date    = s.date     || '—';
     const staff   = s.staffName  || '—';
     const role    = s.staffRole  || '—';
-    const hn      = s.handoverNotes || '';
-    const sn      = s.shiftNotes   || '';
+    const hn      = s.handoverNotes  || '';
+    const sn      = s.shiftNotes      || '';
+    const bb      = s.breakfastBags   || '';
+    const tx      = s.handoverTaxis   || '';
+    const wu      = s.wakeUpCalls     || '';
     const issues  = s.incidentCount ?? 0;
     const clPct   = s.checklistPct ?? 0;
     const auditPct= s.auditPct     ?? 0;
@@ -4666,7 +4768,12 @@ function renderHistory() {
         <div class="history-detail hidden">
           ${sn  ? `<div class="history-section-label">Shift Notes</div><div class="history-section-body">${escapeHtml(sn)}</div>` : ''}
           ${hn  ? `<div class="history-section-label">Handover Notes</div><div class="history-section-body">${escapeHtml(hn)}</div>` : ''}
-          ${!sn && !hn ? '<p style="color:var(--muted)">No notes recorded.</p>' : ''}
+          ${(bb || tx || wu) ? `<div class="history-section-label">Breakfast Bags / Taxis / Wake-up Calls</div><div class="history-section-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div><em style="color:var(--muted);font-size:11px">Breakfast Bags</em><br>${escapeHtml(bb) || '<span style="color:var(--muted)">—</span>'}</div>
+            <div><em style="color:var(--muted);font-size:11px">Taxis</em><br>${escapeHtml(tx) || '<span style="color:var(--muted)">—</span>'}</div>
+            <div><em style="color:var(--muted);font-size:11px">Wake-up Calls</em><br>${escapeHtml(wu) || '<span style="color:var(--muted)">—</span>'}</div>
+          </div>` : ''}
+          ${!sn && !hn && !bb && !tx && !wu ? '<p style="color:var(--muted)">No notes recorded.</p>' : ''}
         </div>
       </div>`;
   }).join('');
@@ -4729,9 +4836,12 @@ function confirmEndShift() {
   const shiftEl    = document.getElementById('shiftNotes');
   const auditEl    = document.getElementById('auditNotes');
 
-  const handoverNotes = handoverEl?.value || '';
+  const handoverNotes  = handoverEl?.value || '';
   const shiftNotes    = shiftEl?.value    || '';
   const auditNotes    = auditEl?.value    || '';
+  const breakfastBags = document.getElementById('breakfastBags')?.value || '';
+  const handoverTaxis = document.getElementById('handoverTaxis')?.value || '';
+  const wakeUpCalls   = document.getElementById('wakeUpCalls')?.value   || '';
 
   // Checklist % 
   const preItems  = getActiveChecklistItems('preAudit').filter(i => !i.isAuditCta);
@@ -4753,6 +4863,9 @@ function confirmEndShift() {
     staffShift:    staffShift,
     shiftNotes,
     handoverNotes,
+    breakfastBags,
+    handoverTaxis,
+    wakeUpCalls,
     auditNotes,
     checklistPct:  clPct,
     auditPct,
@@ -4772,6 +4885,7 @@ function confirmEndShift() {
   // Clear all session data from localStorage
   const sessionKeys = [
     'shiftCompanion_shiftNotes', 'shiftCompanion_handoverNotes',
+    'shiftCompanion_breakfastBags', 'shiftCompanion_handoverTaxis', 'shiftCompanion_wakeUpCalls',
     'shiftCompanion_lastCheckIn', 'shiftCompanion_nightLogEntries',
     'shiftCompanion_checklistState', 'shiftCompanion_auditState',
     'shiftCompanion_boardData', 'shiftCompanion_shiftStart',
@@ -4794,6 +4908,10 @@ function confirmEndShift() {
   if (shiftEl)    shiftEl.value    = '';
   if (handoverEl) handoverEl.value = '';
   if (auditEl)    auditEl?.value != null && (auditEl.value = '');
+  ['breakfastBags','handoverTaxis','wakeUpCalls'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 
   // Reset Night Log UI
   document.getElementById('nlStartScreen')?.classList.remove('hidden');
