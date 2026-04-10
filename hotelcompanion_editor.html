@@ -1,0 +1,1374 @@
+<!--
+  DELIVERY VERSION: A
+  RATIONALE: Single file distributed via OneDrive sync folder, opened via file:// on company PCs. Offline-first, no server required.
+--><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Night Companion — Content Editor</title>
+  <link rel="icon" href="hotelLogo.ico" onerror="this.remove()">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold:       #D4A843;
+      --gold-light: #F0C96A;
+      --gold-dim:   #8A6B20;
+      --black:      #0A0A0A;
+      --dark:       #111111;
+      --card:       #181818;
+      --card2:      #1E1E1E;
+      --border:     #2A2A2A;
+      --text:       #F0EDE8;
+      --muted:      #888880;
+      --red:        #E05555;
+      --green:      #4CAF82;
+      --blue:       #4A90D9;
+      --radius:     8px;
+      --transition: 0.2s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100%;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999;
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 150px 150px;
+    }
+
+    /* ── TOP BAR ─────────────────────────────────────────────── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--black);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex; align-items: center; gap: 20px;
+      height: 60px;
+    }
+    .topbar-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .topbar-logo img {
+      width: 28px; height: 28px; object-fit: contain;
+    }
+    .topbar-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 22px; letter-spacing: 0.08em;
+      color: var(--text); line-height: 1;
+    }
+    .topbar-subtitle {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; letter-spacing: 0.15em;
+      color: var(--gold); text-transform: uppercase;
+    }
+    .topbar-divider { width: 1px; height: 32px; background: var(--border); }
+    .tab-bar { display: flex; gap: 4px; flex: 1; }
+    .tab-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .tab-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--black);
+      font-weight: 600;
+    }
+    .tab-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      padding: 1px 6px;
+      line-height: 1.4;
+    }
+    .tab-btn.active .tab-badge { background: rgba(0,0,0,0.25); }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+    .main { max-width: 900px; margin: 0 auto; padding: 32px 24px 120px; }
+
+    /* ── INSTRUCTION BANNER ──────────────────────────────────── */
+    .banner {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px; color: var(--muted); line-height: 1.6;
+    }
+    .banner strong { color: var(--text); }
+
+    /* ── SECTION HEADING ─────────────────────────────────────── */
+    .section-heading {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 28px; letter-spacing: 0.06em;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .section-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 0.1em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    /* ── ITEM ROW (checklist items) ──────────────────────────── */
+    .item-list { display: flex; flex-direction: column; gap: 8px; }
+    .item-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      display: flex; align-items: flex-start; gap: 10px;
+      transition: border-color var(--transition);
+      cursor: default;
+    }
+    .item-row.drag-over { border-color: var(--gold); border-top: 2px solid var(--gold); }
+    .item-row[draggable="true"] { cursor: grab; }
+    .item-row[draggable="true"]:active { cursor: grabbing; }
+
+    .drag-handle {
+      color: var(--muted); font-size: 16px; line-height: 1; padding-top: 4px;
+      flex-shrink: 0; cursor: grab; user-select: none;
+    }
+    .item-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .item-label-row { display: flex; gap: 8px; align-items: center; }
+    .item-label-input {
+      flex: 1; background: var(--card2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      color: var(--text); outline: none;
+      transition: border-color var(--transition);
+    }
+    .item-label-input:focus { border-color: var(--gold); }
+    .item-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .notes-toggle-btn {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--muted); background: none; border: 1px solid var(--border);
+      border-radius: 4px; padding: 3px 8px; cursor: pointer;
+      transition: all var(--transition); white-space: nowrap;
+    }
+    .notes-toggle-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .notes-toggle-btn.has-notes { color: var(--gold); border-color: var(--gold-dim); }
+    .notes-area {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      color: var(--text); outline: none; resize: vertical;
+      min-height: 70px; width: 100%;
+      transition: border-color var(--transition);
+    }
+    .notes-area:focus { border-color: var(--gold); }
+    .notes-area.hidden { display: none; }
+    .required-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--muted); cursor: pointer; user-select: none;
+      white-space: nowrap;
+    }
+    .required-toggle input[type="checkbox"] { display: none; }
+    .req-pill {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 12px;
+      border: 1px solid var(--border);
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      transition: all var(--transition); cursor: pointer;
+      background: transparent; color: var(--muted);
+    }
+    .req-pill.on { background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 600; }
+    .day-select {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 8px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--text); outline: none; cursor: pointer;
+      transition: border-color var(--transition);
+    }
+    .day-select:focus { border-color: var(--gold); }
+    .delete-btn {
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 8px;
+      color: var(--muted); cursor: pointer; font-size: 14px;
+      transition: all var(--transition); flex-shrink: 0;
+      line-height: 1;
+    }
+    .delete-btn:hover { border-color: var(--red); color: var(--red); background: rgba(224,85,85,0.08); }
+
+    /* ── SCRIPT CARD (AI scripts) ────────────────────────────── */
+    .script-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: border-color var(--transition);
+    }
+    .script-card-header {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .script-card-id {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--gold-dim); white-space: nowrap; padding-top: 8px;
+      flex-shrink: 0; min-width: 72px;
+    }
+    .script-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .script-row { display: flex; gap: 8px; }
+    .script-input {
+      flex: 1; background: var(--card2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px;
+      color: var(--text); outline: none;
+      transition: border-color var(--transition);
+    }
+    .script-input:focus { border-color: var(--gold); }
+    .script-input::placeholder { color: var(--muted); }
+    .field-label {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      letter-spacing: 0.08em; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 2px;
+    }
+    .script-textarea {
+      width: 100%; background: var(--card2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      color: var(--text); outline: none; resize: vertical;
+      transition: border-color var(--transition);
+    }
+    .script-textarea:focus { border-color: var(--gold); }
+    .script-textarea::placeholder { color: var(--muted); }
+    .kw-textarea { min-height: 52px; }
+    .resp-textarea { min-height: 110px; }
+
+    /* ── EMPTY STATE ─────────────────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 48px 24px;
+      color: var(--muted); font-size: 14px;
+    }
+    .empty-state p { margin-bottom: 8px; }
+
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .btn {
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      padding: 8px 18px; border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card2); color: var(--text);
+      cursor: pointer; transition: all var(--transition);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .btn:focus-visible { outline: 2px solid var(--gold); }
+    .btn-gold {
+      background: var(--gold); border-color: var(--gold);
+      color: var(--black); font-weight: 600;
+    }
+    .btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); color: var(--black); }
+    .btn-ghost { background: transparent; }
+    .btn-danger { border-color: var(--red); color: var(--red); }
+    .btn-danger:hover { background: rgba(224,85,85,0.1); }
+    .btn-add {
+      margin-top: 10px; width: 100%; justify-content: center;
+      border-style: dashed; color: var(--muted);
+    }
+    .btn-add:hover { border-color: var(--gold); color: var(--gold); border-style: dashed; }
+
+    /* ── BOTTOM ACTION BAR ───────────────────────────────────── */
+    .action-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: var(--black);
+      border-top: 1px solid var(--border);
+      padding: 12px 32px;
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap;
+    }
+    .action-bar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .last-saved {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--muted); white-space: nowrap;
+    }
+    .last-saved.visible { color: var(--green); }
+
+    /* ── MODAL ───────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px 28px 24px;
+      max-width: 540px; width: 100%; max-height: 80vh;
+      display: flex; flex-direction: column; gap: 16px;
+      position: relative;
+    }
+    .modal-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 24px; letter-spacing: 0.06em;
+      color: var(--text);
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: none; color: var(--muted);
+      font-size: 20px; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { overflow-y: auto; flex: 1; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--border); }
+
+    /* ── PDF REVIEW PANEL ────────────────────────────────────── */
+    #pdfReviewModal .modal-box { max-width: 720px; }
+    .pdf-drafts { display: flex; flex-direction: column; gap: 10px; }
+    .pdf-draft-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .pdf-draft-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .draft-badge {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      letter-spacing: 0.08em; color: var(--blue);
+      text-transform: uppercase;
+    }
+
+    /* ── TABS ────────────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── TOAST ───────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 20px;
+      font-size: 13px; color: var(--text);
+      opacity: 0; pointer-events: none; z-index: 600;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+    #toast.success { border-color: var(--green); color: var(--green); }
+    #toast.error { border-color: var(--red); color: var(--red); }
+
+    /* ── FOCUS STYLES ────────────────────────────────────────── */
+    *:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar" role="banner">
+  <div class="topbar-logo">
+    <img src="hotelLogo.jpg" alt="Hotel logo" onerror="this.style.display='none'">
+    <div>
+      <div class="topbar-subtitle">Night Companion</div>
+      <div class="topbar-title">CONTENT EDITOR</div>
+    </div>
+  </div>
+  <div class="topbar-divider" aria-hidden="true"></div>
+  <nav class="tab-bar" role="tablist" aria-label="Editor tabs">
+    <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="panel-pre"     id="tab-pre"     onclick="switchTab('pre')"    >Pre-Audit  <span class="tab-badge" id="badge-pre">0</span></button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-post"    id="tab-post"    onclick="switchTab('post')"   >Post-Audit <span class="tab-badge" id="badge-post">0</span></button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-scripts" id="tab-scripts" onclick="switchTab('scripts')">AI Scripts <span class="tab-badge" id="badge-scripts">0</span></button>
+  </nav>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="main" role="main">
+
+  <!-- INSTRUCTION BANNER -->
+  <div class="banner" role="note" aria-live="polite">
+    <strong>How to use this editor:</strong> Edit your checklist items and AI scripts below, then click <strong>Export &amp; Save</strong>.
+    Place the downloaded file in the same folder as <strong>hotelcompanion_suite.html</strong> and reload the app.
+    Use <strong>Import</strong> to load a previously saved file back into the editor.
+  </div>
+
+  <!-- PRE-AUDIT TAB -->
+  <div class="tab-panel active" id="panel-pre" role="tabpanel" aria-labelledby="tab-pre">
+    <div class="section-heading">Pre-Audit Items</div>
+    <div class="section-sub">Tasks performed on arrival, up to running the Night Audit</div>
+    <div class="item-list" id="list-pre"></div>
+    <button class="btn btn-add" onclick="addItem('pre')" aria-label="Add Pre-Audit item">＋ Add Item</button>
+  </div>
+
+  <!-- POST-AUDIT TAB -->
+  <div class="tab-panel" id="panel-post" role="tabpanel" aria-labelledby="tab-post">
+    <div class="section-heading">Post-Audit Items</div>
+    <div class="section-sub">Tasks performed after the Night Audit has run</div>
+    <div class="item-list" id="list-post"></div>
+    <button class="btn btn-add" onclick="addItem('post')" aria-label="Add Post-Audit item">＋ Add Item</button>
+  </div>
+
+  <!-- AI SCRIPTS TAB -->
+  <div class="tab-panel" id="panel-scripts" role="tabpanel" aria-labelledby="tab-scripts">
+    <div class="section-heading">AI Coach Scripts</div>
+    <div class="section-sub">Keyword-triggered scripts served by Aria in the main app</div>
+    <div class="item-list" id="list-scripts"></div>
+    <button class="btn btn-add" onclick="addScript()" aria-label="Add AI script">＋ Add Script</button>
+  </div>
+
+</main>
+
+<!-- BOTTOM ACTION BAR -->
+<footer class="action-bar" role="contentinfo">
+  <button class="btn btn-ghost" onclick="openImport()" aria-label="Import existing file">
+    ↑ Import / Load Existing
+  </button>
+  <button class="btn btn-danger" onclick="confirmReset()" aria-label="Reset to built-in defaults">
+    ↺ Reset to Defaults
+  </button>
+  <button class="btn" onclick="openPdfImport()" id="pdfImportBtn" aria-label="Import scripts from PDF" title="AI Scripts tab only — imports from a text-based PDF">
+    ⬇ Import from PDF
+  </button>
+  <div class="action-bar-right">
+    <span class="last-saved" id="lastSavedLabel" aria-live="polite"></span>
+    <button class="btn btn-gold" onclick="exportItems()" id="exportItemsBtn" aria-label="Export and save checklist items">
+      ↓ Export Items (.js)
+    </button>
+    <button class="btn btn-gold" onclick="exportScripts()" id="exportScriptsBtn" aria-label="Export and save AI scripts">
+      ↓ Export Scripts (.js)
+    </button>
+  </div>
+</footer>
+
+<!-- IMPORT FILE INPUT (hidden) -->
+<input type="file" id="importFileInput" accept=".js" style="display:none" aria-hidden="true">
+<input type="file" id="pdfFileInput" accept=".pdf" style="display:none" aria-hidden="true">
+
+<!-- RESET CONFIRM MODAL -->
+<div class="modal-overlay" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('resetModal')" aria-label="Close">×</button>
+    <div class="modal-title" id="resetModalTitle">Reset to Defaults?</div>
+    <p style="color:var(--muted);font-size:14px;line-height:1.6;">This will discard all your changes to <strong style="color:var(--text)">both</strong> the checklist items and AI scripts, and reload the built-in defaults. Any unsaved customisation will be lost.</p>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('resetModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="doReset()">Yes, Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF REVIEW MODAL -->
+<div class="modal-overlay" id="pdfReviewModal" role="dialog" aria-modal="true" aria-labelledby="pdfReviewTitle">
+  <div class="modal-box" style="max-width:720px;">
+    <button class="modal-close" onclick="closeModal('pdfReviewModal')" aria-label="Close">×</button>
+    <div class="modal-title" id="pdfReviewTitle">PDF Import — Review Drafts</div>
+    <p style="color:var(--muted);font-size:13px;">Review the draft scripts extracted from your PDF. Edit any fields, delete cards you don't need, then click <strong style="color:var(--text)">Add to Scripts</strong>.</p>
+    <p style="color:var(--gold);font-size:12px;font-family:'DM Mono',monospace;">⚠ Table content may have scrambled order — review carefully before adding.</p>
+    <div class="modal-body" style="margin-top:8px;">
+      <div class="pdf-drafts" id="pdfDraftList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('pdfReviewModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="addDraftsToScripts()">Add to Scripts (<span id="draftCount">0</span>)</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// DATA — In-memory state
+// ═══════════════════════════════════════════════════════════════
+
+let preAuditItems  = [];
+let postAuditItems = [];
+let scriptItems    = [];
+let activeTab      = 'pre';
+let isDirty        = false;
+let pdfDrafts      = [];
+
+// ═══════════════════════════════════════════════════════════════
+// DEFAULT DATA — mirrors hotelcompanion_items.example.js exactly
+// ═══════════════════════════════════════════════════════════════
+
+function getDefaultPreAudit() {
+  return [
+    { id:'pre_001', label:'Receive Handover from Day Team', required:true, dayRestriction:'every', notes:'• Familiarise yourself with house status and groups/functions for this evening, including Conferences and Parties.\n• Ask if there are any Wake-up Calls, Breakfast Bags or booked Taxis.' },
+    { id:'pre_002', label:'Turn off Jacuzzi Pump and Steam room lights', required:true, dayRestriction:'every', notes:'' },
+    { id:'pre_003', label:'Start Pool Robot', required:true, dayRestriction:'every', notes:'• Get out pool cleaning robot and place in pool.\n• Start it.\n• Ensure cable will not tangle or snag on anything.' },
+    { id:'pre_004', label:'Floor walk 2230', required:true, dayRestriction:'every', notes:'• Check for room service trays outside guest rooms and recover as necessary.\n• Ensure fire exit routes are clear, the link bridge is secured and the golf lounge internal & external door is secured.\n• Turn off any un-needed lights as you go around.' },
+    { id:'pre_005', label:'RevPar', required:true, dayRestriction:'every', notes:'• Work out the RevPar figure for the day.\n• Update any IN HOUSE or ARRIVAL reservations with the market code BMR.' },
+    { id:'pre_006', label:'Collect all dockets from the bar and restaurant', required:true, dayRestriction:'every', notes:'• Be sure to check the office desk for dockets left by earlier shifts.\n• For all dockets cashed off with card or cash — ensure these are filed later with the night audit.' },
+    { id:'pre_007', label:'Rebate', required:true, dayRestriction:'every', notes:'• Rebate charges on the management accounts.\n• If there are charges without a signed docket, extend the account and communicate to restaurant, Marty, Dody, Didier, Debbie H, Aymen, Yaas and Ella for follow up.' },
+    { id:'pre_008', label:'PMs', required:true, dayRestriction:'every', notes:'• Check out all PMs after bar has closed.\n• Extend PM accounts that are due out with balances.' },
+    { id:'pre_009', label:'Fill out the management bills report', required:true, dayRestriction:'every', notes:'• 9000\n• 9001\n• 9066' },
+    { id:'pre_010', label:'D140', required:true, dayRestriction:'every', notes:'• Look at the D140 (negative postings only) for all cashiers.\n• File in Nights Folder on P Drive.' },
+    { id:'pre_011', label:'NAR1', required:true, dayRestriction:'every', notes:'• Look at night audit reports (NAR1) on email.' },
+    { id:'pre_012', label:'A142', required:true, dayRestriction:'every', notes:'• Look at the A142 Report and check rates and source codes.\n• File in Nights Folder on P Drive.' },
+    { id:'pre_013', label:'No Shows', required:true, dayRestriction:'every', notes:'• DO NOT check in any remaining arrivals unless they are members.\n• Remove room numbers and put them in a comment.' },
+    { id:'pre_014', label:'Balance Banking', required:true, dayRestriction:'every', notes:'• Check banking and fill out Balance Sheet.\n• If it does NOT balance, email Aymen, Yaas, Mary and Harriet.' },
+    { id:'pre_015', label:'D100', required:true, dayRestriction:'every', notes:'• All night staff — print a D100 and match to FreedomPay total.\n• INVESTIGATE IF NOT BALANCED.' },
+    { id:'pre_016', label:'DM Report', required:true, dayRestriction:'every', notes:'• Fill in DM Report with Daily figures (PM Actual).' },
+    { id:'pre_017', label:'Run Night Audit at 0301', required:true, dayRestriction:'every', notes:'• Run the Night Audit AT 0301.' }
+  ];
+}
+
+function getDefaultPostAudit() {
+  return [
+    { id:'post_001', label:'Send EMEA reports to Marriott', required:true, dayRestriction:'every', notes:'• D114\n• F116' },
+    { id:'post_002', label:'Deposits', required:true, dayRestriction:'every', notes:'• Collect deposits for all prepaid reservations created on the audit date, as well as yesterday\'s date.\n• DO NOT DO THIS BEFORE 04:00.' },
+    { id:'post_003', label:'Sort reg cards', required:true, dayRestriction:'every', notes:'• Sort them into daily folder or into black box.\n• Make sure to staple dockets to them.' },
+    { id:'post_004', label:'Save D156 / Recs', required:true, dayRestriction:'every', notes:'• Open the D156 as delimited data.\n• Copy and paste the figures into the spreadsheet: P Drive → Operations Team Folder → Hotel → Financial Reporting → 2026 → RECS → select correct month.' },
+    { id:'post_005', label:'Fill out Hotel Flash', required:true, dayRestriction:'every', notes:'• Open and complete Weekly Hotel Flash.\n• P Drive → 3. Operations Team Folder → 14. Hotel → Financial Reporting → 2026 → Weekly Hotel Forecast → select correct month.' },
+    { id:'post_006', label:'Complete the Early Bird Report', required:true, dayRestriction:'every', notes:'' },
+    { id:'post_007', label:'City Ledgers', required:true, dayRestriction:'every', notes:'• Go through ALL CHECK OUTS and follow the City Ledger process for that ledger.\n• Check all routing while you are at it.\n• If you have any discrepancies with the CLs ensure this is on the handover.' },
+    { id:'post_008', label:'Update One Yield', required:true, dayRestriction:'every', notes:'' },
+    { id:'post_009', label:'Complete the Daily Times', required:true, dayRestriction:'every', notes:'' },
+    { id:'post_010', label:'Fill out the STR', required:true, dayRestriction:'every', notes:'' },
+    { id:'post_011', label:'Open and monitor the cases on GXP', required:true, dayRestriction:'every', notes:'' },
+    { id:'post_012', label:'Board', required:true, dayRestriction:'every', notes:'• Update the back-office whiteboard with relevant information for the day.\n• Make sure it is correct before leaving at the end of shift.' },
+    { id:'post_013', label:'Check Comments', required:true, dayRestriction:'every', notes:'• Check comments for all rooms in house to ensure breakfast reports look correct.' },
+    { id:'post_014', label:'Print Breakfast Reports', required:true, dayRestriction:'every', notes:'• Single sided ONLY.\n• D999 (New), R118, R118 detailed, A891 (VIP 10 + 11), B202, A150.\n• Print Opentable Reservations for the kitchen.' },
+    { id:'post_015', label:'Send One Yield and F100', required:true, dayRestriction:'every', notes:'• Send to Michelle Boden, Yaas, Ella, Aymen.' },
+    { id:'post_016', label:'Review Departures', required:true, dayRestriction:'every', notes:'• Check out and reinstate all routed rooms.\n• Make sure to check backups for city ledgers.' },
+    { id:'post_017', label:'Traces', required:true, dayRestriction:'every', notes:'• Go through arrivals and assign rooms to all members and any arrivals with traces.' },
+    { id:'post_018', label:'Housekeeping Reports', required:true, dayRestriction:'every', notes:'• Send A136, A192, T116 reports by email to housekeeping, Aymen, Ella, Yaas and Mays.\n• Include information about pickup rooms in the email.' },
+    { id:'post_019', label:'Yard Gate', required:true, dayRestriction:'every', notes:'• Open service yard gate.\n• 4AM' },
+    { id:'post_020', label:'Post room service cheques to opera', required:true, dayRestriction:'every', notes:'• 4AM' },
+    { id:'post_021', label:'Kitchen Tidy', required:true, dayRestriction:'every', notes:'• Turn off pizza oven and clean area.\n• 4AM' },
+    { id:'post_022', label:'Print final numbers from FreedomPay for Mary', required:true, dayRestriction:'every', notes:'• 4AM' },
+    { id:'post_023', label:'Open Folios', required:true, dayRestriction:'sat', notes:'• Update and send the \'Open Folio and Open PM\' list.' },
+    { id:'post_024', label:'Tidy Bar', required:false, dayRestriction:'every', notes:'• Check and tidy the bar from last remaining guests.' },
+    { id:'post_025', label:'Tidy Front Desk', required:false, dayRestriction:'every', notes:'' },
+    { id:'post_026', label:'Clean and hoover back office', required:false, dayRestriction:'every', notes:'' },
+    { id:'post_027', label:'Restart all computers', required:true, dayRestriction:'every', notes:'' },
+    { id:'post_028', label:'Put out puddle duck signs', required:true, dayRestriction:'sun', notes:'' },
+    { id:'post_029', label:'Put out puddle duck signs', required:true, dayRestriction:'mon', notes:'' },
+    { id:'post_030', label:'Put out fire alarm test signs', required:true, dayRestriction:'tue', notes:'' },
+    { id:'post_031', label:'Function Signs', required:true, dayRestriction:'every', notes:'• Put out function signs outside appropriate meeting rooms.' },
+    { id:'post_032', label:'Send management bill spreadsheet to Didier', required:true, dayRestriction:'last_night_of_month', notes:'' },
+    { id:'post_033', label:'Scan Sheets', required:true, dayRestriction:'every', notes:'• Send scan of Safety checklist and spa sign-in to Didier.' },
+    { id:'post_034', label:'Retrieve Pool Robot', required:true, dayRestriction:'every', notes:'• Pull robot out and make sure it is off.\n• Put robot away and ensure cabling is tidy.\n• Clean filter.' },
+    { id:'post_035', label:'Pool Test', required:true, dayRestriction:'every', notes:'• Pool test to be done and turn Jacuzzi back on if it is working.\n• Trained staff only.' },
+    { id:'post_036', label:'Night Reports', required:true, dayRestriction:'every', notes:'• Send out to the management team in one email: Daily Times / DM Report / Early Bird.' },
+    { id:'post_037', label:'Handover', required:true, dayRestriction:'every', notes:'• Perform a handover with early shift team.' },
+    { id:'post_038', label:'Banking', required:true, dayRestriction:'every', notes:'• Do a D100 end of shift and sign it.\n• Match to FreedomPay.' }
+  ];
+}
+
+function getDefaultScripts() {
+  return [
+    { id:'script_001', title:'Guest Wants to Pay Cash', category:'Payments', keywords:['guest wants to pay cash','cash payment','paying cash','pay in cash'], response:'**Card-Only Policy**\n\nPolitely but firmly explain to the guest that the property operates a card-only policy for all payments.\n\n**Script:**\n"I completely understand, and I\'m sorry for any inconvenience. Our property operates on a card-only basis for all payments — we\'re unable to accept cash for room charges or incidentals. This policy applies to all guests and helps us ensure accurate billing."\n\n**If the guest insists:**\n"I\'d be happy to speak with the Duty Manager on your behalf. However I should let you know this is a property-wide policy and I\'m not in a position to override it."\n\n**Action:** Log the interaction in the Night Log if the guest becomes frustrated or a manager is involved.' },
+    { id:'script_002', title:'Card Declined at Check-In', category:'Payments', keywords:['card declined','card decline','payment declined','card not working','card failed'], response:'**Card Declined — Step by Step**\n\n1. Stay calm and keep your voice low — never announce a decline loudly.\n2. Say: "I\'m sorry, it seems there\'s been a small issue with that card. Could you try a different card or I can retry this one?"\n3. Try a second tap or chip insert.\n4. If declined again, ask if they have an alternative card.\n5. If no alternative: hold the room key and contact the Duty Manager before releasing the room.\n6. Do not allow access to the room without a successful payment or explicit DM approval.\n\n**Log:** Record the guest name, room, and outcome in the Night Log.' },
+    { id:'script_003', title:'Pre-Auth / Billing Query Script', category:'Payments', keywords:['pre-auth','pre auth','billing query','authorisation hold','authorization hold','deposit hold'], response:'**Explaining Pre-Authorisation to Guests**\n\n**Script:**\n"When you checked in, a temporary hold was placed on your card — this is called a pre-authorisation. It\'s not a charge; it\'s simply a security hold to cover any incidental expenses during your stay. The hold will be released within 3–5 business days of checkout, depending on your bank."\n\n**If asked why the amount is higher than the room rate:**\n"The pre-auth covers both the room rate and a standard incidental allowance. Only the amount you actually owe will be charged at checkout."\n\n**If they\'re unhappy:** Offer to print a billing summary and note the query in the Night Log.' },
+    { id:'script_004', title:'Noise Complaint Script', category:'Complaints', keywords:['noise complaint','noisy room','noisy guests','loud music','loud neighbours','noise from room'], response:'**Noise Complaint — Escalation Script**\n\n**Step 1 — Phone call to room:**\n"Good evening, I\'m calling from reception. We\'ve received a noise concern about [room/area]. Could you please keep the noise levels down so other guests can rest? Thank you for your understanding."\n\n**Step 2 — If no improvement (20 mins later):**\nAttend in person. Knock firmly. "I\'m very sorry to disturb you. We\'ve had a second noise complaint. I need to ask you to keep noise levels down or I\'ll have to involve the Duty Manager."\n\n**Step 3 — Escalate to Duty Manager** if still no resolution.\n\n**Always:** Log every contact attempt in the Night Log with times.' },
+    { id:'script_005', title:'Handle a Guest Complaint — LEARN Model', category:'Complaints', keywords:['handle a guest complaint','guest complaint','guest unhappy','guest upset','angry guest','dealing with complaint'], response:'**The LEARN Model for Guest Complaints**\n\n**L — Listen** actively. Don\'t interrupt. Let them finish.\n**E — Empathise.** "I completely understand why you feel that way, and I\'m truly sorry."\n**A — Apologise** sincerely, even if it wasn\'t your fault.\n**R — Resolve** — offer a solution or escalate to someone who can.\n**N — Notify** — document the complaint and resolution in the Night Log.\n\n**Script opener:**\n"Thank you for bringing this to my attention. I want to make sure we put this right for you. Could you tell me exactly what happened?"\n\n**Never:** argue, blame colleagues, or make promises you can\'t keep.' },
+    { id:'script_006', title:'Dealing With an Angry Guest', category:'Complaints', keywords:['dealing with an angry guest','angry guest','irate guest','aggressive guest'], response:'**Calm-Down Techniques for Angry Guests**\n\n1. **Lower your own voice** — this naturally prompts them to lower theirs.\n2. **Don\'t take it personally** — they\'re upset at the situation, not you.\n3. **Use their name** once you know it — it builds calm rapport.\n4. **Avoid defensive language** — never say "that\'s not our policy" or "you should have".\n5. **Offer choice** — giving options returns a sense of control to the guest.\n6. **Know your threshold** — if they become physically threatening, step back, press the panic button, and call security or police.\n\n**Script:** "I hear you, and I want to help. Let me see what I can do right now."' },
+    { id:'script_007', title:'Intoxicated Guest at Desk', category:'Security', keywords:['intoxicated guest','drunk guest','intoxicated person','drunk person','inebriated'], response:'**Intoxicated Guest — De-Escalation & Safety**\n\n**De-escalation:**\n- Stay calm, speak slowly and clearly.\n- Do not argue or raise your voice.\n- Use open, non-threatening body language.\n\n**Script:** "I can see you\'ve had a bit of a night — let me help you get to your room safely."\n\n**If they\'re being disruptive:**\n"I need to ask you to lower your voice as other guests are sleeping. If you\'re not able to do that I\'ll need to call the Duty Manager."\n\n**If they\'re a risk to themselves or others:**\n1. Do not serve alcohol.\n2. Call the Duty Manager.\n3. If a safety risk — call emergency services.\n\n**Log** all interactions in the Night Log.' },
+    { id:'script_008', title:'Suspicious Person in Lobby', category:'Security', keywords:['suspicious person','suspicious individual','unknown person in lobby','stranger in lobby','security concern'], response:'**Suspicious Person — Observe, Approach, Escalate**\n\n**Step 1 — Observe:**\nNote description, time, location, and behaviour. Do not confront alone if you feel unsafe.\n\n**Step 2 — Approach (if safe):**\n"Good evening, can I help you? Are you a guest with us tonight?"\n\nIf they cannot confirm a booking or reason for being on site:\n"I\'m afraid this is a guest-only area at this time of night. I\'ll have to ask you to leave."\n\n**Step 3 — Escalate:**\n- Call Duty Manager if they refuse to leave.\n- Call police (999) if there is any threat to safety.\n\n**Always:** Log in the Night Log with description and time.' },
+    { id:'script_009', title:'Fire Alarm — Evacuation Procedure', category:'Security', keywords:['fire alarm','fire evacuation','evacuation','fire drill','building evacuation'], response:'**Fire Alarm Response**\n\n1. **Treat every alarm as real** until confirmed otherwise.\n2. Call out calmly over the phone to rooms if time permits: "Attention, please evacuate the building calmly via the nearest fire exit."\n3. **Do not use lifts** — direct guests to stairs.\n4. Proceed to the designated assembly point.\n5. Carry the in-house guest list and account for all guests.\n6. Do not re-enter the building until the fire service confirms it is safe.\n7. Call 999 if fire is confirmed or if anyone is unaccounted for.\n\n**Log:** Record time alarm activated, time resolved, number of guests evacuated.' },
+    { id:'script_010', title:'Guest Refuses to Leave', category:'Security', keywords:['guest refuses to leave','trespass','won\'t leave','refused to leave','won\'t go'], response:'**Guest Refusing to Leave — Trespass Process**\n\n1. Remain calm. Clearly state they must leave: "I\'m asking you to leave the premises now."\n2. If they refuse: "If you do not leave I will contact the police."\n3. Call the Duty Manager immediately.\n4. If they still refuse: call 999 — trespass is a civil matter but police will attend if there is a breach of the peace.\n5. Do not physically remove the guest.\n\n**Log** every exchange in the Night Log with exact times and what was said.' },
+    { id:'script_011', title:'Medical Emergency', category:'Security', keywords:['medical emergency','medical','ambulance','collapsed','chest pain','unresponsive','not breathing'], response:'**Medical Emergency Protocol**\n\n1. **Call 999 first.** Stay on the line.\n2. Send someone to the main entrance to meet the ambulance and guide paramedics.\n3. Do not move the guest unless they are in immediate danger.\n4. Apply first aid only if you are trained to do so.\n5. Notify the Duty Manager immediately.\n6. Do not leave the guest alone until help arrives.\n7. Keep other guests away from the area.\n\n**Log:** Record time of discovery, time 999 called, time paramedics arrived, guest details.' },
+    { id:'script_012', title:'Do Not Disturb — Welfare Check', category:'Security', keywords:['do not disturb','dnd','welfare check','dnd sign ignored','welfare'], response:'**DND Welfare Check Protocol**\n\n A DND sign should be respected, but welfare takes priority if:\n- The sign has been on for an unusual length of time (12+ hours).\n- A guest has not been seen and a concern has been raised.\n\n**Procedure:**\n1. Knock firmly: "Housekeeping / Reception — just checking everything is okay."\n2. If no response: knock again and announce loudly.\n3. If still no response: contact the Duty Manager before entering.\n4. Two staff members should be present when entering.\n\n**Log** the time of check and outcome.' },
+    { id:'script_013', title:'Unaccompanied Minor', category:'Security', keywords:['unaccompanied minor','child alone','minor alone','child without adult'], response:'**Unaccompanied Minor — Safeguarding**\n\n1. Approach calmly: "Hi there — are you okay? Is your mum or dad nearby?"\n2. Do not leave the child unattended.\n3. Bring them to reception and attempt to contact their parent/guardian.\n4. Call the Duty Manager immediately.\n5. If no parent/guardian can be located within a short time: call 999 and request police welfare attendance.\n6. Do not allow any third party to take the child unless they can confirm parentage.\n\n**Log** all details including time, description, and actions taken.' },
+    { id:'script_014', title:'Power Cut', category:'Security', keywords:['power cut','power outage','blackout','electricity out','no power','lights out'], response:'**Power Cut Response**\n\n1. Emergency lighting should activate automatically — check it has.\n2. Do not panic — stay at reception to manage guest queries.\n3. Check whether the outage is building-wide or local (fuse/breaker).\n4. Contact the Duty Manager immediately.\n5. If generator-equipped: confirm generator has activated.\n6. Inform guests calmly: "We\'re aware of a power interruption and our team is working to resolve it. Emergency lighting is active and you are safe."\n7. Log the time and extent of the outage.\n8. Contact the electricity provider if it appears to be a wider area outage.' },
+    { id:'script_015', title:'Late Arrival — No Booking Found', category:'Arrivals & Departures', keywords:['late arrival','no booking found','no reservation','no record of booking','booking not found'], response:'**No Reservation Found — 5-Step Process**\n\n1. Ask the guest for their booking confirmation number or the email address used.\n2. Search by name, company, and confirmation number.\n3. Check for misspelling of the name.\n4. Check if the booking may be under a travel agent or third-party OTA reference.\n5. If still not found: do not turn the guest away — contact the Duty Manager before making any decision to walk the guest.\n\n**Script:** "I want to make absolutely sure we\'ve checked everything before I come to any conclusion. Let me try a couple of other searches."' },
+    { id:'script_016', title:'Guest Locked Out at 3am', category:'Arrivals & Departures', keywords:['guest locked out','locked out','lost key card','key not working','key card not working'], response:'**Guest Locked Out — Key Issue Process**\n\n1. **Verify identity** before issuing any key — never skip this step.\n2. Ask for: full name, room number, and check-out date.\n3. Confirm these details against the booking in the PMS.\n4. If details match: re-encode/issue the key card.\n5. If details do not match or the guest cannot provide them: do not issue a key — ask the Duty Manager.\n6. **Never** issue a key based on appearance or room knowledge alone.\n\n**Script:** "Of course — I just need to confirm a couple of details to make sure I get the right room for you."' },
+    { id:'script_017', title:'Early Check-In Request', category:'Arrivals & Departures', keywords:['early check-in','early arrival','arrive early','room ready early'], response:'**Early Check-In Request**\n\n1. Check room availability in the PMS for the requested room type.\n2. Check with housekeeping if the room has been cleaned/inspected.\n3. If room is ready: check in and note in the shift log.\n4. If not ready: offer the luggage room and invite the guest to use hotel facilities.\n\n**Script:** "Let me check what we have available for you. Our standard check-in time is [time], but if a room is ready earlier I\'ll be happy to get you in straight away."\n\n**Upsell:** If a higher-category room is available and ready, this is an opportunity to offer an upgrade.' },
+    { id:'script_018', title:'Late Check-Out Request', category:'Arrivals & Departures', keywords:['late check-out','late checkout','extend stay','stay later','checkout later'], response:'**Late Check-Out Request**\n\n1. Check occupancy — if the room is not sold for tonight, a late check-out may be possible.\n2. Check housekeeping schedule before committing.\n3. Standard late check-out is typically until 12 noon / 1pm — confirm your property\'s policy.\n\n**Script:** "I\'ll check availability for you. Our standard check-out is [time] but I\'d love to help if we can."\n\n**If available:** "We can offer you until [time] — would that work for you?"\n\n**Charge:** Confirm whether late check-out is complimentary or chargeable per your property policy.\n\n**Notify:** Inform housekeeping of any agreed late check-outs.' },
+    { id:'script_019', title:'Group Arrival', category:'Arrivals & Departures', keywords:['group arrival','group check-in','large group','coach group','tour group'], response:'**Group Arrival — Coordination Process**\n\n**Before arrival:**\n1. Pre-assign rooms in the PMS to avoid delays at desk.\n2. Pre-encode key cards and label in envelopes if possible.\n3. Prepare a group rooming list.\n4. Coordinate with housekeeping to confirm all rooms are inspected.\n\n**On arrival:**\n1. Greet the group leader first and work from the rooming list.\n2. Distribute keys efficiently — batch by floor or travel party where possible.\n3. Brief the group on breakfast times, WiFi, and any relevant information.\n\n**Log:** Note arrival time and any issues in the Night Log.' },
+    { id:'script_020', title:'Room Move Request', category:'Arrivals & Departures', keywords:['room move','room change','change room','move room','different room'], response:'**Room Move — PMS Procedure**\n\n1. Identify an available, inspected room matching the guest\'s request.\n2. Process the room move in the PMS.\n3. Re-encode the key card for the new room.\n4. Notify housekeeping of the move (both vacated and new room).\n5. Ensure any luggage stored is moved (offer assistance).\n6. Update any in-room dining or service orders to the new room number.\n\n**Script:** "Let me sort that for you now. I\'ll get you a new key card for [room] and make a note for housekeeping."' },
+    { id:'script_021', title:'VIP Check-In Script', category:'VIP & Service', keywords:['vip check-in','vip arrival','vip guest','check-in script for vip'], response:'**VIP Arrival — Polished Check-In Script**\n\n"Good evening [Name] — welcome back / welcome to [Hotel Name]. It\'s a pleasure to have you with us."\n\n1. Have the registration card pre-completed where possible.\n2. Confirm room assignment — ensure it is inspected and amenities are in place.\n3. Escort or arrange escort to the room if applicable.\n4. Mention any personalised touches: "We\'ve arranged [item] in your room as requested."\n5. Provide direct contact number for any overnight requests.\n\n**Never:** make a VIP guest wait at the desk unnecessarily. Prioritise their arrival.\n\n**Log:** Note VIP arrival in the Night Log and in the handover.' },
+    { id:'script_022', title:'Giving Local Recommendations', category:'VIP & Service', keywords:['recommendation','local recommendation','what to do','where to eat','restaurant recommendation','things to do'], response:'**Confident Local Recommendations — Structure**\n\n1. **Ask first:** "Are you looking for something casual or more of a dining experience?"\n2. **Offer two or three options** — not a list of ten.\n3. **Give a reason:** "I\'d suggest [name] — the [dish/atmosphere] is really excellent."\n4. **Practical detail:** opening hours, walking distance, whether booking is needed.\n5. **Offer to help:** "Would you like me to call ahead for you?"\n\n**Keep a go-to list** of 3–4 local recommendations for: casual dining, fine dining, late-night food, and things to do — so you\'re never caught unprepared.' },
+    { id:'script_023', title:'Phone Greeting Script', category:'VIP & Service', keywords:['phone greeting','telephone greeting','answer the phone','how to answer','phone script'], response:'**Standard Phone Scripts**\n\n**Incoming external call:**\n"Good [morning/afternoon/evening], [Hotel Name] reception, [Your Name] speaking — how may I help you?"\n\n**Transferring a call:**\n"Of course, I\'ll transfer you now. Please hold one moment."\n*(If transfer fails, return to the caller and take a message.)*\n\n**Taking a message:**\n"I\'m sorry, [Name] isn\'t available right now. May I take a message? Could I have your name and the best number to reach you?"\n\n**Wake-up call confirmation:**\n"I\'ve noted a wake-up call for [time] — is there anything else I can help you with?"' },
+    { id:'script_024', title:'Night Audit Error — What to Do', category:'Operations', keywords:['night audit error','audit error','pms error','audit problem','audit failed','audit issue'], response:'**Night Audit Error — Common Issues & Golden Rules**\n\n**Common PMS errors:**\n- Date not rolling: check open folios or pending check-ins blocking the audit.\n- Discrepancy report exceptions: review each one before proceeding.\n- Card batch error: re-run batch close on the terminal; if it fails, log and notify the Duty Manager.\n\n**Golden Rules:**\n1. Never force-close an audit without understanding why it failed.\n2. Document every error and action taken in the Night Log.\n3. If in doubt — stop and call the Duty Manager. It\'s better to delay the audit than to corrupt the data.\n4. Always take a screenshot or note the exact error message.\n\n**Contact:** Your PMS support line is available 24/7 for audit errors.' },
+    { id:'script_025', title:'Maintenance Fault Reporting', category:'Operations', keywords:['maintenance fault','maintenance issue','broken','fault reported','out of order','not working'], response:'**Maintenance Fault — Logging & Escalation**\n\n**Severity guide:**\n- **High** (log + call out-of-hours): flooding, power to occupied room, lift failure, fire safety equipment.\n- **Medium** (log + note for morning): heating/cooling, TV, hot water fault.\n- **Low** (log only): light bulb, cosmetic damage, minor fixture.\n\n**Process:**\n1. Log in the Night Log: location, description, severity, time discovered.\n2. If a guest is affected, offer a room move for high-severity faults.\n3. For out-of-hours callouts: use the emergency maintenance contact list — only call for H&S or guest safety issues.\n4. Include in the morning handover.' },
+    { id:'script_026', title:'Lost Property', category:'Operations', keywords:['lost property','lost and found','found item','guest left item','lost item','found property'], response:'**Lost Property Procedure**\n\n**Item found:**\n1. Record in the Lost Property log: item description, date/time found, location, found by.\n2. Store securely — valuables in the safe, other items in the lost property box.\n3. If a guest is still in house, attempt to return straight away.\n\n**Guest enquiry:**\n1. Check the lost property log.\n2. Ask for a description before confirming you have the item.\n3. For high-value items, verify identity before releasing.\n4. For posted returns: manager authorisation required.\n\n**Retention period:** Follow property policy (typically 3 months for valuables, 1 month for other items).' }
+  ];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ID GENERATION
+// ═══════════════════════════════════════════════════════════════
+
+function nextItemId(prefix, list) {
+  const nums = list
+    .map(it => { const m = it.id.match(/^[a-z_]+_(\d+)$/); return m ? parseInt(m[1],10) : 0; })
+    .filter(n => !isNaN(n));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return prefix + '_' + String(max + 1).padStart(3,'0');
+}
+
+function nextScriptId(list) {
+  const nums = list
+    .map(it => { const m = it.id.match(/^script_(\d+)$/); return m ? parseInt(m[1],10) : 0; })
+    .filter(n => !isNaN(n));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return 'script_' + String(max + 1).padStart(3,'0');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER — CHECKLIST ITEMS
+// ═══════════════════════════════════════════════════════════════
+
+const DAY_OPTIONS = [
+  { value:'every', label:'Every Day' },
+  { value:'mon', label:'Mon only' }, { value:'tue', label:'Tue only' },
+  { value:'wed', label:'Wed only' }, { value:'thu', label:'Thu only' },
+  { value:'fri', label:'Fri only' }, { value:'sat', label:'Sat only' },
+  { value:'sun', label:'Sun only' }, { value:'last_night_of_month', label:'Last night of month' }
+];
+
+function renderItems(tab) {
+  const list = tab === 'pre' ? preAuditItems : postAuditItems;
+  const container = document.getElementById('list-' + tab);
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>No items yet.</p><p>Click <strong>＋ Add Item</strong> to get started.</p></div>';
+    updateBadge(tab, 0);
+    return;
+  }
+
+  list.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.setAttribute('draggable', 'true');
+    row.dataset.idx = idx;
+    row.dataset.tab = tab;
+
+    const notesHidden = !item.notes;
+    const dayOpts = DAY_OPTIONS.map(o =>
+      `<option value="${o.value}"${item.dayRestriction === o.value ? ' selected' : ''}>${escHtml(o.label)}</option>`
+    ).join('');
+
+    row.innerHTML = `
+      <span class="drag-handle" aria-hidden="true" title="Drag to reorder">⠿</span>
+      <div class="item-fields">
+        <div class="item-label-row">
+          <input type="text" class="item-label-input" value="${escHtml(item.label)}"
+            placeholder="Task label (required)"
+            aria-label="Task label"
+            oninput="updateItemField('${tab}',${idx},'label',this.value)">
+        </div>
+        <div class="item-controls">
+          <button class="notes-toggle-btn${item.notes ? ' has-notes' : ''}"
+            onclick="toggleNotes(this,'${tab}',${idx})"
+            aria-expanded="${!notesHidden}"
+            aria-label="${item.notes ? 'Edit notes' : 'Add notes'}">
+            ${item.notes ? '📝 Notes' : '+ Add notes'}
+          </button>
+          <label class="required-toggle" title="Mark as required before continuing">
+            <input type="checkbox" ${item.required ? 'checked' : ''}
+              onchange="updateItemField('${tab}',${idx},'required',this.checked)">
+            <span class="req-pill ${item.required ? 'on' : ''}">
+              ${item.required ? '★ Required' : '☆ Optional'}
+            </span>
+          </label>
+          <select class="day-select"
+            aria-label="Day restriction"
+            onchange="updateItemField('${tab}',${idx},'dayRestriction',this.value)">
+            ${dayOpts}
+          </select>
+          <button class="delete-btn" onclick="deleteItem('${tab}',${idx})" aria-label="Delete item">🗑</button>
+        </div>
+        <textarea class="notes-area${notesHidden ? ' hidden' : ''}"
+          placeholder="• Bullet point guidance shown below the task label in the app"
+          aria-label="Notes for this item"
+          oninput="updateItemField('${tab}',${idx},'notes',this.value)">${escHtml(item.notes)}</textarea>
+      </div>
+    `;
+
+    // Drag events
+    row.addEventListener('dragstart', onDragStart);
+    row.addEventListener('dragover',  onDragOver);
+    row.addEventListener('dragleave', onDragLeave);
+    row.addEventListener('drop',      onDrop);
+    row.addEventListener('dragend',   onDragEnd);
+
+    container.appendChild(row);
+  });
+
+  updateBadge(tab, list.length);
+}
+
+function toggleNotes(btn, tab, idx) {
+  const row = btn.closest('.item-row');
+  const ta  = row.querySelector('.notes-area');
+  const hidden = ta.classList.toggle('hidden');
+  btn.setAttribute('aria-expanded', !hidden);
+}
+
+function updateItemField(tab, idx, field, value) {
+  const list = tab === 'pre' ? preAuditItems : postAuditItems;
+  if (!list[idx]) return;
+  if (field === 'required') {
+    list[idx].required = !!value;
+    // Update pill style without full re-render
+    const row = document.querySelectorAll(`#list-${tab} .item-row`)[idx];
+    if (row) {
+      const pill = row.querySelector('.req-pill');
+      if (pill) {
+        pill.className = 'req-pill' + (value ? ' on' : '');
+        pill.textContent = value ? '★ Required' : '☆ Optional';
+      }
+    }
+  } else {
+    list[idx][field] = value;
+    if (field === 'notes') {
+      // Update notes toggle button style
+      const row = document.querySelectorAll(`#list-${tab} .item-row`)[idx];
+      if (row) {
+        const btn = row.querySelector('.notes-toggle-btn');
+        if (btn) {
+          btn.className = 'notes-toggle-btn' + (value ? ' has-notes' : '');
+          btn.textContent = value ? '📝 Notes' : '+ Add notes';
+        }
+      }
+    }
+  }
+  markDirty();
+  updateBadge(tab, (tab === 'pre' ? preAuditItems : postAuditItems).length);
+}
+
+function addItem(tab) {
+  const list = tab === 'pre' ? preAuditItems : postAuditItems;
+  const prefix = tab === 'pre' ? 'pre' : 'post';
+  list.push({ id: nextItemId(prefix, list), label:'', notes:'', required:false, dayRestriction:'every' });
+  renderItems(tab);
+  markDirty();
+  // Focus new row label
+  const rows = document.querySelectorAll('#list-' + tab + ' .item-label-input');
+  if (rows.length) { rows[rows.length-1].focus(); rows[rows.length-1].scrollIntoView({behavior:'smooth',block:'center'}); }
+}
+
+function deleteItem(tab, idx) {
+  const list = tab === 'pre' ? preAuditItems : postAuditItems;
+  const item = list[idx];
+  if (!item) return;
+  const label = item.label || 'this item';
+  if (!confirm(`Delete "${label}"?`)) return;
+  list.splice(idx, 1);
+  renderItems(tab);
+  markDirty();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER — AI SCRIPTS
+// ═══════════════════════════════════════════════════════════════
+
+const CATEGORY_OPTIONS = ['Payments','Complaints','Security','Arrivals & Departures','VIP & Service','Operations'];
+
+function renderScripts() {
+  const container = document.getElementById('list-scripts');
+  container.innerHTML = '';
+
+  if (scriptItems.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>No scripts yet.</p><p>Click <strong>＋ Add Script</strong> to get started.</p></div>';
+    updateBadge('scripts', 0);
+    return;
+  }
+
+  const datalistHtml = `<datalist id="categoryList">${CATEGORY_OPTIONS.map(c=>`<option value="${escHtml(c)}">`).join('')}</datalist>`;
+
+  scriptItems.forEach((sc, idx) => {
+    const card = document.createElement('div');
+    card.className = 'script-card';
+    card.innerHTML = `
+      ${idx === 0 ? datalistHtml : ''}
+      <div class="script-card-header">
+        <div class="script-card-id">${escHtml(sc.id)}</div>
+        <div class="script-fields">
+          <div class="script-row">
+            <div style="flex:2">
+              <div class="field-label">Title</div>
+              <input type="text" class="script-input" value="${escHtml(sc.title)}"
+                placeholder="Script display title"
+                aria-label="Script title"
+                oninput="updateScriptField(${idx},'title',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="field-label">Category</div>
+              <input type="text" class="script-input" value="${escHtml(sc.category)}"
+                placeholder="e.g. Payments"
+                list="categoryList"
+                aria-label="Script category"
+                oninput="updateScriptField(${idx},'category',this.value)">
+            </div>
+            <button class="delete-btn" style="margin-top:20px" onclick="deleteScript(${idx})" aria-label="Delete script">🗑</button>
+          </div>
+          <div>
+            <div class="field-label">Keywords <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(comma-separated, lowercase)</span></div>
+            <textarea class="script-textarea kw-textarea"
+              placeholder="keyword one, keyword two, another phrase"
+              aria-label="Keywords (comma separated)"
+              oninput="updateScriptField(${idx},'keywords',this.value)">${escHtml(sc.keywords.join(', '))}</textarea>
+          </div>
+          <div>
+            <div class="field-label">Response <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(**bold** and \\n supported)</span></div>
+            <textarea class="script-textarea resp-textarea"
+              placeholder="Full response shown to staff in the AI Coach chat..."
+              aria-label="Script response text"
+              oninput="updateScriptField(${idx},'response',this.value)">${escHtml(sc.response)}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  updateBadge('scripts', scriptItems.length);
+}
+
+function updateScriptField(idx, field, value) {
+  if (!scriptItems[idx]) return;
+  if (field === 'keywords') {
+    scriptItems[idx].keywords = value.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+  } else {
+    scriptItems[idx][field] = value;
+  }
+  markDirty();
+}
+
+function addScript() {
+  scriptItems.push({ id: nextScriptId(scriptItems), title:'', category:'', keywords:[], response:'' });
+  renderScripts();
+  markDirty();
+  const cards = document.querySelectorAll('#list-scripts .script-input');
+  if (cards.length) { cards[cards.length - 4].focus(); cards[cards.length - 4].scrollIntoView({behavior:'smooth',block:'center'}); }
+}
+
+function deleteScript(idx) {
+  const sc = scriptItems[idx];
+  if (!sc) return;
+  const title = sc.title || 'this script';
+  if (!confirm(`Delete "${title}"?`)) return;
+  scriptItems.splice(idx, 1);
+  renderScripts();
+  markDirty();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG AND DROP (checklist items only)
+// ═══════════════════════════════════════════════════════════════
+
+let dragSrcIdx = null;
+let dragSrcTab = null;
+
+function onDragStart(e) {
+  dragSrcIdx = parseInt(this.dataset.idx, 10);
+  dragSrcTab = this.dataset.tab;
+  e.dataTransfer.effectAllowed = 'move';
+  this.style.opacity = '0.5';
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (this.dataset.tab === dragSrcTab) this.classList.add('drag-over');
+}
+function onDragLeave() { this.classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault();
+  this.classList.remove('drag-over');
+  const destIdx = parseInt(this.dataset.idx, 10);
+  const tab = this.dataset.tab;
+  if (tab !== dragSrcTab || dragSrcIdx === destIdx) return;
+  const list = tab === 'pre' ? preAuditItems : postAuditItems;
+  const [moved] = list.splice(dragSrcIdx, 1);
+  list.splice(destIdx, 0, moved);
+  renderItems(tab);
+  markDirty();
+}
+function onDragEnd() { this.style.opacity = ''; document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over')); }
+
+// ═══════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════
+
+function switchTab(tab) {
+  activeTab = tab;
+  ['pre','post','scripts'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('tab-' + t).setAttribute('aria-selected', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+  document.getElementById('exportItemsBtn').style.display   = tab === 'scripts' ? 'none' : '';
+  document.getElementById('exportScriptsBtn').style.display = tab !== 'scripts' ? 'none' : '';
+  document.getElementById('pdfImportBtn').style.display     = tab !== 'scripts' ? 'none' : '';
+}
+
+function updateBadge(tab, count) {
+  const el = document.getElementById('badge-' + tab);
+  if (el) el.textContent = count;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DIRTY STATE
+// ═══════════════════════════════════════════════════════════════
+
+function markDirty() { isDirty = true; }
+function markClean() { isDirty = false; }
+
+window.addEventListener('beforeunload', e => {
+  if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
+
+function serialiseItems() {
+  const indent = (obj) => JSON.stringify(obj, null, 2).replace(/"([a-z_]+)":/g, '$1:').replace(/\n/g, '\n    ');
+  const preLines  = preAuditItems.map(it => '    ' + indent(it)).join(',\n');
+  const postLines = postAuditItems.map(it => '    ' + indent(it)).join(',\n');
+  return `// hotelcompanion_items.js\n// Generated by hotelcompanion_editor.html on ${new Date().toLocaleString('en-GB')}\n// Place this file in the same folder as hotelcompanion_suite.html and reload the app.\n\nwindow.HOTELCOMPANION_ITEMS = {\n  version: 1,\n  preAudit: [\n${preLines}\n  ],\n  postAudit: [\n${postLines}\n  ]\n};\n`;
+}
+
+function serialiseScripts() {
+  const indent = (obj) => JSON.stringify(obj, null, 2).replace(/"([a-z_]+)":/g, '$1:').replace(/\n/g, '\n    ');
+  const scriptLines = scriptItems.map(sc => '    ' + indent(sc)).join(',\n');
+  return `// hotelcompanion_scripts.js\n// Generated by hotelcompanion_editor.html on ${new Date().toLocaleString('en-GB')}\n// Place this file in the same folder as hotelcompanion_suite.html and reload the app.\n\nwindow.HOTELCOMPANION_SCRIPTS = {\n  version: 1,\n  scripts: [\n${scriptLines}\n  ]\n};\n`;
+}
+
+function downloadFile(content, filename) {
+  const blob = new Blob([content], { type: 'application/javascript' });
+  if (window.showSaveFilePicker) {
+    window.showSaveFilePicker({
+      suggestedName: filename,
+      types: [{ description: 'JavaScript file', accept: { 'application/javascript': ['.js'] } }]
+    }).then(h => h.createWritable())
+      .then(w => { w.write(blob); return w; })
+      .then(w => w.close())
+      .then(() => showToast(filename + ' saved', 'success'))
+      .catch(err => { if (err.name !== 'AbortError') fallbackDownload(blob, filename); });
+  } else {
+    fallbackDownload(blob, filename);
+  }
+}
+
+function fallbackDownload(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  showToast(filename + ' downloaded', 'success');
+}
+
+function exportItems() {
+  const errors = validateItems();
+  if (errors.length) { showToast('Fix errors: ' + errors[0], 'error'); return; }
+  downloadFile(serialiseItems(), 'hotelcompanion_items.js');
+  showLastSaved('Items');
+  markClean();
+}
+
+function exportScripts() {
+  downloadFile(serialiseScripts(), 'hotelcompanion_scripts.js');
+  showLastSaved('Scripts');
+  markClean();
+}
+
+function validateItems() {
+  const errors = [];
+  [...preAuditItems, ...postAuditItems].forEach((it, i) => {
+    if (!it.label || !it.label.trim()) errors.push('Item ' + (i+1) + ' has no label');
+  });
+  return errors;
+}
+
+function showLastSaved(what) {
+  const el = document.getElementById('lastSavedLabel');
+  if (!el) return;
+  el.textContent = what + ' exported ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 4000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORT
+// ═══════════════════════════════════════════════════════════════
+
+function openImport() {
+  const input = document.getElementById('importFileInput');
+  input.value = '';
+  input.click();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('importFileInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => processImportText(e.target.result, file.name);
+    reader.readAsText(file);
+  });
+});
+
+function processImportText(text, filename) {
+  // Detect which file type we're importing
+  const isItems   = /window\.HOTELCOMPANION_ITEMS\s*=/.test(text);
+  const isScripts = /window\.HOTELCOMPANION_SCRIPTS\s*=/.test(text);
+
+  if (!isItems && !isScripts) {
+    showToast('Unrecognised file — expected hotelcompanion_items.js or hotelcompanion_scripts.js', 'error');
+    return;
+  }
+
+  if (isItems) {
+    const data = parseJsAssignment(text, 'HOTELCOMPANION_ITEMS');
+    if (!data) { showToast('Could not parse ' + filename + ' — check file format', 'error'); return; }
+    const err = validateItemsData(data);
+    if (err) { showToast('Import failed: ' + err, 'error'); return; }
+    preAuditItems  = data.preAudit;
+    postAuditItems = data.postAudit;
+    renderItems('pre');
+    renderItems('post');
+    markDirty();
+    showToast('Items loaded from ' + filename, 'success');
+  }
+
+  if (isScripts) {
+    const data = parseJsAssignment(text, 'HOTELCOMPANION_SCRIPTS');
+    if (!data) { showToast('Could not parse ' + filename + ' — check file format', 'error'); return; }
+    const err = validateScriptsData(data);
+    if (err) { showToast('Import failed: ' + err, 'error'); return; }
+    scriptItems = data.scripts;
+    renderScripts();
+    markDirty();
+    showToast('Scripts loaded from ' + filename, 'success');
+  }
+}
+
+function parseJsAssignment(text, varName) {
+  // Extract the JSON-like object after "window.VARNAME = " — text-parse only, no eval
+  const escapedName = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('window\\.' + escapedName + '\\s*=\\s*(\\{[\\s\\S]*?\\});?\\s*$', 'm');
+  const m = text.match(re);
+  if (!m) return null;
+
+  let raw = m[1];
+  // Normalise JS object literal to valid JSON:
+  // 1. Convert unquoted keys to quoted keys
+  raw = raw.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+  // 2. Remove trailing commas before } or ]
+  raw = raw.replace(/,(\s*[}\]])/g, '$1');
+  // 3. Normalise single-quoted strings to double-quoted (simple pass — handles most cases)
+  raw = raw.replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, (_, inner) => '"' + inner.replace(/"/g, '\\"') + '"');
+
+  try {
+    return JSON.parse(raw);
+  } catch(e) {
+    return null;
+  }
+}
+
+function validateItemsData(data) {
+  if (!data || typeof data !== 'object') return 'Not a valid object';
+  if (data.version !== 1) return 'version must be 1';
+  if (!Array.isArray(data.preAudit))  return 'preAudit must be an array';
+  if (!Array.isArray(data.postAudit)) return 'postAudit must be an array';
+  const validDr = new Set(['every','mon','tue','wed','thu','fri','sat','sun','last_night_of_month']);
+  for (const [i, it] of [...data.preAudit, ...data.postAudit].entries()) {
+    if (typeof it.id !== 'string' || !it.id) return `Item ${i+1}: id must be a non-empty string`;
+    if (typeof it.label !== 'string') return `Item ${i+1}: label must be a string`;
+    if (typeof it.notes !== 'string') return `Item ${i+1}: notes must be a string`;
+    if (typeof it.required !== 'boolean') return `Item ${i+1}: required must be boolean`;
+    if (!validDr.has(it.dayRestriction)) return `Item ${i+1}: invalid dayRestriction "${it.dayRestriction}"`;
+  }
+  return null;
+}
+
+function validateScriptsData(data) {
+  if (!data || typeof data !== 'object') return 'Not a valid object';
+  if (data.version !== 1) return 'version must be 1';
+  if (!Array.isArray(data.scripts)) return 'scripts must be an array';
+  for (const [i, sc] of data.scripts.entries()) {
+    if (typeof sc.id !== 'string' || !sc.id) return `Script ${i+1}: id must be a non-empty string`;
+    if (typeof sc.title !== 'string') return `Script ${i+1}: title must be a string`;
+    if (typeof sc.category !== 'string') return `Script ${i+1}: category must be a string`;
+    if (!Array.isArray(sc.keywords)) return `Script ${i+1}: keywords must be an array`;
+    if (typeof sc.response !== 'string') return `Script ${i+1}: response must be a string`;
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════════════
+
+function confirmReset() { openModal('resetModal'); }
+
+function doReset() {
+  preAuditItems  = getDefaultPreAudit();
+  postAuditItems = getDefaultPostAudit();
+  scriptItems    = getDefaultScripts();
+  renderItems('pre');
+  renderItems('post');
+  renderScripts();
+  closeModal('resetModal');
+  markDirty();
+  showToast('Reset to defaults', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PDF IMPORT
+// ═══════════════════════════════════════════════════════════════
+
+function openPdfImport() {
+  const input = document.getElementById('pdfFileInput');
+  input.value = '';
+  input.click();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pdfFileInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    loadAndParsePdf(file);
+  });
+});
+
+async function loadAndParsePdf(file) {
+  const btn = document.getElementById('pdfImportBtn');
+  btn.textContent = '⏳ Loading PDF…';
+  btn.disabled = true;
+
+  try {
+    // Lazy-load pdf.js only when needed
+    if (!window.pdfjsLib) {
+      const mod = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs');
+      window.pdfjsLib = mod;
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    let fullText = '';
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(item => item.str).join(' ');
+      fullText += pageText + '\n';
+    }
+
+    if (!fullText.trim()) {
+      showToast('No text extracted. This PDF may be a scanned image.', 'error');
+      alert('No text could be extracted from this PDF.\n\nYour PDF may be a scanned image. Please share the PDF with your developer to process it manually.');
+      return;
+    }
+
+    const drafts = segmentByHeadings(fullText);
+    if (drafts.length === 0) {
+      showToast('No section headings found in PDF.', 'error');
+      alert('No section headings were found. The PDF may be a flat document without a clear structure.\n\nTry adding scripts manually or ask your developer to review the PDF format.');
+      return;
+    }
+
+    pdfDrafts = drafts;
+    renderPdfDrafts();
+    openModal('pdfReviewModal');
+
+  } catch(err) {
+    console.error('PDF import error:', err);
+    showToast('PDF import failed: ' + err.message, 'error');
+  } finally {
+    btn.textContent = '⬇ Import from PDF';
+    btn.disabled = false;
+  }
+}
+
+function segmentByHeadings(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const headings = [];
+
+  lines.forEach((line, i) => {
+    // Heuristic: heading = short line (< 80 chars) that is followed by body text
+    // and looks like a title (not purely numeric, not a TOC page-number line)
+    if (line.length < 80 &&
+        line.length > 3 &&
+        !/^\d+$/.test(line) &&
+        !/\.\.\.\s*\d+$/.test(line) &&   // exclude TOC entries (e.g. "Section ...... 12")
+        /[a-zA-Z]/.test(line) &&
+        (line === line.toUpperCase() || /^[A-Z]/.test(line)) &&
+        i < lines.length - 1) {
+      headings.push({ title: line, lineIdx: i });
+    }
+  });
+
+  if (headings.length === 0) return [];
+
+  // Segment body text between headings
+  const drafts = headings.map((h, hi) => {
+    const nextHeadingLine = hi + 1 < headings.length ? headings[hi + 1].lineIdx : lines.length;
+    const bodyLines = lines.slice(h.lineIdx + 1, nextHeadingLine);
+    const body = bodyLines.join('\n').trim();
+    const keywords = h.title.toLowerCase()
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2)
+      .slice(0, 5);
+    return {
+      _draftId: 'draft_' + hi,
+      title: h.title,
+      category: '',
+      keywords: keywords,
+      response: body
+    };
+  });
+
+  return drafts.filter(d => d.response.length > 10); // skip empty segments
+}
+
+function renderPdfDrafts() {
+  const container = document.getElementById('pdfDraftList');
+  const countEl   = document.getElementById('draftCount');
+  container.innerHTML = '';
+  countEl.textContent = pdfDrafts.length;
+
+  pdfDrafts.forEach((draft, idx) => {
+    const card = document.createElement('div');
+    card.className = 'pdf-draft-card';
+    card.innerHTML = `
+      <div class="pdf-draft-header">
+        <span class="draft-badge">Draft ${idx + 1}</span>
+        <button class="delete-btn" onclick="deleteDraft(${idx})" aria-label="Remove draft">🗑</button>
+      </div>
+      <div>
+        <div class="field-label">Title</div>
+        <input type="text" class="script-input" value="${escHtml(draft.title)}"
+          aria-label="Draft title"
+          oninput="updateDraft(${idx},'title',this.value)">
+      </div>
+      <div>
+        <div class="field-label">Category</div>
+        <input type="text" class="script-input" value="${escHtml(draft.category)}"
+          list="categoryList" placeholder="e.g. Operations"
+          aria-label="Draft category"
+          oninput="updateDraft(${idx},'category',this.value)">
+      </div>
+      <div>
+        <div class="field-label">Keywords (comma-separated)</div>
+        <textarea class="script-textarea kw-textarea"
+          aria-label="Draft keywords"
+          oninput="updateDraft(${idx},'keywords',this.value)">${escHtml(draft.keywords.join(', '))}</textarea>
+      </div>
+      <div>
+        <div class="field-label">Response body</div>
+        <textarea class="script-textarea resp-textarea"
+          aria-label="Draft response"
+          oninput="updateDraft(${idx},'response',this.value)">${escHtml(draft.response)}</textarea>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function updateDraft(idx, field, value) {
+  if (!pdfDrafts[idx]) return;
+  if (field === 'keywords') {
+    pdfDrafts[idx].keywords = value.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+  } else {
+    pdfDrafts[idx][field] = value;
+  }
+  document.getElementById('draftCount').textContent = pdfDrafts.length;
+}
+
+function deleteDraft(idx) {
+  pdfDrafts.splice(idx, 1);
+  renderPdfDrafts();
+}
+
+function addDraftsToScripts() {
+  if (pdfDrafts.length === 0) { closeModal('pdfReviewModal'); return; }
+  pdfDrafts.forEach(draft => {
+    scriptItems.push({
+      id:       nextScriptId(scriptItems),
+      title:    draft.title,
+      category: draft.category,
+      keywords: draft.keywords,
+      response: draft.response
+    });
+  });
+  renderScripts();
+  markDirty();
+  closeModal('pdfReviewModal');
+  switchTab('scripts');
+  showToast(pdfDrafts.length + ' scripts added from PDF', 'success');
+  pdfDrafts = [];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('open');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+
+let _toastTimer = null;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + (type || '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITY
+// ═══════════════════════════════════════════════════════════════
+
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  preAuditItems  = getDefaultPreAudit();
+  postAuditItems = getDefaultPostAudit();
+  scriptItems    = getDefaultScripts();
+  renderItems('pre');
+  renderItems('post');
+  renderScripts();
+  // Show correct export buttons for initial tab
+  switchTab('pre');
+});
+</script>
+</body>
+</html>
