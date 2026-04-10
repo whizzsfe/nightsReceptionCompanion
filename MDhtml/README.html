@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Night Receptionist Companion Suite</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="night-receptionist-companion-suite">Night Receptionist Companion Suite</h1>
+<p>A browser-based toolkit for hotel front-office night staff. Runs entirely from a local file — no server, no internet connection required during a shift.</p>
+<hr>
+<h2 id="whats-included">What's included</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Night Dashboard</strong></td>
+<td>Live clock, shift stats, lone-worker check-in, incoming handover banner</td>
+</tr>
+<tr>
+<td><strong>Shift Checklist</strong></td>
+<td>Pre-Audit and Post-Audit tabs with progress tracking, day-of-week filtering, and a printable handover sheet</td>
+</tr>
+<tr>
+<td><strong>Notes &amp; Handover</strong></td>
+<td>Shift notes, outgoing handover, and incoming handover from the previous shift</td>
+</tr>
+<tr>
+<td><strong>Night Log</strong></td>
+<td>Log issues and floor walks during the shift; export to JSON; quick-log from anywhere via the ⚡ button</td>
+</tr>
+<tr>
+<td><strong>Shift History</strong></td>
+<td>All completed shifts with aggregate stats, incident charts, and a filterable all-incidents table</td>
+</tr>
+<tr>
+<td><strong>AI Coach — Aria</strong></td>
+<td>Keyword-triggered scripts for common hospitality scenarios (no internet required)</td>
+</tr>
+<tr>
+<td><strong>Group Check-in</strong></td>
+<td>Print-ready group arrival list with bulk name import</td>
+</tr>
+<tr>
+<td><strong>Sign Generator</strong></td>
+<td>A4/A3 ISO-style signs with custom background, logo, and text</td>
+</tr>
+<tr>
+<td><strong>Daily Info Board</strong></td>
+<td>7-day rolling stats board, VIP list, staff assignments, and Principle of the Day</td>
+</tr>
+<tr>
+<td><strong>Motivation</strong></td>
+<td>Quote carousel and excellence tips for lone workers</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="setup--getting-started">Setup — getting started</h2>
+<h3 id="what-you-need">What you need</h3>
+<ul>
+<li>A Windows PC with access to the OneDrive sync folder</li>
+<li>Island Enterprise Browser (or any modern Chromium-based browser)</li>
+<li>No installation, no internet, no admin rights required</li>
+</ul>
+<h3 id="files">Files</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hotelcompanion_suite.html</code></td>
+<td><strong>The main app</strong> — open this to start a shift</td>
+</tr>
+<tr>
+<td><code>hotelcompanion_editor.html</code></td>
+<td><strong>Content editor</strong> — managers use this to customise checklist items and AI scripts</td>
+</tr>
+<tr>
+<td><code>hotelcompanion_items.js</code></td>
+<td>Your property's checklist content <em>(generated by the editor — see below)</em></td>
+</tr>
+<tr>
+<td><code>hotelcompanion_scripts.js</code></td>
+<td>Your property's AI Coach scripts <em>(generated by the editor — see below)</em></td>
+</tr>
+<tr>
+<td><code>hotelLogo.jpg</code></td>
+<td>Hotel logo displayed in the app and on printed documents</td>
+</tr>
+</tbody>
+</table>
+<p>All files must be kept <strong>in the same folder</strong>. OneDrive keeps them in sync across all front-desk PCs automatically.</p>
+<h3 id="first-time-setup">First-time setup</h3>
+<ol>
+<li>Copy all files into your shared OneDrive folder.</li>
+<li>Open <code>hotelcompanion_suite.html</code> in the browser.</li>
+<li>Fill in the <strong>Setup Profile</strong> form (your name, role, and shift type).</li>
+<li>Optionally open <strong>🎨 Customise</strong> in the sidebar to set your hotel name, logo, and accent colour.</li>
+</ol>
+<hr>
+<h2 id="customising-checklist-items-and-ai-scripts">Customising checklist items and AI scripts</h2>
+<p>These are changed using the <strong>Content Editor</strong> (<code>hotelcompanion_editor.html</code>) — no coding required.</p>
+<ol>
+<li>Open <code>hotelcompanion_editor.html</code> in the browser.</li>
+<li>Edit, add, reorder, or delete items across the <strong>Pre-Audit</strong>, <strong>Post-Audit</strong>, and <strong>AI Scripts</strong> tabs.</li>
+<li>Click <strong>Export Items (.js)</strong> — save the file as <code>hotelcompanion_items.js</code> in the same folder as the main app.</li>
+<li>Click <strong>Export Scripts (.js)</strong> — save as <code>hotelcompanion_scripts.js</code> in the same folder.</li>
+<li>Reload <code>hotelcompanion_suite.html</code> — your changes are live.</li>
+</ol>
+<blockquote>
+<p><strong>To import your night operations manual into AI Scripts:</strong> Open the <strong>AI Scripts</strong> tab in the editor, click <strong>Import from PDF</strong>, select your PDF, review the extracted draft scripts, and export.</p>
+</blockquote>
+<blockquote>
+<p><strong>To load back a file you previously exported:</strong> Click <strong>Import / Load Existing</strong> in the editor and select the <code>.js</code> file.</p>
+</blockquote>
+<hr>
+<h2 id="during-a-shift">During a shift</h2>
+<ul>
+<li>Use the <strong>Shift Checklist</strong> to work through Pre-Audit and Post-Audit tasks.</li>
+<li>Tap <strong>⚡</strong> (bottom-right corner) to quickly log an incident from anywhere.</li>
+<li>Use <strong>Night Log</strong> for detailed issue recording and floor walks.</li>
+<li>Click <strong>AI Coach — Aria</strong> and type a scenario (or tap a suggestion chip) for instant scripts.</li>
+<li>Toggle <strong>Persist Data</strong> in the sidebar to save session data between page reloads. On shared terminals, leave this off.</li>
+</ul>
+<hr>
+<h2 id="ending-a-shift">Ending a shift</h2>
+<ol>
+<li>Fill in the <strong>Handover</strong> notes in the Notes &amp; Handover section.</li>
+<li>Click <strong>End Shift</strong> in the sidebar.</li>
+<li>Confirm — your shift is saved to history, the handover is queued for the next user, and session data is cleared.</li>
+</ol>
+<hr>
+<h2 id="data--privacy">Data &amp; privacy</h2>
+<ul>
+<li>All data is stored locally in the browser's <code>localStorage</code> — nothing is sent to any server.</li>
+<li>Shift history and profile data persist across sessions.</li>
+<li>Session data (notes, checklist ticks, log entries) is only saved if the <strong>Persist Data</strong> toggle is on.</li>
+<li>Clearing browser data or using a different browser will lose any saved data.</li>
+</ul>
+<hr>
+<h2 id="printing">Printing</h2>
+<ul>
+<li><strong>Handover sheet:</strong> Notes &amp; Handover section → Print Handover</li>
+<li><strong>Checklist:</strong> Shift Checklist → Print</li>
+<li><strong>Group check-in list:</strong> Group Check-in → Print</li>
+<li><strong>Signs:</strong> Sign Generator → Print</li>
+<li><strong>Daily board:</strong> Daily Info Board → Print</li>
+<li><strong>Shift report:</strong> Shift History → Print Report</li>
+</ul>
+<p>All print views suppress navigation chrome automatically.</p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Checklist items or AI scripts not updating after export</td>
+<td>Make sure the <code>.js</code> file is in the <strong>same folder</strong> as <code>hotelcompanion_suite.html</code>, then hard-reload (<code>Ctrl+Shift+R</code>)</td>
+</tr>
+<tr>
+<td>Logo not showing</td>
+<td>Rename your logo file to <code>hotelLogo.jpg</code> and place it in the same folder</td>
+</tr>
+<tr>
+<td>Shift history missing on another PC</td>
+<td>History is per-device only. Use <strong>Export Night Log</strong> during a shift to preserve records, or use the Shift History sync feature</td>
+</tr>
+<tr>
+<td>AI Coach says &quot;Smart Defaults Active&quot;</td>
+<td><code>hotelcompanion_scripts.js</code> is missing or hasn't been exported yet — use the editor to generate it</td>
+</tr>
+</tbody>
+</table>
+
+            
+            
+        </body>
+        </html>
