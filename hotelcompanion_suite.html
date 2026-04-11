@@ -514,6 +514,51 @@
     .badge-blue  { background: rgba(74,144,217,0.15); color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
     .badge-muted { background: rgba(136,136,128,0.15); color: var(--muted); border: 1px solid rgba(136,136,128,0.2); }
 
+    /* ── Night Log entry cards ─────────────────────────────── */
+    .nl-entry {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .nl-entry-walk { border-left-color: var(--blue); }
+    .nl-entry-issue { border-left-color: var(--gold); }
+    .nl-entry-issue.rectified { opacity: 0.55; border-left-color: var(--green); }
+    .nl-entry-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .nl-entry-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .nl-entry-floor { font-size: 12px; color: var(--text); font-weight: 600; }
+    .nl-entry-cat   { font-size: 12px; color: var(--muted); }
+    .nl-entry-time  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .nl-entry-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .nl-entry-desc  { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
+    .nl-entry-reporter { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .nl-entry-notes { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .nl-entry-thumb { max-width: 100%; max-height: 180px; border-radius: var(--radius); margin-top: 8px; display: block; }
+    .nl-entry-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #2A2A2A; flex-wrap: wrap; }
+    .nl-action-btn { display: inline-flex; align-items: center; gap: 4px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+    .nl-rectify-btn { background: rgba(76,175,130,0.12); color: #4CAF82; border: 1px solid rgba(76,175,130,0.45); }
+    .nl-rectify-btn:hover { background: rgba(76,175,130,0.25); }
+    .nl-edit-btn    { background: rgba(74,144,217,0.12);  color: #4A90D9; border: 1px solid rgba(74,144,217,0.45); }
+    .nl-edit-btn:hover    { background: rgba(74,144,217,0.25); }
+    .nl-delete-btn  { background: rgba(224,85,85,0.12);  color: #E05555; border: 1px solid rgba(224,85,85,0.45); }
+    .nl-delete-btn:hover  { background: rgba(224,85,85,0.25); }
+
     /* --- MODAL OVERLAY --- */
     .modal-overlay {
       position: fixed;
@@ -1827,6 +1872,75 @@
 </div>
 
 <!-- -----------------------------------------------------------
+     EDIT LOG ENTRY MODAL
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="editEntryModal" role="dialog" aria-modal="true" aria-labelledby="editEntryModalTitle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="editEntryModalTitle">&#9998; Edit Log Entry</span>
+      <button class="modal-close" onclick="closeModal('editEntryModal')" aria-label="Close edit entry modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="editFloor">Floor</label>
+          <select id="editFloor">
+            <option value="">— Select —</option>
+            <option value="Ground">Ground</option>
+            <option value="First">First</option>
+            <option value="Second">Second</option>
+            <option value="Third">Third</option>
+            <option value="Roof">Roof</option>
+            <option value="Reception">Reception</option>
+            <option value="Car Park">Car Park</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="editCategory">Category</label>
+          <select id="editCategory">
+            <option value="">— Select —</option>
+            <option value="Noise Complaint">Noise Complaint</option>
+            <option value="Maintenance Issue">Maintenance Issue</option>
+            <option value="Guest Complaint">Guest Complaint</option>
+            <option value="Safety/Security">Safety / Security</option>
+            <option value="Billing Dispute">Billing Dispute</option>
+            <option value="Medical">Medical</option>
+            <option value="Lost &amp; Found">Lost &amp; Found</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="editSeverity">Severity</label>
+          <select id="editSeverity">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="editTitle">Issue Title</label>
+        <input type="text" id="editTitle" placeholder="Short summary" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="editDesc">Description</label>
+        <textarea id="editDesc" rows="3" maxlength="1000" placeholder="Full details…"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="editReporter">Reporter</label>
+        <input type="text" id="editReporter" placeholder="Who reported this?" maxlength="60">
+      </div>
+      <div class="validation-msg" id="editFormError">Please fill in Floor, Category, Title, and Description.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editEntryModal')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEditEntry()" aria-label="Save changes">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
      QUICK LOG MODAL
 ----------------------------------------------------------- -->
 <div class="modal-overlay" id="quickLogModal" role="dialog" aria-modal="true" aria-labelledby="quickLogModalTitle">
@@ -2304,7 +2418,7 @@
           Shift Leader: <strong id="nlLeaderDisplay">—</strong> &nbsp;|&nbsp; Started: <span id="nlStartTimeDisplay" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);">—</span>
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="exportNightlogJSON()" aria-label="Export night log as JSON">📤 Export JSON</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportNightlogJSON()" aria-label="Export night log as JSON" style="display:none">📤 Export JSON</button>
     </div>
 
     <!-- Floor Walk Grid -->
@@ -3015,7 +3129,20 @@ function loadState() {
     const bd = localStorage.getItem('shiftCompanion_boardData');
     if (bd) { try { loadBoardData(JSON.parse(bd)); } catch(e){} }
     const nlFloor = localStorage.getItem('shiftCompanion_floorWalkState');
-    if (nlFloor) { try { floorWalkState = JSON.parse(nlFloor); } catch(e){} }
+    if (nlFloor) {
+      try {
+        floorWalkState = JSON.parse(nlFloor);
+        // Restore button visual state after reload
+        for (const [floor, count] of Object.entries(floorWalkState)) {
+          if (!count) continue;
+          const btn = document.getElementById('floorBtn-' + floor);
+          if (!btn) continue;
+          btn.classList.add('clear');
+          const statusEl = btn.querySelector('.floor-btn-status');
+          if (statusEl) statusEl.textContent = `✓ ${count} walk${count > 1 ? 's' : ''}`;
+        }
+      } catch(e){}
+    }
   }
 
   // Persist UI
@@ -3697,19 +3824,25 @@ document.addEventListener('DOMContentLoaded', () => {
 // -- Night Log --
 
 function toggleFloorClear(floor) {
-  floorWalkState[floor] = !floorWalkState[floor];
-  const btn = document.querySelector(`.floor-clear-btn[data-floor="${floor}"]`);
+  // One-way stamp: each tap logs a new all-clear entry.
+  // Multiple taps per floor are expected (3+ walks per night).
+  floorWalkState[floor] = (floorWalkState[floor] || 0) + 1;
+  const walkCount = floorWalkState[floor];
+  const btn = document.getElementById('floorBtn-' + floor);
   if (btn) {
-    btn.classList.toggle('clear', floorWalkState[floor]);
-    btn.classList.toggle('unclear', !floorWalkState[floor]);
-    btn.setAttribute('aria-pressed', floorWalkState[floor] ? 'true' : 'false');
-    btn.textContent = floor + (floorWalkState[floor] ? ' ?' : '');
+    btn.classList.add('clear');
+    btn.classList.remove('unclear');
+    btn.setAttribute('aria-pressed', 'true');
+    const statusEl = btn.querySelector('.floor-btn-status');
+    const timeEl   = btn.querySelector('.floor-btn-time') || document.getElementById('floorTime-' + floor);
+    if (statusEl) statusEl.textContent = `✓ ${walkCount} walk${walkCount > 1 ? 's' : ''}`;
+    if (timeEl)   timeEl.textContent   = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   }
   // Log a floor_walk entry
   const entryId = 'entry_' + Date.now() + '_' + Math.random().toString(16).slice(2,6);
   logEntries.push({
     id: entryId, type: 'floor_walk', timestamp: new Date().toISOString(),
-    floor: floor, allClear: floorWalkState[floor], notes: ''
+    floor: floor, allClear: true, notes: ''
   });
   renderNightLogEntries();
   saveState();
@@ -3724,12 +3857,16 @@ function addLogEntry() {
   const category = document.getElementById('nlCategory')?.value || '';
   const severity = document.getElementById('nlSeverity')?.value || 'medium';
   const title    = (document.getElementById('nlTitle')?.value    || '').trim();
-  const desc     = (document.getElementById('nlDesc')?.value     || '').trim();
-  const reporter = (document.getElementById('nlReporter')?.value || '').trim();
+  const desc     = (document.getElementById('nlDescription')?.value || '').trim();
+  const reporter = (document.getElementById('nlReporter')?.value   || '').trim();
 
   if (!floor || !category || !title || !desc) {
-    alert('Please fill in Floor, Category, Title, and Description.'); return;
+    const errEl = document.getElementById('nlFormError');
+    if (errEl) errEl.style.display = 'block';
+    return;
   }
+  const errEl = document.getElementById('nlFormError');
+  if (errEl) errEl.style.display = 'none';
 
   const entry = {
     id: generateEntryId(), type: 'issue', timestamp: new Date().toISOString(),
@@ -3743,15 +3880,16 @@ function addLogEntry() {
   updateDashboardStats();
 
   // Reset form
-  ['nlFloor','nlCategory','nlTitle','nlDesc','nlReporter'].forEach(id => {
+  ['nlFloor','nlCategory','nlTitle','nlDescription','nlReporter'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   nlPhotoBase64 = null;
-  const preview = document.getElementById('nlPhotoPreview');
-  if (preview) { preview.src = ''; preview.classList.add('hidden'); }
-  const photoInput = document.getElementById('nlPhotoInput');
+  const previewImg  = document.getElementById('nlPhotoPreviewImg');
+  const previewWrap = document.getElementById('nlPhotoPreviewWrap');
+  if (previewImg)  { previewImg.src = ''; }
+  if (previewWrap) { previewWrap.classList.add('hidden'); }
+  const photoInput = document.getElementById('nlPhoto');
   if (photoInput) photoInput.value = '';
-  document.getElementById('nlPhotoRemoveBtn')?.classList.add('hidden');
 
   saveState();
 }
@@ -3762,10 +3900,14 @@ function renderNightLogEntries() {
   if (ldEl) ldEl.textContent = staffName || '—';
   if (stEl) stEl.textContent = shiftStart ? new Date(shiftStart).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
 
-  const list = document.getElementById('nlEntriesList');
+  const list = document.getElementById('nightLogEntries');
   if (!list) return;
+
+  const countEl = document.getElementById('nlEntryCount');
+  if (countEl) countEl.textContent = logEntries.length + ' entr' + (logEntries.length === 1 ? 'y' : 'ies');
+
   if (logEntries.length === 0) {
-    list.innerHTML = '<p class="empty-state" style="text-align:center;color:var(--muted);padding:32px;">No entries yet. Use the form above to log an issue.</p>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No entries yet. Log your first issue above.</div></div>';
     return;
   }
 
@@ -3774,9 +3916,10 @@ function renderNightLogEntries() {
     if (e.type === 'floor_walk') {
       return `<div class="nl-entry nl-entry-walk">
         <div class="nl-entry-header">
-          <span class="nl-entry-badge ${e.allClear ? 'badge-green' : 'badge-red'}">${e.allClear ? '? All Clear' : '? Issue Found'}</span>
+          <span class="nl-entry-badge ${e.allClear ? 'badge-green' : 'badge-red'}">${e.allClear ? '&#10003; All Clear' : '&#9888; Issue Found'}</span>
           <span class="nl-entry-floor">${escapeHtml(e.floor)} Floor</span>
           <span class="nl-entry-time">${formatTime(e.timestamp)}</span>
+          <button class="nl-action-btn nl-delete-btn" onclick="deleteLogEntry('${e.id}')" aria-label="Delete floor walk entry" style="margin-left:auto">&#x2715;</button>
         </div>
         ${e.notes ? `<div class="nl-entry-notes">${escapeHtml(e.notes)}</div>` : ''}
       </div>`;
@@ -3785,19 +3928,20 @@ function renderNightLogEntries() {
     const sevClass = e.severity === 'high' ? 'badge-red' : e.severity === 'medium' ? 'badge-gold' : 'badge-muted';
     return `<div class="nl-entry nl-entry-issue ${e.rectified ? 'rectified' : ''}">
       <div class="nl-entry-header">
-        <span class="nl-entry-badge ${sevClass}">${e.severity}</span>
+        <span class="nl-entry-badge ${sevClass}">${escapeHtml(e.severity)}</span>
         <span class="nl-entry-cat">${escapeHtml(e.category)}</span>
         <span class="nl-entry-floor">${escapeHtml(e.floor)}</span>
         <span class="nl-entry-time">${formatTime(e.timestamp)}</span>
-        <div class="nl-entry-actions">
-          <button class="btn btn-ghost nl-rectify-btn" onclick="toggleRectify('${e.id}')" aria-label="${e.rectified ? 'Mark unresolved' : 'Mark resolved'}">${e.rectified ? 'Reopen' : 'Resolve'}</button>
-          <button class="btn btn-ghost nl-delete-btn" onclick="deleteLogEntry('${e.id}')" aria-label="Delete entry">✕</button>
-        </div>
       </div>
       <div class="nl-entry-title">${escapeHtml(e.title)}</div>
       <div class="nl-entry-desc">${escapeHtml(e.description)}</div>
       ${e.reporter ? `<div class="nl-entry-reporter">Reported by: ${escapeHtml(e.reporter)}</div>` : ''}
       ${e.imageBase64 ? `<img src="${e.imageBase64}" class="nl-entry-thumb" alt="Attached photo">` : ''}
+      <div class="nl-entry-actions">
+        <button class="nl-action-btn nl-rectify-btn" onclick="toggleRectify('${e.id}')" aria-label="${e.rectified ? 'Mark unresolved' : 'Mark resolved'}">${e.rectified ? '&#10003; Reopen' : '&#10003; Resolve'}</button>
+        <button class="nl-action-btn nl-edit-btn" onclick="openEditEntry('${e.id}')" aria-label="Edit entry">&#9998; Edit</button>
+        <button class="nl-action-btn nl-delete-btn" onclick="deleteLogEntry('${e.id}')" aria-label="Delete entry">&#x2715; Delete</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -3807,9 +3951,66 @@ function toggleRectify(id) {
   if (entry) { entry.rectified = !entry.rectified; renderNightLogEntries(); saveState(); }
 }
 
+let editingEntryId = null;
+
+function openEditEntry(id) {
+  const entry = logEntries.find(e => e.id === id);
+  if (!entry || entry.type !== 'issue') return;
+  editingEntryId = id;
+  document.getElementById('editFloor').value    = entry.floor    || '';
+  document.getElementById('editCategory').value = entry.category || '';
+  document.getElementById('editSeverity').value = entry.severity || 'medium';
+  document.getElementById('editTitle').value    = entry.title    || '';
+  document.getElementById('editDesc').value     = entry.description || '';
+  document.getElementById('editReporter').value = entry.reporter || '';
+  document.getElementById('editFormError').style.display = 'none';
+  openModal('editEntryModal');
+}
+
+function saveEditEntry() {
+  const floor    = document.getElementById('editFloor').value;
+  const category = document.getElementById('editCategory').value;
+  const severity = document.getElementById('editSeverity').value;
+  const title    = (document.getElementById('editTitle').value    || '').trim();
+  const desc     = (document.getElementById('editDesc').value     || '').trim();
+  const reporter = (document.getElementById('editReporter').value || '').trim();
+  if (!floor || !category || !title || !desc) {
+    document.getElementById('editFormError').style.display = 'block'; return;
+  }
+  const entry = logEntries.find(e => e.id === editingEntryId);
+  if (entry) {
+    entry.floor = floor; entry.category = category; entry.severity = severity;
+    entry.title = title; entry.description = desc; entry.reporter = reporter;
+  }
+  editingEntryId = null;
+  closeModal('editEntryModal');
+  renderNightLogEntries();
+  saveState();
+}
+
 function deleteLogEntry(id) {
-  if (!confirm('Delete this log entry?')) return;
+  const entry = logEntries.find(e => e.id === id);
   logEntries = logEntries.filter(e => e.id !== id);
+
+  // Update floor walk button counter if a floor_walk entry was deleted
+  if (entry && entry.type === 'floor_walk') {
+    const floor = entry.floor;
+    const remaining = logEntries.filter(e => e.type === 'floor_walk' && e.floor === floor).length;
+    floorWalkState[floor] = remaining;
+    const btn = document.getElementById('floorBtn-' + floor);
+    if (btn) {
+      if (remaining === 0) {
+        btn.classList.remove('clear');
+        btn.classList.add('unclear');
+        const statusEl = btn.querySelector('.floor-btn-status');
+        if (statusEl) statusEl.textContent = 'Pending';
+      } else {
+        const statusEl = btn.querySelector('.floor-btn-status');
+        if (statusEl) statusEl.textContent = `\u2713 ${remaining} walk${remaining > 1 ? 's' : ''}`;
+      }
+    }
+    saveState();
+  }
   renderNightLogEntries();
   updateDashboardStats();
   saveState();
@@ -3850,7 +4051,7 @@ function fallbackDownload(blob, filename) {
 
 // Night Log photo handling
 document.addEventListener('DOMContentLoaded', () => {
-  const photoInput = document.getElementById('nlPhotoInput');
+  const photoInput = document.getElementById('nlPhoto');
   if (photoInput) {
     photoInput.addEventListener('change', e => {
       const file = e.target.files[0];
@@ -3869,13 +4070,13 @@ document.addEventListener('DOMContentLoaded', () => {
           canvas.width  = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           const b64 = canvas.toDataURL('image/jpeg', 0.7);
-          if (b64.length > 500 * 1024) {
-            alert('Warning: image is large even after compression. Consider using a smaller photo.');
-          }
+          const warnEl = document.getElementById('nlPhotoWarning');
+          if (warnEl) warnEl.style.display = b64.length > 500 * 1024 ? 'block' : 'none';
           nlPhotoBase64 = b64;
-          const prev = document.getElementById('nlPhotoPreview');
-          if (prev) { prev.src = b64; prev.classList.remove('hidden'); }
-          document.getElementById('nlPhotoRemoveBtn')?.classList.remove('hidden');
+          const prevImg  = document.getElementById('nlPhotoPreviewImg');
+          const prevWrap = document.getElementById('nlPhotoPreviewWrap');
+          if (prevImg)  prevImg.src = b64;
+          if (prevWrap) prevWrap.classList.remove('hidden');
         };
         img.src = evt.target.result;
       };
@@ -3886,23 +4087,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function removeNlPhoto() {
   nlPhotoBase64 = null;
-  const prev = document.getElementById('nlPhotoPreview');
-  if (prev) { prev.src = ''; prev.classList.add('hidden'); }
-  const input = document.getElementById('nlPhotoInput');
+  const prevImg  = document.getElementById('nlPhotoPreviewImg');
+  const prevWrap = document.getElementById('nlPhotoPreviewWrap');
+  if (prevImg)  prevImg.src = '';
+  if (prevWrap) prevWrap.classList.add('hidden');
+  const input = document.getElementById('nlPhoto');
   if (input) input.value = '';
-  document.getElementById('nlPhotoRemoveBtn')?.classList.add('hidden');
 }
 
 // -- Quick Log (Floating Button) --
 function submitQuickLog() {
-  const guest    = (document.getElementById('qlGuest')?.value    || '').trim();
-  const type     = document.getElementById('qlType')?.value      || '';
-  const desc     = (document.getElementById('qlDesc')?.value     || '').trim();
-  const status   = document.getElementById('qlStatus')?.value    || 'Pending Follow-up';
+  const guest    = (document.getElementById('qlGuestRoom')?.value    || '').trim();
+  const type     = document.getElementById('qlType')?.value           || '';
+  const desc     = (document.getElementById('qlDescription')?.value   || '').trim();
+  const status   = document.getElementById('qlStatus')?.value         || 'Pending Follow-up';
 
   if (!guest || !type || !desc) {
-    alert('Please fill in Guest/Room, Type, and Description.'); return;
+    const msg = document.getElementById('qlValidationMsg');
+    if (msg) msg.style.display = 'block';
+    return;
   }
+  const msg = document.getElementById('qlValidationMsg');
+  if (msg) msg.style.display = 'none';
 
   if (!staffName) {
     closeModal('quickLogModal');
@@ -3932,7 +4138,7 @@ function submitQuickLog() {
   }
 
   // Reset form
-  ['qlGuest','qlDesc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['qlGuestRoom','qlDescription'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const qlType = document.getElementById('qlType'); if (qlType) qlType.selectedIndex = 0;
 }
 
@@ -5280,9 +5486,6 @@ function init() {
 
   // Wire add night log entry
   document.getElementById('addNlEntryBtn')?.addEventListener('click', addLogEntry);
-
-  // Wire remove photo
-  document.getElementById('nlPhotoRemoveBtn')?.addEventListener('click', removeNlPhoto);
 
   // Wire sign print
   document.getElementById('printSignBtn')?.addEventListener('click', printSign);
