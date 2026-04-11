@@ -20,7 +20,7 @@
 | **AI Coach mode** | **Smart Defaults only** — no external API calls | `file://` blocks CORS for external APIs; offline-first requirement; scripted responses are more reliable and accurate for hospitality scenarios than a small LLM |
 | **Knowledge source** | PDF night operations manual → build-time extraction via `hotelcompanion_editor.html` | Manual is a digital Word-exported PDF (text-selectable, has TOC, embedded screenshots) — pdf.js can extract all procedural text cleanly |
 | **AI scripts file** | External `hotelcompanion_scripts.js` (gitignored) loaded from the same OneDrive folder | Allows non-technical managers to update AI Coach scripts without touching app code |
-| **Editor scope** | `hotelcompanion_editor.html` expanded to **4 tabs**: Pre-Audit, Post-Audit, Night Audit Steps, AI Scripts | Keeps all content editing in one file; AI Scripts tab includes PDF import via pdf.js |
+| **Editor scope** | `hotelcompanion_editor.html` — **3 tabs only**: Pre-Audit, Post-Audit, AI Scripts | Night Audit Steps tab deprecated (see § 0.1) |
 | **Authentication** | Anonymous — Windows/system login acts as gatekeeper | No per-user accounts needed at this stage |
 | **localStorage** | Per-device only (no cross-device sync) | Each company PC manages its own session; shared terminal model |
 | **Hardware target** | Dell / Intel Core i5-14500 (14 cores / 16 GB RAM) | Modern hotel terminals; JavaScript-heavy features are viable |
