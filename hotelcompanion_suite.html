@@ -1670,6 +1670,23 @@
     }
     .sidebar-backdrop.visible { display: block; }
 
+    /* Help & Guide section */
+    .help-accordion { display: flex; flex-direction: column; gap: 10px; }
+    .help-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .help-card summary { padding: 14px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 10px; list-style: none; user-select: none; }
+    .help-card summary::-webkit-details-marker { display: none; }
+    .help-card summary::before { content: '▶'; font-size: 10px; color: var(--gold); transition: transform 0.2s; flex-shrink: 0; }
+    .help-card[open] summary::before { transform: rotate(90deg); }
+    .help-card summary:hover { background: rgba(212,168,67,0.05); }
+    .help-card summary:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+    .help-card-body { padding: 0 18px 16px 38px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .help-card-body p { margin: 0 0 10px; }
+    .help-card-body ul { margin: 0 0 10px; padding-left: 18px; }
+    .help-card-body li { margin-bottom: 4px; }
+    .help-card-body strong { color: var(--text); }
+    .help-tip { background: rgba(212,168,67,0.08); border-left: 3px solid var(--gold); padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 8px 0; font-size: 12.5px; }
+    .help-note { background: rgba(74,144,217,0.08); border-left: 3px solid var(--blue); padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 8px 0; font-size: 12.5px; }
+
   </style>
 </head>
 <body>
@@ -1752,6 +1769,10 @@
       <span class="nav-icon">📅</span> Daily Info Board
     </div>
 
+    <div class="tools-divider"></div>
+    <div class="nav-item" data-section="help" onclick="showSection('help',this)" role="button" tabindex="0" aria-label="Help and Guide">
+      <span class="nav-icon">❓</span> Help &amp; Guide
+    </div>
     <div class="tools-divider"></div>
     <div class="nav-item" onclick="openModal('brandModal')" role="button" tabindex="0" aria-label="Customise branding">
       <span class="nav-icon">🎨</span> Customise
@@ -2929,6 +2950,253 @@
 
 </section>
 
+<!-- -----------------------------------------------------------
+     HELP & GUIDE SECTION
+----------------------------------------------------------- -->
+<section class="section" id="section-help" aria-label="Help and Guide">
+  <div class="flex-between mb-12">
+    <div>
+      <div class="section-heading">Help &amp; Guide</div>
+      <div class="section-sub">How to use every part of this app. Click a heading to expand.</div>
+    </div>
+  </div>
+
+  <div class="help-accordion">
+
+    <!-- Getting Started -->
+    <details class="help-card">
+      <summary><span class="help-icon">🚀</span> Getting Started</summary>
+      <div class="help-card-body">
+        <p>When you open the app for the first time, a <strong>Setup Profile</strong> box will appear. Enter your name, your role, and your shift type — this is saved permanently to this device and shows in the sidebar.</p>
+        <p>You can update your profile at any time by clicking your name card at the top of the sidebar.</p>
+        <p>The <strong>shift timer</strong> in the sidebar starts automatically and keeps running while the page is open. If you reload the page, the timer picks up from where it left off.</p>
+        <div class="help-tip">All files (suite, editor, items.js, scripts.js, logo) must be kept in the <strong>same folder</strong> for customisations and the logo to load correctly.</div>
+      </div>
+    </details>
+
+    <!-- Dashboard -->
+    <details class="help-card">
+      <summary><span class="help-icon">🌙</span> Night Dashboard</summary>
+      <div class="help-card-body">
+        <p>The dashboard gives you an at-a-glance view of the current shift:</p>
+        <ul>
+          <li><strong>Checklist progress</strong> — percentage of items ticked across both tabs.</li>
+          <li><strong>Incidents logged</strong> — number of issue entries in the Night Log this shift.</li>
+          <li><strong>Shift streak</strong> — total completed shifts stored in history on this device.</li>
+          <li><strong>Tonight's tip</strong> — rotates daily, keyed to your shift start date.</li>
+        </ul>
+        <p>The <strong>Quick Actions</strong> cards navigate directly to key sections.</p>
+        <p>The <strong>Lone Worker Safety</strong> card has a "I'm OK — Check In" button. Press it regularly during your shift. It records the time so a manager can confirm you were active.</p>
+        <div class="help-tip">If a handover was left by the previous shift, a gold banner will appear here. Read it, then dismiss it when done.</div>
+      </div>
+    </details>
+
+    <!-- Shift Checklist -->
+    <details class="help-card">
+      <summary><span class="help-icon">✅</span> Shift Checklist</summary>
+      <div class="help-card-body">
+        <p>The checklist has two tabs:</p>
+        <ul>
+          <li><strong>Pre-Audit</strong> — tasks completed on arrival and up to running the night audit (arrival procedures, cash float, system checks).</li>
+          <li><strong>Post-Audit</strong> — tasks completed after the audit runs (reports, banking, handover preparation).</li>
+        </ul>
+        <p>Items marked <strong>Required</strong> are highlighted in yellow. These should be completed before signing off that phase.</p>
+        <p>Some items show a <strong>day badge</strong> (e.g. "Mon only", "Last night of month"). Items that don't apply today are greyed out — you don't need to tick them.</p>
+        <p>The <strong>Run Night Audit</strong> card at the end of the Pre-Audit tab navigates to the Night Audit Tracker when you're ready.</p>
+        <div class="help-note">To customise items (add, remove, reorder, change day restrictions) use the Content Editor (<code>hotelcompanion_editor.html</code>). No coding required.</div>
+      </div>
+    </details>
+
+    <!-- Night Audit Tracker -->
+    <details class="help-card">
+      <summary><span class="help-icon">🔄</span> Night Audit Tracker</summary>
+      <div class="help-card-body">
+        <p>The Night Audit Tracker is a step-by-step guide through the audit procedure — entirely separate from the shift checklist. It covers PMS steps: posting charges, running the audit, printing reports, reconciling payments, and closing the day.</p>
+        <ul>
+          <li>Tick each step as you complete it.</li>
+          <li>Each step has a notes field for logging anything unusual.</li>
+          <li>The progress bar updates in real time.</li>
+          <li>Use <strong>Reset Audit</strong> to clear all ticks if you need to re-run.</li>
+        </ul>
+        <div class="help-tip">Audit steps and checklist items are independent — completing one does not affect the other.</div>
+      </div>
+    </details>
+
+    <!-- Night Log -->
+    <details class="help-card">
+      <summary><span class="help-icon">📋</span> Night Log</summary>
+      <div class="help-card-body">
+        <p>The Night Log is the single place for all incident and observation recording. It has two entry types:</p>
+        <p><strong>Issue entries</strong> — fill in the form at the top of the section:</p>
+        <ul>
+          <li><strong>Floor</strong> — where the incident occurred.</li>
+          <li><strong>Category</strong> — type of incident (noise complaint, maintenance, security, etc.).</li>
+          <li><strong>Severity</strong> — Low / Medium / High.</li>
+          <li><strong>Title</strong> — a short description (required).</li>
+          <li><strong>Description</strong> — full detail of what happened and what action was taken.</li>
+          <li><strong>Reporter</strong> — name of the person who reported it.</li>
+          <li><strong>Photo</strong> — optional image (file picker only — live camera is not available).</li>
+        </ul>
+        <p><strong>Floor walks</strong> — use the floor walk grid at the top. Press the button for a floor after each walkaround. The button shows the walk count for that floor this shift. Aim for at least <strong>3 walks per floor</strong> per night.</p>
+        <p>Entries can be <strong>Resolved</strong> (marked green), <strong>Edited</strong>, or <strong>Deleted</strong> at any time.</p>
+        <p>Use <strong>Export JSON</strong> to save the shift's log as a file for the Monthly Report.</p>
+        <div class="help-tip">The <strong>⚡ button</strong> in the bottom-right corner opens a quick log form from anywhere in the app — entries go straight into the Night Log.</div>
+        <div class="help-note">All Night Log entries are cleared when you click <strong>End Shift</strong>. Export the JSON first if you want a record for monthly reporting.</div>
+      </div>
+    </details>
+
+    <!-- Notes & Handover -->
+    <details class="help-card">
+      <summary><span class="help-icon">📝</span> Notes &amp; Handover</summary>
+      <div class="help-card-body">
+        <p>There are two text areas in this section:</p>
+        <ul>
+          <li><strong>Shift Notes</strong> — your working scratch pad for the current shift. Use it for anything you want to track mid-shift that doesn't need to be in the Night Log.</li>
+          <li><strong>Handover Notes</strong> — what you want to pass on to the next shift. This text is queued for the next person when you press <strong>End Shift</strong>.</li>
+        </ul>
+        <p>The <strong>Incoming Handover</strong> panel (read-only) shows the handover left by the previous shift. The same text also appears as a banner on the Dashboard.</p>
+        <p>Click <strong>Print Handover</strong> to print a formatted sheet — the sidebar and navigation are hidden automatically.</p>
+        <div class="help-note">Notes are only saved between page reloads if <strong>Persist Data</strong> is on. With the toggle off, reloading the page will lose any unsaved notes.</div>
+      </div>
+    </details>
+
+    <!-- AI Coach -->
+    <details class="help-card">
+      <summary><span class="help-icon">🤖</span> AI Coach — Aria</summary>
+      <div class="help-card-body">
+        <p>Aria is an offline, keyword-driven script assistant. She does not use the internet or any external AI service — all responses come from built-in scripts or your property's custom scripts file.</p>
+        <p><strong>To use:</strong> Type a scenario in the chat box, or tap one of the suggestion chips. Aria responds within about a second.</p>
+        <p>Built-in topics include: noise complaints, card declines, intoxicated guests, no-show reservations, night audit errors, fire alarms, medical emergencies, VIP arrivals, lost property, and more.</p>
+        <p>The status badge in the chat header shows:</p>
+        <ul>
+          <li><span style="color:var(--green)">● Property Scripts Loaded</span> — your custom <code>hotelcompanion_scripts.js</code> file is present and loaded. Property scripts take priority over built-in ones.</li>
+          <li><span style="color:var(--gold)">● Smart Defaults Active</span> — the custom file is missing or invalid; built-in scripts are in use.</li>
+        </ul>
+        <p>If Aria has no script for your query, she will suggest three practical steps: contact the Duty Manager, check the night manual, or log the incident.</p>
+        <div class="help-tip">To add property-specific scripts: open the Content Editor → AI Scripts tab → add or import from your PDF manual → export <code>hotelcompanion_scripts.js</code> to the same folder.</div>
+      </div>
+    </details>
+
+    <!-- Shift History -->
+    <details class="help-card">
+      <summary><span class="help-icon">📊</span> Shift History</summary>
+      <div class="help-card-body">
+        <p>Every time you click <strong>End Shift</strong>, a summary is saved to history on this device. Each entry shows:</p>
+        <ul>
+          <li>Date, duration, staff name and role</li>
+          <li>Checklist completion percentage</li>
+          <li>Number of incidents and floor walks</li>
+          <li>Handover notes left at shift end</li>
+        </ul>
+        <p>Aggregate stats (total shifts, average checklist %, incidents by type) are shown at the top.</p>
+        <p>Click <strong>📋 Load Handover</strong> on any entry to push that shift's handover notes back to the incoming-handover banner — useful if a handover was accidentally dismissed.</p>
+        <div class="help-note"><strong>History lives in this browser on this device only.</strong> It is not shared between devices or browsers. The app keeps up to 365 entries; older ones are removed automatically. Clearing browser data will erase everything stored here.</div>
+        <div class="help-tip">"Clear History" removes all stored entries permanently. The app will ask you to confirm before proceeding.</div>
+      </div>
+    </details>
+
+    <!-- Data Persistence -->
+    <details class="help-card">
+      <summary><span class="help-icon">💾</span> Data Persistence Toggle</summary>
+      <div class="help-card-body">
+        <p>The <strong>Data Persistence</strong> toggle is in the sidebar below the navigation. It defaults to <strong>Off</strong>.</p>
+        <p><strong>When OFF (default):</strong> Session data (checklist ticks, notes, Night Log entries) is held in memory only. Closing or reloading the tab loses that data. This is the right setting for a <strong>shared terminal</strong> — the next person who opens the app starts with a clean slate.</p>
+        <p><strong>When ON:</strong> Session data is saved to this browser's localStorage and restored if you reload. Use this when <strong>you are the only person using this PC</strong> during your shift and want protection against accidental reloads.</p>
+        <p>The following is <strong>always saved</strong> regardless of this toggle:</p>
+        <ul>
+          <li>Staff profile (name, role, shift type)</li>
+          <li>Shift history</li>
+          <li>Pending handover for the oncoming shift</li>
+          <li>Brand customisation (hotel name, logo, accent colour)</li>
+          <li>Shift start time</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- Auto-Save Folder -->
+    <details class="help-card">
+      <summary><span class="help-icon">📁</span> Shift Auto-Save (OneDrive Folder)</summary>
+      <div class="help-card-body">
+        <p>The <strong>Shift Auto-save</strong> panel in the sidebar lets you configure a folder where the app automatically writes a JSON file when you end a shift.</p>
+        <p>Click <strong>Set folder</strong> and grant browser permission to a folder — typically a sub-folder inside your OneDrive sync folder (e.g. <code>NightShifts\shiftLogs</code>).</p>
+        <p>Each file is named <code>shift_YYYY-MM-DD.json</code> and contains the full shift summary: notes, checklist state, Night Log entries, and stats.</p>
+        <p>The <strong>Monthly Report</strong> section can import these files to generate charts and summaries across multiple nights.</p>
+        <div class="help-note">The folder permission is granted by the browser using the File System Access API. You may need to re-grant permission after the browser is closed or after a system security policy update. You will be prompted automatically if permission has lapsed.</div>
+        <div class="help-tip">Auto-save at End Shift is separate from the manual <strong>Export JSON</strong> button in the Night Log section. Both produce JSON, but auto-save covers the full shift summary while Night Log export covers log entries only.</div>
+      </div>
+    </details>
+
+    <!-- Printing -->
+    <details class="help-card">
+      <summary><span class="help-icon">🖨️</span> Printing</summary>
+      <div class="help-card-body">
+        <p>Several sections support printing. Use your browser's print function (Ctrl+P) or the on-screen Print button. The sidebar, topbar, and all navigation are hidden automatically when printing.</p>
+        <ul>
+          <li><strong>Handover Sheet</strong> — Notes &amp; Handover → Print Handover</li>
+          <li><strong>Shift Checklist</strong> — Shift Checklist section → Print</li>
+          <li><strong>Group Check-in List</strong> — Group Check-in → Print (portrait or landscape)</li>
+          <li><strong>Sign Generator</strong> — Sign Generator → Print (A4 or A3)</li>
+          <li><strong>Daily Info Board</strong> — Daily Info Board → Print (landscape, A3 size recommended)</li>
+        </ul>
+        <div class="help-tip">In the browser print dialog, set <strong>Margins to None</strong> and tick <strong>Print backgrounds</strong> for the best results. For the Daily Info Board, set paper size to A3 landscape.</div>
+      </div>
+    </details>
+
+    <!-- Brand Customisation -->
+    <details class="help-card">
+      <summary><span class="help-icon">🎨</span> Brand Customisation</summary>
+      <div class="help-card-body">
+        <p>Click <strong>🎨 Customise</strong> at the bottom of the sidebar to open brand settings:</p>
+        <ul>
+          <li><strong>Hotel / Property Name</strong> — appears in the sidebar, print headers, and AI Coach context.</li>
+          <li><strong>Hotel Logo</strong> — upload a JPG or PNG; it is stored as base64 data on this device and shown in the sidebar and on printed documents.</li>
+          <li><strong>Accent Colour</strong> — choose from 14 preset swatches or click the colour picker for a custom value. This replaces the gold highlight colour throughout the app instantly.</li>
+        </ul>
+        <p>Click <strong>Apply &amp; Save</strong> to save changes permanently to this device. Click <strong>Cancel</strong> to discard any changes.</p>
+        <div class="help-note">Brand settings are saved <strong>in this browser on this device only</strong>. They will need to be set once per PC. Clearing browser data removes them.</div>
+      </div>
+    </details>
+
+    <!-- Content Editor -->
+    <details class="help-card">
+      <summary><span class="help-icon">🛠️</span> Content Editor (Managers Only)</summary>
+      <div class="help-card-body">
+        <p>The <strong>Content Editor</strong> is a separate file (<code>hotelcompanion_editor.html</code>) in the same folder. Open it in any browser to customise content without touching any code:</p>
+        <ul>
+          <li><strong>Pre-Audit Items</strong> — arrival and pre-audit checklist tasks</li>
+          <li><strong>Post-Audit Items</strong> — post-audit and close-of-shift tasks</li>
+          <li><strong>Night Audit Steps</strong> — the step-by-step audit procedure</li>
+          <li><strong>AI Scripts</strong> — property-specific response scripts for the AI Coach</li>
+        </ul>
+        <p>Each item has a drag handle for reordering, a label field, a "Required?" toggle, and a day-restriction dropdown (every day, Mon only, last night of month, etc.).</p>
+        <p>When finished editing:</p>
+        <ul>
+          <li>Click <strong>Export Items (.js)</strong> → save as <code>hotelcompanion_items.js</code> in the same folder → reload the app.</li>
+          <li>Click <strong>Export Scripts (.js)</strong> → save as <code>hotelcompanion_scripts.js</code> in the same folder → reload the app.</li>
+        </ul>
+        <p>To <strong>import your night operations PDF</strong>: AI Scripts tab → Import from PDF → select the file → review draft scripts → export.</p>
+        <p>To <strong>load back a file you previously exported</strong>: click <strong>Import / Load Existing</strong> in the editor and select the <code>.js</code> file.</p>
+      </div>
+    </details>
+
+    <!-- Troubleshooting -->
+    <details class="help-card">
+      <summary><span class="help-icon">⚠️</span> Troubleshooting</summary>
+      <div class="help-card-body">
+        <p><strong>My checklist ticks / notes disappeared after I reloaded.</strong><br>The Persist Data toggle was off. Turn it on before reloading if you want session data to survive a page reload.</p>
+        <p><strong>AI Coach shows "Smart Defaults Active" but I exported scripts.</strong><br>Check that <code>hotelcompanion_scripts.js</code> is in the <strong>same folder</strong> as <code>hotelcompanion_suite.html</code>. Reload the page after placing the file there.</p>
+        <p><strong>My hotel name / logo / accent colour are gone.</strong><br>Browser data was cleared, or you are on a different browser or device. Re-apply via 🎨 Customise — settings must be set once per device/browser.</p>
+        <p><strong>The logo doesn't appear.</strong><br>Ensure <code>hotelLogo.jpg</code> is in the same folder as the app. The file name and extension must match exactly (case-sensitive on some systems).</p>
+        <p><strong>Printing doesn't look right.</strong><br>In the print dialog, set Margins to <strong>None</strong> and enable <strong>Print backgrounds</strong>. For the Sign Generator and Group Check-in, make sure the paper size matches the size selected in the app.</p>
+        <p><strong>The editor says "No text extracted" when I import a PDF.</strong><br>The PDF is likely a scanned image rather than a text-based document. A text-based (digitally created) PDF is required. Ask your developer to assist with extraction if you only have a scanned copy.</p>
+        <p><strong>The app isn't loading my customised items after exporting.</strong><br>Ensure the exported file is named exactly <code>hotelcompanion_items.js</code> (not <code>hotelcompanion_items (1).js</code> or similar), is in the same folder as the app, and that you reloaded the page after placing it there.</p>
+        <div class="help-tip">If in doubt, open the browser console (F12 → Console tab) and reload the page. Any loading errors will be shown there with the file name and reason.</div>
+      </div>
+    </details>
+
+  </div><!-- /help-accordion -->
+</section>
+
     </div><!-- /content -->
   </main><!-- /main -->
 </div><!-- /app -->
@@ -2956,7 +3224,8 @@ const sectionTitles = {
   nightlog:   'NIGHT LOG',
   checkin:    'GROUP CHECK-IN',
   signs:      'SIGN GENERATOR',
-  board:      'DAILY INFO BOARD'
+  board:      'DAILY INFO BOARD',
+  help:       'HELP & GUIDE'
 };
 
 // -- State --
