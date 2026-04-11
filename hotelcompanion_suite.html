@@ -1470,6 +1470,7 @@
       #section-checkin .btn { display: none; }
       #section-checkin .no-print { display: none; }
       #section-checkin .flex-between { display: none; }
+      #checkinPrintHeader { display: block !important; }
       /* Hide the delete-button column on print */
       #checkinTable th:last-child,
       #checkinTable td:last-child { display: none; }
@@ -2608,11 +2609,11 @@
     <div class="checkin-controls">
       <div class="form-group" style="margin-bottom:0;flex:1;min-width:160px;">
         <label for="checkinDate">Date</label>
-        <input type="date" id="checkinDate" aria-label="Check-in date">
+        <input type="date" id="checkinDate" aria-label="Check-in date" onchange="updateCheckinPrintHeader()">
       </div>
       <div class="form-group" style="margin-bottom:0;flex:2;min-width:180px;">
         <label for="checkinGroupName">Group Name</label>
-        <input type="text" id="checkinGroupName" placeholder="e.g. Smith Wedding Party" maxlength="80">
+        <input type="text" id="checkinGroupName" placeholder="e.g. Smith Wedding Party" maxlength="80" oninput="updateCheckinPrintHeader()">
       </div>
       <div>
         <label style="display:block;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Logo</label>
@@ -2634,6 +2635,16 @@
   </div>
 
   <div style="overflow-x:auto;">
+    <!-- Print-only header — hidden on screen, visible on print -->
+    <div id="checkinPrintHeader" style="display:none;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:10px;">
+        <img id="checkinPrintLogo" src="" alt="" style="max-height:56px;max-width:130px;object-fit:contain;display:none;">
+        <div style="flex:1;">
+          <div id="checkinPrintGroupName" style="font-size:20px;font-weight:700;font-family:'Bebas Neue',cursive;letter-spacing:0.05em;"></div>
+          <div id="checkinPrintDate" style="font-size:13px;color:#444;margin-top:2px;"></div>
+        </div>
+      </div>
+    </div>
     <table class="checkin-table" id="checkinTable">
       <thead>
         <tr>
@@ -4691,10 +4702,26 @@ function loadCheckinLogo(e) {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    const img = document.getElementById('checkinLogo');
-    if (img) { img.src = ev.target.result; img.classList.remove('hidden'); }
+    const preview = document.getElementById('checkinLogoPreview');
+    const printLogo = document.getElementById('checkinPrintLogo');
+    if (preview) { preview.src = ev.target.result; preview.style.display = ''; }
+    if (printLogo) { printLogo.src = ev.target.result; printLogo.style.display = ''; }
   };
   reader.readAsDataURL(file);
+}
+
+function updateCheckinPrintHeader() {
+  const name = document.getElementById('checkinGroupName')?.value || '';
+  const dateVal = document.getElementById('checkinDate')?.value || '';
+  const nameEl = document.getElementById('checkinPrintGroupName');
+  const dateEl = document.getElementById('checkinPrintDate');
+  if (nameEl) nameEl.textContent = name;
+  if (dateEl && dateVal) {
+    const d = new Date(dateVal + 'T12:00:00');
+    dateEl.textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  } else if (dateEl) {
+    dateEl.textContent = '';
+  }
 }
 
 // -- Sign Generator --
