@@ -2311,7 +2311,7 @@
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm no-print" onclick="loadHistoryFromFolder()" aria-label="Sync history from OneDrive folder">📁 Sync from Folder</button>
       <button class="btn btn-ghost btn-sm no-print" onclick="window.print()" aria-label="Print shift history report">🖨️ Print Report</button>
-      <button class="btn btn-danger btn-sm no-print" onclick="clearHistory()" id="clearHistoryBtn" aria-label="Clear all shift history">🗑 Clear</button>
+      <button class="btn btn-danger btn-sm no-print" id="clearHistoryBtn" aria-label="Clear all shift history">&#128465; Clear</button>
     </div>
   </div>
 
@@ -4955,7 +4955,7 @@ function loadHandoverFromHistory(idx) {
 }
 
 function clearHistory() {
-  if (!confirm('Permanently delete all shift history? This cannot be undone.')) return;
+  // Only clears localStorage — saved shift files on disk are not affected
   shiftHistory = [];
   try { localStorage.removeItem('shiftCompanion_history'); } catch {}
   renderHistory();
@@ -5503,7 +5503,9 @@ function init() {
   document.getElementById('submitQuickLogBtn')?.addEventListener('click', submitQuickLog);
 
   // Wire history clear
-  document.getElementById('clearHistoryBtn')?.addEventListener('click', clearHistory);
+  document.getElementById('clearHistoryBtn')?.addEventListener('click', () => {
+    if (confirm('Clear shift history from this device? Saved shift files are not affected.')) clearHistory();
+  });
 
   // Wire print handover
   document.getElementById('printHandoverBtn')?.addEventListener('click', printHandover);
