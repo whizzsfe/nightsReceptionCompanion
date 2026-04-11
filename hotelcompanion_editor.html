@@ -1056,7 +1056,7 @@ function processImportText(text, filename) {
 function parseJsAssignment(text, varName) {
   // Extract the JSON-like object after "window.VARNAME = " — text-parse only, no eval
   const escapedName = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp('window\\.' + escapedName + '\\s*=\\s*(\\{[\\s\\S]*?\\});?\\s*$', 'm');
+  const re = new RegExp('window\\.' + escapedName + '\\s*=\\s*(\\{[\\s\\S]*\\});?\\s*$');
   const m = text.match(re);
   if (!m) return null;
 
@@ -1066,8 +1066,10 @@ function parseJsAssignment(text, varName) {
   raw = raw.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
   // 2. Remove trailing commas before } or ]
   raw = raw.replace(/,(\s*[}\]])/g, '$1');
-  // 3. Normalise single-quoted strings to double-quoted (simple pass — handles most cases)
-  raw = raw.replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, (_, inner) => '"' + inner.replace(/"/g, '\\"') + '"');
+  // Note: step 3 (single-quote normalisation) intentionally omitted — it corrupts
+  // apostrophes inside double-quoted string values (e.g. "Don't", "I'm", "yesterday's").
+  // The editor always serialises with JSON.stringify (double-quoted strings), so
+  // single-quote normalisation is never needed and would only cause data corruption.
 
   try {
     return JSON.parse(raw);
