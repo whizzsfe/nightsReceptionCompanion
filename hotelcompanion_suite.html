@@ -2114,7 +2114,7 @@
 
   <!-- Tip Card -->
   <div class="tip-card-dash" id="dashTip">
-    💡 <strong>Tonight's tip:</strong> A calm, friendly greeting sets the tone for every interaction — even at 3am.
+    &#128161; <strong>Tonight's tip:</strong> <span id="dashTipText"></span>
   </div>
 
 </section>
@@ -3160,6 +3160,48 @@ function loadState() {
     try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
   }
   updateShiftTimer();
+}
+
+// -- Daily tip rotation --
+const NIGHTLY_TIPS = [
+  "A calm, friendly greeting sets the tone for every interaction — even at 3am.",
+  "If a guest seems distressed, slow down and listen fully before offering solutions.",
+  "Log every incident as it happens — memory is unreliable at the end of a long shift.",
+  "A clean, well-lit lobby tells arriving guests the whole hotel is well run.",
+  "If you're unsure about a billing query, it's always better to say 'Let me confirm that for you' than to guess.",
+  "Pre-auth holds confuse many guests. A calm, clear explanation prevents disputes at checkout.",
+  "Check your handover notes before 6am — don't pass on a problem without a status update.",
+  "VIP arrivals deserve more than an upgrade. A personalised welcome note takes two minutes.",
+  "If a guest is intoxicated, match their energy downwards — speak slower, softer, calmer.",
+  "A floor walk isn't just security — it's your chance to spot a maintenance issue before it becomes a complaint.",
+  "Keep a mental note of which rooms are light sleepers or have made requests — it pays off on future stays.",
+  "The night audit is a safeguard for the whole business. Take your time and don't skip steps under pressure.",
+  "When a complaint can't be fixed immediately, tell the guest exactly what will happen and when.",
+  "Your body language at the desk is visible from the entrance. Sit straight, look engaged.",
+  "If you feel unsafe at any point, trust your instincts and escalate early — don't wait.",
+  "A warm goodbye at checkout is the last impression a guest takes home — make it count.",
+  "Noise complaints handled quickly at 11pm rarely become the 2am calls that wake the duty manager.",
+  "Knowing your emergency procedures cold means you stay calm when it actually matters.",
+  "Group arrivals go smoothly when keys are pre-allocated and the list is checked twice beforehand.",
+  "Never promise a room type you haven't confirmed in the PMS — underpromise and overdeliver.",
+  "If the lobby is quiet, use the time to prep for arrivals, not just to wait.",
+  "A tidy front desk signals professionalism to every guest who approaches — keep it clear.",
+  "When taking a maintenance report, get the exact room, exact issue, and exact time — vague reports get missed.",
+  "Lost property handled properly protects the hotel and builds trust with the guest.",
+  "The best service recovery isn't the biggest gesture — it's the fastest, most sincere response.",
+  "If a guest asks for a local recommendation, give one confidently. 'I don't know' is a missed moment.",
+  "Handover notes should answer: what's unresolved, who knows about it, and what the next step is.",
+  "Check that the audit balances before signing off — a small discrepancy now is a big problem tomorrow.",
+  "A well-placed 'Is there anything else I can help with?' often catches the issue a guest was too polite to raise.",
+  "Night shift is when your judgment matters most — there's no supervisor in the next room. Trust yourself."
+];
+
+function setDailyTip() {
+  const el = document.getElementById('dashTipText');
+  if (!el) return;
+  const d = new Date(shiftStart || Date.now());
+  const dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  el.textContent = NIGHTLY_TIPS[dayOfYear % NIGHTLY_TIPS.length];
 }
 
 // -- Dashboard stats --
@@ -5426,6 +5468,7 @@ function init() {
   // Dashboard stats
   updateDashboardStats();
   updateCheckInDisplay();
+  setDailyTip();
 
   // AI Coach greeting
   updateAiStatusBadge();
