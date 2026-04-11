@@ -2077,7 +2077,7 @@
       <p>Check in regularly to confirm you are safe and well.</p>
       <div id="lastCheckIn">Not yet checked in this shift</div>
     </div>
-    <button class="btn btn-gold" id="checkInBtn" onclick="safetyCheckIn()" aria-label="Check in as safe">✓ I'm OK — Check In</button>
+    <button class="btn btn-gold" id="checkInBtn" onclick="safetyCheckIn()" aria-label="Check in as safe">&#10003; I'm OK &#8212; Check In</button>
   </div>
 
   <!-- Quick Actions -->
@@ -3218,9 +3218,9 @@ function safetyCheckIn() {
   if (persistData) localStorage.setItem('shiftCompanion_lastCheckIn', lastCheckInTime.toString());
   const btn = document.getElementById('checkInBtn');
   if (btn) {
-    btn.textContent = '? Checked In!';
+    btn.innerHTML = '&#10003;&#10003; Checked In!';
     btn.disabled = true;
-    setTimeout(() => { btn.textContent = '? I\'m OK — Check In'; btn.disabled = false; }, 2500);
+    setTimeout(() => { btn.innerHTML = '&#10003; I\'m OK &#8212; Check In'; btn.disabled = false; }, 2500);
   }
 }
 function updateCheckInDisplay() {
