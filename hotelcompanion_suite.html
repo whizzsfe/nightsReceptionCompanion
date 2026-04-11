@@ -1778,6 +1778,50 @@
 </aside>
 
 <!-- -----------------------------------------------------------
+     NEW SHIFT MODAL (shown after End Shift — cannot be dismissed)
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="newShiftModal" role="dialog" aria-modal="true" aria-labelledby="newShiftModalTitle" style="z-index:1100;">
+  <div class="modal-box">
+    <div class="modal-header" style="border-bottom:2px solid var(--gold);">
+      <span class="modal-title" id="newShiftModalTitle">&#127769; New Shift Starting</span>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Previous shift ended. Please confirm who is starting this shift.</p>
+      <div class="form-group">
+        <label for="newShiftName">Your Name</label>
+        <input type="text" id="newShiftName" placeholder="e.g. Alex Johnson" maxlength="60" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="newShiftRole">Your Role</label>
+        <select id="newShiftRole">
+          <option value="Front Desk Agent">Front Desk Agent</option>
+          <option value="Concierge">Concierge</option>
+          <option value="Bell Staff">Bell Staff</option>
+          <option value="Housekeeping Supervisor">Housekeeping Supervisor</option>
+          <option value="Food &amp; Beverage">Food &amp; Beverage</option>
+          <option value="Night Auditor" selected>Night Auditor</option>
+          <option value="Night Supervisor">Night Supervisor</option>
+          <option value="Duty Manager">Duty Manager</option>
+          <option value="New Hire/Trainee">New Hire / Trainee</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="newShiftType">Shift Type</label>
+        <select id="newShiftType">
+          <option value="Morning (6:30am–2pm)">Morning (6:30am–2pm)</option>
+          <option value="Afternoon (2pm–11pm)">Afternoon (2pm–11pm)</option>
+          <option value="Night (10:30pm–7am)" selected>Night (10:30pm–7am)</option>
+          <option value="Split Shift">Split Shift</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gold" onclick="startNewShift()" aria-label="Start new shift">Start Shift ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
      PROFILE SETUP MODAL
 ----------------------------------------------------------- -->
 <div class="modal-overlay" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
@@ -3289,10 +3333,10 @@ function closeModal(id) {
   if (m) m.classList.remove('open');
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => { if (m.id !== 'newShiftModal') m.classList.remove('open'); });
 });
 document.querySelectorAll && document.addEventListener('click', e => {
-  if (e.target.classList && e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+  if (e.target.classList && e.target.classList.contains('modal-overlay') && e.target.id !== 'newShiftModal') e.target.classList.remove('open');
 });
 
 // -- Live clock --
@@ -5287,8 +5331,27 @@ function confirmEndShift() {
   updateDashboardStats();
   updateCheckInDisplay();
 
-  // Navigate to dashboard
+  // Navigate to dashboard then show new-shift prompt
   showSection('dashboard', document.querySelector('[data-section=dashboard]'));
+
+  // Pre-clear name so new person must type theirs
+  const nsName = document.getElementById('newShiftName');
+  if (nsName) nsName.value = '';
+  document.getElementById('newShiftModal').classList.add('open');
+}
+
+function startNewShift() {
+  const name = (document.getElementById('newShiftName')?.value || '').trim();
+  if (!name) { document.getElementById('newShiftName').focus(); document.getElementById('newShiftName').style.outline = '2px solid var(--red)'; return; }
+  document.getElementById('newShiftName').style.outline = '';
+  staffName  = name;
+  staffRole  = document.getElementById('newShiftRole')?.value  || 'Night Auditor';
+  staffShift = document.getElementById('newShiftType')?.value  || 'Night (10:30pm–7am)';
+  localStorage.setItem('shiftCompanion_staffName',  staffName);
+  localStorage.setItem('shiftCompanion_staffRole',  staffRole);
+  localStorage.setItem('shiftCompanion_staffShift', staffShift);
+  updateSidebarStaffCard();
+  document.getElementById('newShiftModal').classList.remove('open');
 }
 
 
