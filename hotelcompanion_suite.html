@@ -1447,6 +1447,8 @@
         border: none !important;
       }
       .handover-form-section textarea::placeholder { color: transparent !important; }
+      #handoverStaff2 { border: none !important; border-bottom: 1px solid #ccc !important; background: none !important; color: #000 !important; font-size: 11px !important; width: auto !important; padding: 0 !important; font-family: inherit !important; }
+      #handoverStaff2::placeholder { color: transparent !important; }
       .handover-main-notes textarea { min-height: 200px !important; }
       .handover-breakfast-section textarea,
       .handover-taxis-section textarea,
@@ -2178,6 +2180,7 @@
       <div class="handover-form-meta">
         <div><span class="handover-meta-label">Date:</span> <span id="handoverPrintDate"></span></div>
         <div><span class="handover-meta-label">Staff:</span> <span id="handoverPrintStaff"></span></div>
+        <div><span class="handover-meta-label">2nd Staff:</span> <input type="text" id="handoverStaff2" placeholder="Second staff name…" aria-label="Second staff member name" oninput="saveState()" style="background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;width:150px;padding:0;"></div>
       </div>
     </div>
 
@@ -3331,6 +3334,7 @@ function saveState() {
   try {
     localStorage.setItem('shiftCompanion_shiftNotes',     document.getElementById('shiftNotes')?.value || '');
     localStorage.setItem('shiftCompanion_handoverNotes',  document.getElementById('handoverNotes')?.value || '');
+    localStorage.setItem('shiftCompanion_handoverStaff2',  document.getElementById('handoverStaff2')?.value || '');
     localStorage.setItem('shiftCompanion_breakfastBags',  document.getElementById('breakfastBags')?.value || '');
     localStorage.setItem('shiftCompanion_handoverTaxis',  document.getElementById('handoverTaxis')?.value || '');
     localStorage.setItem('shiftCompanion_wakeUpCalls',    document.getElementById('wakeUpCalls')?.value || '');
@@ -3365,7 +3369,9 @@ function loadState() {
     const wuc = localStorage.getItem('shiftCompanion_wakeUpCalls');
     if (sn  && document.getElementById('shiftNotes'))     document.getElementById('shiftNotes').value     = sn;
     if (hn  && document.getElementById('handoverNotes'))  document.getElementById('handoverNotes').value  = hn;
-    if (bb  && document.getElementById('breakfastBags'))  document.getElementById('breakfastBags').value  = bb;
+    const hs2 = localStorage.getItem('shiftCompanion_handoverStaff2');
+    if (hs2 && document.getElementById('handoverStaff2')) document.getElementById('handoverStaff2').value = hs2;
+    if (bb  && document.getElementById('breakfastBags')  document.getElementById('breakfastBags').value  = bb;
     if (htx && document.getElementById('handoverTaxis'))  document.getElementById('handoverTaxis').value  = htx;
     if (wuc && document.getElementById('wakeUpCalls'))    document.getElementById('wakeUpCalls').value    = wuc;
     const cs = localStorage.getItem('shiftCompanion_checklistState');
@@ -5250,6 +5256,7 @@ function confirmEndShift() {
     'shiftCompanion_lastCheckIn', 'shiftCompanion_nightLogEntries',
     'shiftCompanion_checklistState',
     'shiftCompanion_boardData', 'shiftCompanion_shiftStart',
+    'shiftCompanion_handoverStaff2',
     'shiftCompanion_nightlogLeader', 'shiftCompanion_nightlogStart',
     'shiftCompanion_floorWalkState'
   ];
@@ -5265,6 +5272,8 @@ function confirmEndShift() {
   lastCheckInTime   = null;
   if (shiftEl)    shiftEl.value    = '';
   if (handoverEl) handoverEl.value = '';
+  const staff2El = document.getElementById('handoverStaff2');
+  if (staff2El) staff2El.value = '';
   ['breakfastBags','handoverTaxis','wakeUpCalls'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
