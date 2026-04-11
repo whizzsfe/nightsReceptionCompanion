@@ -3151,7 +3151,15 @@ function loadState() {
   if (btn) { btn.classList.toggle('on', persistData); btn.setAttribute('aria-pressed', persistData); }
   if (desc) desc.textContent = persistData ? 'On — saving session data' : 'Off — session only';
 
-  shiftStart = shiftStart || Date.now();
+  // Restore shift start time (always-saved so timer survives reload)
+  const savedShiftStart = localStorage.getItem('shiftCompanion_shiftStart');
+  if (savedShiftStart) {
+    shiftStart = parseInt(savedShiftStart, 10);
+  } else {
+    shiftStart = Date.now();
+    try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
+  }
+  updateShiftTimer();
 }
 
 // -- Dashboard stats --
@@ -4974,6 +4982,7 @@ function confirmEndShift() {
   floorWalkState    = {};
   nlPhotoBase64     = null;
   shiftStart        = Date.now();
+  try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
   lastCheckInTime   = null;
   if (shiftEl)    shiftEl.value    = '';
   if (handoverEl) handoverEl.value = '';
