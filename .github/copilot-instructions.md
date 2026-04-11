@@ -28,6 +28,20 @@
 
 ---
 
+## 0.1. Deprecated Features (confirmed 11 April 2026)
+
+The following items were scoped in earlier versions of these instructions but are **permanently out of scope**. Do not build or reference them.
+
+| Feature | Original location in spec | Reason deprecated |
+|---|---|---|
+| **Night Audit Tracker section** (`section-nightaudit`) | § 5 core sections, § 10 file output checklist | Not required; the shift checklist covers pre/post-audit tasks sufficiently |
+| **Editor — Night Audit Steps tab** (`panel-nightaudit`) | § 10, editor scope | Follows from Night Audit Tracker deprecation; editor remains at 3 tabs |
+| **`auditSteps` array** in `hotelcompanion_items.js` schema | § 10 editor export schema | Not needed without the Night Audit Tracker section |
+| **`shiftCompanion_auditState`** localStorage key | § 3 data persistence | Not needed without the Night Audit Tracker section |
+| **Monthly Report section** (`section-reports`) | § 5 tools section, § 10 nice-to-have | Source file (`NightLogMonthlyReport.html`) not available; permanently deferred |
+
+---
+
 ## 1. Project Overview
 
 The **Night Receptionist Companion Suite** is a set of browser-based tools for hotel
