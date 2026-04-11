@@ -659,29 +659,6 @@
     .hidden { display: none !important; }
 
     /* --- DASHBOARD --- */
-    .handover-banner {
-      background: rgba(74,144,217,0.1);
-      border: 1px solid rgba(74,144,217,0.35);
-      border-radius: var(--radius-lg);
-      padding: 14px 18px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-    }
-    .handover-banner-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-    .handover-banner-content { flex: 1; min-width: 0; }
-    .handover-banner-title {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--blue);
-      margin-bottom: 4px;
-      font-family: 'DM Mono', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .handover-banner-text { font-size: 14px; color: var(--text); white-space: pre-wrap; }
-
     .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
     .stat-card {
       background: var(--card);
@@ -2194,7 +2171,10 @@
 
     <div class="handover-form-header">
       <img src="hotelLogo.jpg" class="handover-form-logo" alt="Hotel logo" onerror="this.style.display='none'">
-      <div class="handover-form-title">Front Office Nights — Morning Handover</div>
+      <div>
+        <div class="handover-form-title">Front Office Nights — Morning Handover</div>
+        <div style="font-size:13px;color:var(--muted);font-family:'DM Mono',monospace;" id="printHotelName"></div>
+      </div>
       <div class="handover-form-meta">
         <div><span class="handover-meta-label">Date:</span> <span id="handoverPrintDate"></span></div>
         <div><span class="handover-meta-label">Staff:</span> <span id="handoverPrintStaff"></span></div>
@@ -3370,7 +3350,6 @@ function loadState() {
   persistData = localStorage.getItem('shiftCompanion_persist') !== '0';
   const histRaw = localStorage.getItem('shiftCompanion_history');
   if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
-  // pendingHandover kept in localStorage for history reference only — no banner shown
 
   // Brand
   currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || 'Lingfield Park Marriott Hotel & Country Club';
@@ -3539,12 +3518,6 @@ function updateCheckInDisplay() {
   if (!el || !lastCheckInTime) return;
   const d = new Date(lastCheckInTime);
   el.textContent = 'Last check-in: ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-}
-
-// -- Handover banner --
-function dismissHandoverBanner() {
-  const b = document.getElementById('handoverBanner');
-  if (b) b.classList.add('hidden');
 }
 
 // -- Brand customisation --
@@ -5095,7 +5068,6 @@ function renderHistory() {
             </div>
             <div class="history-meta">
               <span>${escapeHtml(date)}</span>
-              <button class="btn btn-ghost btn-sm" onclick="loadHandoverFromHistory(${idx})" aria-label="Load handover from this shift">📋 Load Handover</button>
               <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">▼ Details</button>
             </div>
           </div>
@@ -5215,14 +5187,6 @@ function updateHistoryStats(filtered) {
   setEl('hStatTopType', top ? top[0] : '—');
 }
 
-function loadHandoverFromHistory(idx) {
-  const entry = shiftHistory[idx];
-  if (!entry || !entry.handoverNotes) { alert('No handover notes found for this shift.'); return; }
-  try { localStorage.setItem('shiftCompanion_pendingHandover', entry.handoverNotes); } catch {}
-  showSection('dashboard', document.querySelector('[data-section=dashboard]'));
-  showHandoverBanner(entry.handoverNotes);
-}
-
 function clearHistory() {
   // Only clears localStorage — saved shift files on disk are not affected
   shiftHistory = [];
@@ -5279,11 +5243,6 @@ function confirmEndShift() {
   }
   exportCompletedShift(entry);  // write to OneDrive folder + delete session file (no-op if not configured)
 
-  // Write handover for next user
-  if (handoverNotes) {
-    try { localStorage.setItem('shiftCompanion_pendingHandover', handoverNotes); } catch {}
-  }
-
   // Clear all session data from localStorage
   const sessionKeys = [
     'shiftCompanion_shiftNotes', 'shiftCompanion_handoverNotes',
@@ -5323,15 +5282,7 @@ function confirmEndShift() {
   showSection('dashboard', document.querySelector('[data-section=dashboard]'));
 }
 
-// -- showHandoverBanner (called from loadHandoverFromHistory) --
-function showHandoverBanner(text) {
-  const banner = document.getElementById('handoverBanner');
-  const textEl = document.getElementById('handoverBannerText');
-  const incoming = document.getElementById('incomingHandoverText');
-  if (banner) banner.classList.remove('hidden');
-  if (textEl) textEl.textContent = text;
-  if (incoming) incoming.textContent = text;
-}
+
 
 // =============================================================
 // STREAM 4: SHIFT AUTO-SAVE & CROSS-DEVICE RESUME
@@ -5739,12 +5690,6 @@ function init() {
 
   // Board
   initBoard();
-
-  // Incoming handover banner
-  const pendingHandover = (() => { try { return localStorage.getItem('shiftCompanion_pendingHandover'); } catch { return null; } })();
-  if (pendingHandover) {
-    showHandoverBanner(pendingHandover);
-  }
 
   // Dashboard stats
   updateDashboardStats();

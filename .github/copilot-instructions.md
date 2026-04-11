@@ -39,6 +39,7 @@ The following items were scoped in earlier versions of these instructions but ar
 | **`auditSteps` array** in `hotelcompanion_items.js` schema | § 10 editor export schema | Not needed without the Night Audit Tracker section |
 | **`shiftCompanion_auditState`** localStorage key | § 3 data persistence | Not needed without the Night Audit Tracker section |
 | **Monthly Report section** (`section-reports`) | § 5 tools section, § 10 nice-to-have | Source file (`NightLogMonthlyReport.html`) not available; permanently deferred |
+| **Incoming handover banner & panel** | Dashboard `#handoverBanner`, Notes `#incomingHandoverCard`, `shiftCompanion_pendingHandover` localStorage key, `loadHandoverFromHistory()` history button | § 3, § 5 dashboard, § 12.5 | Deprecated by user April 2026; handover notes remain writable and printable but are not automatically forwarded to the next session |
 
 ---
 
@@ -122,7 +123,6 @@ across sessions and page reloads:
 - Staff profile — name, role, shift type (`shiftCompanion_staffName`, `…staffRole`, `…staffShift`)
 - Persist-toggle state itself (`shiftCompanion_persist`)
 - Shift history log (`shiftCompanion_history`) — needed for the History section
-- Incoming handover text (`shiftCompanion_pendingHandover`) — passed between shifts
 - Brand customisation — hotel name, logo (base64), accent colour (`shiftCompanion_brandColour`, etc.)
 
 #### Session data (only saved when toggle is ON)
@@ -258,7 +258,7 @@ migrate into each section.
 
 | Section slug | Display title | Source section | Key features to preserve |
 |---|---|---|---|
-| `dashboard` | Night Dashboard | `§ section-dashboard` | Live date/time clock (topbar), stat cards (checklist %, incidents, streak), quick-action cards, lone-worker safety check-in button, incoming handover banner |
+| `dashboard` | Night Dashboard | `§ section-dashboard` | Live date/time clock (topbar), stat cards (checklist %, incidents, streak), quick-action cards, lone-worker safety check-in button |
 | `checklist` | Shift Checklist | `§ section-checklist` + `nightsTicklist.htm` | **Pre-Audit** and **Post-Audit** tabs (two tabs only — no "During Shift" tab); Pre-Audit items from `nightsTicklist.htm` `preAuditTasks`; Post-Audit items from `nightsTicklist.htm` `rawTasks`; items from `§ section-checklist` merged and deduplicated; progress bar; `required-before-continue` highlights; day-of-week / last-night-of-month badges; handover-sheet print view. See § 7 for full merge guide. |
 | `nightaudit` | Night Audit | `§ section-nightaudit` | Step-by-step audit tracker (procedure steps only — not checklist items); checkbox per step; progress bar; notes per step; reset button. Source: `hotelcompanion_enhanced.html § section-nightaudit`. |
 | `notes` | Notes & Handover | `§ section-notes` | Shift notes textarea, handover notes textarea, incoming handover read-only panel. **Do not add a separate incident log here.** All incident logging — including quick in-shift entries — is handled exclusively by the Night Log tool (see Tools section below). The incident mini-log that exists in `hotelcompanion_enhanced.html § section-notes` is a duplicate of Night Log and must not be carried forward. |
@@ -849,17 +849,9 @@ On the Dashboard section, include a **Lone Worker Safety** card with:
 - If persist is ON, save the timestamp to `shiftCompanion_lastCheckIn`.
 - No automated timer or alert is required — the check-in is purely manual.
 
-### 12.5 Incoming Handover Banner
+### 12.5 Incoming Handover Banner — ~~DEPRECATED~~
 
-- When `shiftCompanion_pendingHandover` exists in localStorage on page load:
-  - Show a gold-accent banner on the Dashboard below the stat cards with the handover
-    text and a dismiss button.
-  - Show the same text in the Notes section's incoming-handover read-only panel.
-- When the user clicks **End Shift** and fills in handover notes, write those notes to
-  `shiftCompanion_pendingHandover` so the next user loading the app sees them.
-- The Shift History section must have a "📋 Load Handover" button per entry that writes
-  that entry's `handoverNotes` to `shiftCompanion_pendingHandover` and navigates to
-  the Dashboard to show it.
+> **Deprecated April 2026.** Removed from the app. Handover notes are still writable and printable in the Notes section, but are not automatically forwarded to the next session. See § 0.1 for the full deprecation record.
 
 ### 12.6 Shift Streak Counter
 
