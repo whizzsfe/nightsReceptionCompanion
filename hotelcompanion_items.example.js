@@ -165,7 +165,7 @@ window.HOTELCOMPANION_ITEMS = {
     },
     {
       id: "post_019", label: "Yard Gate", required: true, dayRestriction: "every",
-      notes: "• Open service yard gate.\n• Padlock code: 1991\n• 4AM"
+      notes: "• Open service yard gate.\n• 4AM"
     },
     {
       id: "post_020", label: "Post room service cheques to opera", required: true, dayRestriction: "every",
