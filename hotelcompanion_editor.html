@@ -1161,24 +1161,70 @@ async function loadAndParsePdf(file) {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-    let fullText = '';
+    // Extract all lines with font-height metadata across all pages.
+    // Grouping items by rounded y-coordinate reconstructs proper text lines
+    // and lets us use font size (item.height) to detect headings reliably.
+    const allLines = [];
+
     for (let p = 1; p <= pdf.numPages; p++) {
       const page = await pdf.getPage(p);
       const content = await page.getTextContent();
-      const pageText = content.items.map(item => item.str).join(' ');
-      fullText += pageText + '\n';
+
+      // Group text items by rounded y-position → one entry per visual line
+      const lineMap = new Map();
+      for (const item of content.items) {
+        if (typeof item.str !== 'string' || !item.str.trim()) continue;
+        const y = Math.round(item.transform[5]);
+        const h = item.height > 0 ? item.height : Math.abs(item.transform[0]);
+        if (!lineMap.has(y)) lineMap.set(y, { parts: [], maxH: 0 });
+        const entry = lineMap.get(y);
+        entry.parts.push(item.str);
+        if (h > entry.maxH) entry.maxH = h;
+      }
+
+      // Emit lines top-to-bottom (PDF y increases upward, so sort descending)
+      Array.from(lineMap.keys())
+        .sort((a, b) => b - a)
+        .forEach(y => {
+          const { parts, maxH } = lineMap.get(y);
+          // Smart-join: add a space at part boundaries only when neither side already has one.
+          // This prevents table cells from merging ("Name" + "Signature" → "NameSignature")
+          // while not inserting double-spaces inside text that pdf.js already spaced.
+          let text = '';
+          for (const part of parts) {
+            if (text && !text.endsWith(' ') && !part.startsWith(' ')) text += ' ';
+            text += part;
+          }
+          text = text.trim();
+          if (text) allLines.push({ text, height: maxH, page: p });
+        });
     }
 
-    if (!fullText.trim()) {
+    if (allLines.length === 0) {
       showToast('No text extracted. This PDF may be a scanned image.', 'error');
       alert('No text could be extracted from this PDF.\n\nYour PDF may be a scanned image. Please share the PDF with your developer to process it manually.');
       return;
     }
 
-    const drafts = segmentByHeadings(fullText);
+    // Strategy 1: parse the TOC (if present, usually page 2) for a definitive heading list.
+    // This is far more reliable than font-size heuristics — it gives us exact titles + pages.
+    const tocTitles = extractTocTitles(allLines);
+    let drafts = [];
+
+    if (tocTitles.length >= 3) {
+      drafts = segmentByToc(allLines, tocTitles);
+    }
+
+    // Strategy 2: fall back to font-size heuristics if no usable TOC was found.
+    if (drafts.length === 0) {
+      const heights = allLines.map(l => l.height).filter(h => h > 0).sort((a, b) => a - b);
+      const median  = heights[Math.floor(heights.length / 2)] || 10;
+      drafts = segmentByFontSize(allLines, median * 1.6);
+    }
+
     if (drafts.length === 0) {
       showToast('No section headings found in PDF.', 'error');
-      alert('No section headings were found. The PDF may be a flat document without a clear structure.\n\nTry adding scripts manually or ask your developer to review the PDF format.');
+      alert('No section headings were detected in this PDF.\n\nThe PDF may be a flat document without a clear structure.\n\nTry adding scripts manually or ask your developer to review the PDF format.');
       return;
     }
 
@@ -1195,46 +1241,170 @@ async function loadAndParsePdf(file) {
   }
 }
 
-function segmentByHeadings(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  const headings = [];
+// ── TOC-BASED SEGMENTATION ──────────────────────────────────────────────────
 
-  lines.forEach((line, i) => {
-    // Heuristic: heading = short line (< 80 chars) that is followed by body text
-    // and looks like a title (not purely numeric, not a TOC page-number line)
-    if (line.length < 80 &&
-        line.length > 3 &&
-        !/^\d+$/.test(line) &&
-        !/\.\.\.\s*\d+$/.test(line) &&   // exclude TOC entries (e.g. "Section ...... 12")
-        /[a-zA-Z]/.test(line) &&
-        (line === line.toUpperCase() || /^[A-Z]/.test(line)) &&
-        i < lines.length - 1) {
-      headings.push({ title: line, lineIdx: i });
+// Normalise a title for comparison: lowercase, strip non-alphanumeric, collapse spaces.
+function normTitle(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Parse the TOC page (page 2 in most Word-exported PDFs).
+// TOC lines look like:  "Section Title ................... 12"
+// Returns [{title, pageNum}, ...] sorted in document order.
+function extractTocTitles(allLines) {
+  const seen   = new Set();
+  const titles = [];
+
+  for (const line of allLines) {
+    if (line.page !== 2) continue;
+    const text = line.text.trim();
+    if (!text) continue;
+
+    // Must contain at least 3 consecutive dots (the tab-leader) and end with a page number.
+    // Captures: (everything before the dots) and (the trailing page number).
+    const m = text.match(/^(.+?)\s*\.{3,}.*?(\d+)\s*$/);
+    if (!m) continue;
+
+    const title   = m[1].replace(/\.+\s*$/, '').trim();
+    const pageNum = parseInt(m[2], 10);
+
+    if (!title || title.length < 2)         continue;   // too short
+    if (pageNum < 3 || pageNum > 999)       continue;   // cover/TOC pages or bad match
+    if (title.toLowerCase() === 'contents') continue;   // skip the "Contents" heading itself
+    if (seen.has(normTitle(title)))         continue;   // deduplicate
+
+    seen.add(normTitle(title));
+    titles.push({ title, pageNum });
+  }
+
+  return titles; // already in page-2 reading order, which matches document order
+}
+
+// Use the TOC title list to segment the document.
+// Each section runs from its heading line to the line before the next heading.
+function segmentByToc(allLines, tocTitles) {
+  const sectionStarts = [];
+
+  for (const { title, pageNum } of tocTitles) {
+    const normT   = normTitle(title);
+    const minPage = Math.max(3, pageNum - 1); // content always starts at page 3+
+    const maxPage = pageNum + 2;              // small tolerance for page-numbering drift
+
+    for (let i = 0; i < allLines.length; i++) {
+      const line = allLines[i];
+      if (line.page < minPage || line.page > maxPage) continue;
+      if (normTitle(line.text) === normT) {
+        sectionStarts.push({ title, lineIdx: i });
+        break;
+      }
     }
-  });
+  }
 
-  if (headings.length === 0) return [];
+  // Ensure document order (should already be correct if TOC is ordered)
+  sectionStarts.sort((a, b) => a.lineIdx - b.lineIdx);
 
-  // Segment body text between headings
-  const drafts = headings.map((h, hi) => {
-    const nextHeadingLine = hi + 1 < headings.length ? headings[hi + 1].lineIdx : lines.length;
-    const bodyLines = lines.slice(h.lineIdx + 1, nextHeadingLine);
-    const body = bodyLines.join('\n').trim();
-    const keywords = h.title.toLowerCase()
-      .replace(/[^a-z0-9 ]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 2)
-      .slice(0, 5);
-    return {
-      _draftId: 'draft_' + hi,
-      title: h.title,
-      category: '',
-      keywords: keywords,
-      response: body
-    };
-  });
+  const segments = [];
+  for (let s = 0; s < sectionStarts.length; s++) {
+    const { title, lineIdx } = sectionStarts[s];
+    const endIdx = s + 1 < sectionStarts.length
+      ? sectionStarts[s + 1].lineIdx
+      : allLines.length;
 
-  return drafts.filter(d => d.response.length > 10); // skip empty segments
+    const bodyLines = allLines
+      .slice(lineIdx + 1, endIdx)
+      .map(l => cleanPdfLine(l.text.trim()))
+      .filter(t => t && !isPdfBoilerplate(t));
+
+    const body = bodyLines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+
+    segments.push({
+      _draftId:  'draft_' + segments.length,
+      title,
+      category:  'Operations',
+      keywords:  normTitle(title).split(' ').filter(w => w.length > 2).slice(0, 5),
+      response:  body || '(No content extracted — review and complete manually.)'
+    });
+  }
+
+  return segments;
+}
+
+// Clean a raw pdf.js text line: replace Wingdings/Symbol private-use glyphs with bullet char.
+function cleanPdfLine(text) {
+  // Private Use Area (U+E000–U+F8FF) — Wingdings/Symbol font glyphs
+  // Common mappings: U+F0B7 = Wingdings bullet, U+F0FC = Wingdings checkmark, etc.
+  return text
+    .replace(/[\uE000-\uF8FF]/g, '• ')  // any PUA glyph → bullet
+    .replace(/[\u2022\u2023\u25CF\u25BA\u25E6\u2013\u2014]/g, '• ')  // common dingbat bullets
+    .replace(/^[ℵℶℷℸ]\s*/g, '• ')        // aleph/beth symbols used as Wingdings bullets in Word
+    .replace(/\s{2,}/g, ' ')             // collapse multiple spaces left by glyph removal
+    .trim();
+}
+
+// Lines that are structural/boilerplate in training manuals — never content
+const PDF_BOILERPLATE_RE = [
+  /^trained$/i,
+  /name\s*signature\s*date/i,      // table header row, spaced or unspaced
+  /^night\s+training\s+manual/i,
+  /^contents$/i,
+  /^\d+$/,                         // standalone page numbers
+  /^[a-d]\.$/i,                    // lone single-letter sub-step labels (a. b. c. d.)
+  // Note: i. ii. iii. etc are NOT filtered — they are valid numbered sub-steps
+];
+
+function isPdfBoilerplate(text) {
+  return PDF_BOILERPLATE_RE.some(re => re.test(text.trim()));
+}
+
+function segmentByFontSize(allLines, headingThreshold) {
+  const segments = [];
+  let currentTitle = null;
+  let bodyLines   = [];
+
+  function flush() {
+    if (!currentTitle) return;
+    const body = bodyLines
+      .filter(l => !isPdfBoilerplate(l))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    if (body.length > 10) {
+      segments.push({
+        _draftId: 'draft_' + segments.length,
+        title: currentTitle,
+        category: '',
+        keywords: currentTitle.toLowerCase()
+          .replace(/[^a-z0-9 ]/g, ' ')
+          .split(/\s+/)
+          .filter(w => w.length > 2)
+          .slice(0, 5),
+        response: body
+      });
+    }
+    bodyLines = [];
+  }
+
+  for (const line of allLines) {
+    const text = line.text.trim();
+    if (!text) continue;
+    if (isPdfBoilerplate(text)) continue;
+
+    // Skip TOC page lines (pages 1–2) that end with a number — "Section name ... 3"
+    if (line.page <= 2 && /\d+$/.test(text)) continue;
+
+    const isHeading = line.height >= headingThreshold && text.length < 120;
+
+    if (isHeading) {
+      flush();
+      currentTitle = text;
+    } else if (currentTitle) {
+      bodyLines.push(text);
+    }
+    // Text before the first detected heading (cover page etc.) is silently skipped
+  }
+
+  flush(); // emit final segment
+  return segments;
 }
 
 function renderPdfDrafts() {
@@ -1298,20 +1468,41 @@ function deleteDraft(idx) {
 
 function addDraftsToScripts() {
   if (pdfDrafts.length === 0) { closeModal('pdfReviewModal'); return; }
+
+  let added = 0, updated = 0;
+
   pdfDrafts.forEach(draft => {
-    scriptItems.push({
-      id:       nextScriptId(scriptItems),
-      title:    draft.title,
-      category: draft.category,
-      keywords: draft.keywords,
-      response: draft.response
-    });
+    // Look for an existing script with the same title (case-insensitive)
+    const normDraft = draft.title.trim().toLowerCase();
+    const existing  = scriptItems.find(s => s.title.trim().toLowerCase() === normDraft);
+
+    if (existing) {
+      // Overwrite the content of the existing script (preserves its id and position)
+      existing.category = draft.category;
+      existing.keywords = draft.keywords;
+      existing.response = draft.response;
+      updated++;
+    } else {
+      scriptItems.push({
+        id:       nextScriptId(scriptItems),
+        title:    draft.title,
+        category: draft.category,
+        keywords: draft.keywords,
+        response: draft.response
+      });
+      added++;
+    }
   });
+
   renderScripts();
   markDirty();
   closeModal('pdfReviewModal');
   switchTab('scripts');
-  showToast(pdfDrafts.length + ' scripts added from PDF', 'success');
+
+  const parts = [];
+  if (added)   parts.push(added   + ' added');
+  if (updated) parts.push(updated + ' updated');
+  showToast('PDF import: ' + parts.join(', '), 'success');
   pdfDrafts = [];
 }
 

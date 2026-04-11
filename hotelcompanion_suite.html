@@ -995,6 +995,18 @@
       padding: 0 2px;
     }
     .msg.user .msg-time { text-align: right; }
+    .chat-bullet {
+      display: block;
+      padding-left: 14px;
+      text-indent: -14px;
+      line-height: 1.5;
+    }
+    .chat-step {
+      display: block;
+      padding-left: 22px;
+      text-indent: -22px;
+      line-height: 1.5;
+    }
     .typing-msg { margin-bottom: 14px; }
     .typing-dots {
       display: inline-flex;
@@ -3541,7 +3553,18 @@ function updateAiStatusBadge() {
 
 function markdownToHtml(text) {
   let h = escapeHtml(text);
+  // Bold
   h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Bullet lines: lines starting with • or - or * (as a list marker)
+  h = h.replace(/(^|\n)([ \t]*)[•\-\*] (.+)/g, (_, pre, indent, content) => {
+    const pad = indent.length > 0 ? ' style="margin-left:' + (indent.length * 8) + 'px"' : '';
+    return (pre === '\n' ? '<br>' : '') + '<span class="chat-bullet"' + pad + '>• ' + content + '</span>';
+  });
+  // Numbered list lines: "1. text" "i. text" "ii. text" etc.
+  h = h.replace(/(^|\n)([ \t]*)([ivxlcdm]+\.|\d+[.)]|[a-h]\.)([ \t]+)(.+)/gi, (_, pre, indent, num, sp, content) => {
+    const pad = indent.length > 0 ? ' style="margin-left:' + (indent.length * 8) + 'px"' : '';
+    return (pre === '\n' ? '<br>' : '') + '<span class="chat-step"' + pad + '><strong>' + num + '</strong> ' + content + '</span>';
+  });
   h = h.replace(/\n/g, '<br>');
   return h;
 }
