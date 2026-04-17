@@ -1243,10 +1243,11 @@
     /* Paper layer structure */
     #signBgLayer  { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: 0; }
     #signOvlLayer { position: absolute; inset: 0; z-index: 1; }
-    #signContent  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8%; text-align: center; gap: 4%; z-index: 2; }
-    #signLogoPreview { max-width: 35%; max-height: 20%; object-fit: contain; }
-    #signBodyEl { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; line-height: 1.2; word-break: break-word; color: #000; }
-    #signSubEl  { font-family: 'DM Sans', sans-serif; word-break: break-word; margin-top: 2%; color: #000; }
+    #signContent  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8%; z-index: 2; overflow: hidden; box-sizing: border-box; gap: 4%; }
+    #signLogoPreview { max-width: 50%; max-height: 22%; object-fit: contain; flex-shrink: 0; }
+    #signTextWrap { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; overflow: hidden; gap: 3%; }
+    #signBodyEl { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; line-height: 1.1; word-break: break-word; overflow-wrap: break-word; color: #000; width: 100%; box-sizing: border-box; text-align: center; }
+    #signSubEl  { font-family: 'DM Sans', sans-serif; word-break: break-word; overflow-wrap: break-word; color: #000; width: 100%; box-sizing: border-box; text-align: center; line-height: 1.35; }
     .colour-swatch-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
     .colour-swatch {
       width: 26px;
@@ -1490,7 +1491,14 @@
       #section-signs .sign-controls { display: none; }
       #section-signs .sign-preview-outer { position: static; }
       .sign-preview-wrap { transform: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
-      #signPaper { box-shadow: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
+      /* Use actual paper mm sizes at print — avoids logo/text scaling off 100vw/100vh */
+      #signPaper { box-shadow: none !important; position: fixed !important; top: 0 !important; left: 0 !important; }
+      body[data-sign-page="a4-portrait"]  #signPaper { width: 210mm !important; height: 297mm !important; }
+      body[data-sign-page="a4-landscape"] #signPaper { width: 297mm !important; height: 210mm !important; }
+      body[data-sign-page="a3-portrait"]  #signPaper { width: 297mm !important; height: 420mm !important; }
+      body[data-sign-page="a3-landscape"] #signPaper { width: 420mm !important; height: 297mm !important; }
+      /* Logo: cap to a sensible fixed size in print so it never dominates the layout */
+      #signLogoPreview { max-width: 60mm !important; max-height: 35mm !important; }
 
       /* Daily Info Board print */
       /* Named page for A3 landscape — overrides the default @page only when #section-board is printed */
@@ -2785,7 +2793,7 @@
         </div>
         <div class="form-group">
           <label for="signSubText">Sub-body Text</label>
-          <input type="text" id="signSubText" value="Please present ID at the front desk." maxlength="120" oninput="updateSignPreview()">
+          <input type="text" id="signSubText" value="Please present ID at the front desk." maxlength="240" oninput="updateSignPreview()">
         </div>
         <div class="form-group">
           <label for="signSubColour">Sub-body Text Colour</label>
@@ -2804,8 +2812,10 @@
             <div id="signOvlLayer" style="background:transparent;"></div>
             <div id="signContent">
               <img id="signLogoPreview" src="hotelLogo.jpg" alt="Logo" onload="signDefaultLogoLoaded()" onerror="this.style.display='none';">
-              <div id="signBodyEl">Authorized Personnel Only</div>
-              <div id="signSubEl">Please present ID at the front desk.</div>
+              <div id="signTextWrap">
+                <div id="signBodyEl">Authorized Personnel Only</div>
+                <div id="signSubEl">Please present ID at the front desk.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -3137,9 +3147,9 @@
     <details class="help-card">
       <summary><span class="help-icon">💾</span> Data Persistence Toggle</summary>
       <div class="help-card-body">
-        <p>The <strong>Data Persistence</strong> toggle is in the sidebar below the navigation. It defaults to <strong>Off</strong>.</p>
-        <p><strong>When OFF (default):</strong> Session data (checklist ticks, notes, Night Log entries) is held in memory only. Closing or reloading the tab loses that data. This is the right setting for a <strong>shared terminal</strong> — the next person who opens the app starts with a clean slate.</p>
-        <p><strong>When ON:</strong> Session data is saved to this browser's localStorage and restored if you reload. Use this when <strong>you are the only person using this PC</strong> during your shift and want protection against accidental reloads.</p>
+        <p>The <strong>Data Persistence</strong> toggle is in the sidebar below the navigation. It defaults to <strong>On</strong>.</p>
+        <p><strong>When OFF:</strong> Session data (checklist ticks, notes, Night Log entries) is held in memory only. Closing or reloading the tab loses that data. This is the right setting for a <strong>shared terminal</strong> — the next person who opens the app starts with a clean slate.</p>
+        <p><strong>When ON (default):</strong> Session data is saved to this browser's localStorage and restored if you reload. Use this when <strong>you are the only person using this PC</strong> during your shift and want protection against accidental reloads.</p>
         <p>The following is <strong>always saved</strong> regardless of this toggle:</p>
         <ul>
           <li>Staff profile (name, role, shift type)</li>
@@ -4850,27 +4860,41 @@ function updateSignPreview() {
 }
 
 function autoScaleSignText() {
-  const paper  = document.getElementById('signPaper');
-  const bodyEl = document.getElementById('signBodyEl');
-  const subEl  = document.getElementById('signSubEl');
-  if (!paper || !bodyEl) return;
+  const textWrap = document.getElementById('signTextWrap');
+  const bodyEl   = document.getElementById('signBodyEl');
+  const subEl    = document.getElementById('signSubEl');
+  if (!textWrap || !bodyEl) return;
 
-  const maxH = paper.clientHeight * 0.45;
-  const maxW = paper.clientWidth  * 0.85;
+  // If section is hidden, dimensions are 0 — skip (showSection will re-trigger)
+  if (!textWrap.clientHeight) return;
 
+  const hasSubText = subEl && subEl.style.display !== 'none';
+
+  // Reset both to minimum and force a reflow so overflow state is cleared
   bodyEl.style.fontSize = '10px';
-  for (let size = 10; size <= 500; size += 2) {
-    bodyEl.style.fontSize = `${size}px`;
-    if (bodyEl.scrollHeight > maxH || bodyEl.scrollWidth > maxW) {
-      bodyEl.style.fontSize = `${size - 2}px`;
+  if (hasSubText) subEl.style.fontSize = '10px';
+  void textWrap.offsetHeight;
+
+  let size = 10;
+  const MAX = 500;
+
+  // Grow both together until the text wrapper overflows
+  while (size < MAX) {
+    const overflowsH = textWrap.scrollHeight > textWrap.clientHeight;
+    const overflowsW = bodyEl.scrollWidth   > textWrap.clientWidth ||
+                       (hasSubText && subEl.scrollWidth > textWrap.clientWidth);
+    if (overflowsH || overflowsW) {
+      size = Math.max(10, size - 2);
       break;
     }
+    size += 2;
+    bodyEl.style.fontSize = `${size}px`;
+    if (hasSubText) subEl.style.fontSize = `${Math.max(10, Math.round(size * 0.42))}px`;
   }
 
-  if (subEl && subEl.style.display !== 'none') {
-    const mainSize = parseInt(bodyEl.style.fontSize, 10) || 48;
-    subEl.style.fontSize = `${Math.max(16, Math.round(mainSize * 0.45))}px`;
-  }
+  // Apply final safe sizes
+  bodyEl.style.fontSize = `${size}px`;
+  if (hasSubText) subEl.style.fontSize = `${Math.max(10, Math.round(size * 0.42))}px`;
 }
 
 function updateSignScale() {
