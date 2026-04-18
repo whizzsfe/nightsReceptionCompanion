@@ -2680,7 +2680,7 @@
       <button class="modal-close" onclick="closeModal('signPrintModal')" aria-label="Close">×</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Island, Chrome and Edge remember your last print settings. When the dialog opens, make sure these match:</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">The page size and orientation below will be set automatically. In the print dialog, verify these match and set <strong style="color:var(--text);">Margins</strong> to <strong style="color:var(--text);">None</strong>:</p>
       <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:14px;">
           <span style="color:var(--muted);">Paper size</span>
@@ -5002,15 +5002,32 @@ function removeSignLogo() {
 }
 
 function printSign() {
-  // Chrome/Edge persist paper size in their own settings store and ignore @page { size }
-  // once a user has changed it. We can't override that — so show a modal with the
-  // exact settings to enter, then open the print dialog.
-  document.body.dataset.signPage = `${signState.size.toLowerCase()}-${signState.orient}`;
+  const size   = signState.size;   // 'A4' or 'A3'
+  const orient = signState.orient; // 'portrait' or 'landscape'
+
+  // Inject a @page size rule as the very last stylesheet so it wins the cascade.
+  // Named @page rules and earlier @page rules are overridden by whichever comes last.
+  let overrideStyle = document.getElementById('signPrintOverride');
+  if (!overrideStyle) {
+    overrideStyle = document.createElement('style');
+    overrideStyle.id = 'signPrintOverride';
+    document.body.appendChild(overrideStyle);
+  }
+  overrideStyle.textContent = `@media print { @page { size: ${size} ${orient}; margin: 0; } }`;
+
+  // Remove the override after printing so other sections print normally
+  window.addEventListener('afterprint', function cleanup() {
+    const el = document.getElementById('signPrintOverride');
+    if (el) el.textContent = '';
+    window.removeEventListener('afterprint', cleanup);
+  });
+
+  document.body.dataset.signPage = `${size.toLowerCase()}-${orient}`;
 
   const sizeEl   = document.getElementById('signPrintModalSize');
   const orientEl = document.getElementById('signPrintModalOrient');
-  if (sizeEl)   sizeEl.textContent   = signState.size;
-  if (orientEl) orientEl.textContent = signState.orient.charAt(0).toUpperCase() + signState.orient.slice(1);
+  if (sizeEl)   sizeEl.textContent   = size;
+  if (orientEl) orientEl.textContent = orient.charAt(0).toUpperCase() + orient.slice(1);
 
   openModal('signPrintModal');
 }
