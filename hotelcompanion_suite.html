@@ -3267,10 +3267,9 @@
         <p>There are two text areas in this section:</p>
         <ul>
           <li><strong>Shift Notes</strong> — your working scratch pad for the current shift. Use it for anything you want to track mid-shift that doesn't need to be in the Night Log.</li>
-          <li><strong>Handover Notes</strong> — what you want to pass on to the next shift. This text is queued for the next person when you press <strong>End Shift</strong>.</li>
+          <li><strong>Handover Notes</strong> — what you want to pass on to the next shift. Write what the incoming team needs to know, then click <strong>Print Handover</strong> before you leave.</li>
         </ul>
-        <p>The <strong>Incoming Handover</strong> panel (read-only) shows the handover left by the previous shift. The same text also appears as a banner on the Dashboard.</p>
-        <p>Click <strong>Print Handover</strong> to print a formatted sheet — the sidebar and navigation are hidden automatically.</p>
+        <p>Click <strong>Print Handover</strong> to print a formatted handover sheet — the sidebar and navigation are hidden automatically.</p>
         <div class="help-note">Notes are only saved between page reloads if <strong>Persist Data</strong> is on. With the toggle off, reloading the page will lose any unsaved notes.</div>
       </div>
     </details>
@@ -3391,6 +3390,91 @@
         </ul>
         <p>To <strong>import your night operations PDF</strong>: AI Scripts tab → Import from PDF → select the file → review draft scripts → export.</p>
         <p>To <strong>load back a file you previously exported</strong>: click <strong>Import / Load Existing</strong> in the editor and select the <code>.js</code> file.</p>
+      </div>
+    </details>
+
+    <!-- Night Rota & Contacts -->
+    <details class="help-card">
+      <summary><span class="help-icon">👥</span> Night Rota &amp; Contacts</summary>
+      <div class="help-card-body">
+        <p>The <strong>Night Rota &amp; Contacts</strong> section has two tabs:</p>
+        <ul>
+          <li><strong>Tonight &amp; Contacts</strong> — see who is on shift tonight (pulled from the rota planner), manage on-call contacts, and list emergency/property numbers (alarm company, lift engineer, maintenance, etc.).</li>
+          <li><strong>Rota Planner</strong> — a rolling 14-night grid where a supervisor assigns night staff to each shift date. Add your team to the staff list, then select names into each shift slot.</li>
+        </ul>
+        <p>The rota is saved to and loaded from your <strong>shared OneDrive folder</strong>. Set the folder up on the Dashboard first. The file is named <code>nightRota.json</code> and is shared across all PCs that point to the same folder.</p>
+        <p><strong>Editing permissions:</strong> Only staff with the role <em>Night Supervisor</em> can save changes. Other roles see a read-only view.</p>
+        <p>Use the <strong>Print</strong> button to produce a clean printed rota — all navigation chrome is hidden automatically.</p>
+        <div class="help-tip">Keep on-call contacts up to date at the start of each week so the night team always has the right numbers without hunting through emails.</div>
+        <div class="help-note">The rota file lives on OneDrive, not in this browser. Clearing browser data does not remove it — but losing access to the OneDrive folder will.</div>
+      </div>
+    </details>
+
+    <!-- Group Check-in -->
+    <details class="help-card">
+      <summary><span class="help-icon">🏨</span> Group Check-in</summary>
+      <div class="help-card-body">
+        <p>The <strong>Group Check-in</strong> tool generates a print-ready check-in sheet for group arrivals — coach parties, sports teams, event delegates, or any multi-room booking.</p>
+        <ul>
+          <li>Enter the <strong>Date</strong> and <strong>Group / Tour Name</strong> at the top.</li>
+          <li>Optionally upload your <strong>hotel logo</strong> for a branded header.</li>
+          <li>Add guest rows one at a time with <strong>+ Add Guest</strong>, or paste a full list of names into the <strong>Bulk Import</strong> modal (one name per line).</li>
+          <li>Each row has fields for: Name, Room, Email, Car Registration, and Signature.</li>
+          <li>Toggle <strong>Portrait / Landscape</strong> to match the paper you want to print on.</li>
+        </ul>
+        <p>Click <strong>Print</strong> — only the check-in table is printed; all app chrome disappears.</p>
+        <div class="help-tip">Prepare the sheet during a quiet moment before the group arrives so the desk is ready when the coach pulls up.</div>
+      </div>
+    </details>
+
+    <!-- Sign Generator -->
+    <details class="help-card">
+      <summary><span class="help-icon">🪧</span> Sign Generator</summary>
+      <div class="help-card-body">
+        <p>Design and print professional notices without leaving the app — no design software needed.</p>
+        <ul>
+          <li><strong>Paper size</strong> — A4 or A3.</li>
+          <li><strong>Orientation</strong> — Portrait or Landscape.</li>
+          <li><strong>Background</strong> — pick a colour from the palette <em>or</em> upload a background image. Use the opacity slider to overlay a colour wash over the image.</li>
+          <li><strong>Logo</strong> — optional upload shown in the top-left corner.</li>
+          <li><strong>Body Text</strong> — the main message, with a colour picker for the text colour.</li>
+          <li><strong>Sub-body Text</strong> — a smaller line below (e.g. a phone number or instruction), also with its own colour picker.</li>
+        </ul>
+        <p>The live preview updates as you type. Click <strong>Print</strong> when ready — the preview fills the page and all app chrome is hidden.</p>
+        <div class="help-tip">Common uses: "Lift Out of Order", "Pool Closed — Maintenance", "Reception — Please Ring Bell", "No Entry — Staff Only".</div>
+        <div class="help-note">In the browser print dialog, set <strong>Margins to None</strong> and tick <strong>Print backgrounds</strong> so coloured backgrounds print correctly.</div>
+      </div>
+    </details>
+
+    <!-- Daily Info Board -->
+    <details class="help-card">
+      <summary><span class="help-icon">📋</span> Daily Info Board</summary>
+      <div class="help-card-body">
+        <p>The <strong>Daily Info Board</strong> mirrors your physical back-office board. Fill it in at the start of the shift and print it for the team.</p>
+        <ul>
+          <li><strong>7-Night Stats Grid</strong> — a rolling seven-night table. Set the date and fill in: Rooms Sold, Guests in House, Occupancy %, Room Revenue, Total Revenue, ADR, RevPAR, Arrivals, Departures, and F&amp;B Covers. Column headers auto-populate from the selected date.</li>
+          <li><strong>VIP Guests</strong> — up to 10 rows for Name, Code, and Room.</li>
+          <li><strong>Staff Assignments</strong> — Pool Responsible, Pool Tester, and First Aider for AM / PM / Night shifts.</li>
+          <li><strong>Principle of the Day</strong> — rotates automatically by day of the week (Be Caring, Be A Storyteller, Be Extraordinary, Be Open-Minded…).</li>
+          <li><strong>Special Notes / Info</strong> — free text for anything else the team needs to know tonight.</li>
+        </ul>
+        <p>Board data is saved when <strong>Persist Data</strong> is on, so you can reload without losing your entries. Click <strong>Reset</strong> to clear all fields and start fresh for a new night.</p>
+        <div class="help-tip">Set paper to <strong>A3 Landscape</strong> in the print dialog for the best fit. A4 Landscape also works if A3 is not available.</div>
+      </div>
+    </details>
+
+    <!-- Display Theme -->
+    <details class="help-card">
+      <summary><span class="help-icon">🌗</span> Display Theme</summary>
+      <div class="help-card-body">
+        <p>The <strong>Display Theme</strong> switcher sits at the bottom of the sidebar. Three modes are available:</p>
+        <ul>
+          <li><strong>🌙 Dark</strong> — the default. Best for night shifts in dimly lit reception areas.</li>
+          <li><strong>☀ Light</strong> — a light cream-and-gold theme. Useful in bright offices or during day handover meetings.</li>
+          <li><strong>🖥 Auto</strong> — follows your operating system's light/dark preference and switches automatically if that setting changes.</li>
+        </ul>
+        <p>Your choice is saved to this device and restored each time you open the app.</p>
+        <div class="help-tip">Dark is recommended for overnight use — it reduces glare and is easier on the eyes during a long shift.</div>
       </div>
     </details>
 
