@@ -1388,8 +1388,87 @@
       30%            { transform: translateY(-6px); }
     }
 
+    /* ============================================================
+       ROTA & CONTACTS STYLES
+    ============================================================ */
+    .rota-card { padding: 16px 18px; }
+    .rota-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+    .rota-card-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.04em; color: var(--gold); margin: 0; }
+    .rota-date-badge { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); background: var(--card2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; }
+    .rota-actions-top { display: flex; gap: 8px; }
+
+    /* Tonight panel */
+    .rota-tonight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+    .rota-tonight-item { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .rota-tonight-item.rota-dm-highlight { border-color: var(--gold-dim); }
+    .rota-tonight-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .rota-tonight-name { font-size: 18px; font-weight: 600; color: var(--text); }
+    .rota-empty-tonight { padding: 12px 0; display: flex; flex-direction: column; gap: 12px; }
+
+    /* Contact rows */
+    .rota-contact-header { display: grid; grid-template-columns: 1fr 1fr 1fr 32px; gap: 6px; padding: 0 0 6px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .rota-emergency-header { grid-template-columns: 2fr 1fr 1fr 32px; }
+    .rota-contact-row { display: grid; grid-template-columns: 1fr 1fr 1fr 32px; gap: 6px; margin-bottom: 8px; align-items: center; }
+    .rota-emergency-row { display: grid; grid-template-columns: 2fr 1fr 1fr 32px; gap: 6px; margin-bottom: 8px; align-items: center; }
+    .rota-input { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 10px; outline: none; width: 100%; box-sizing: border-box; transition: border-color 0.2s; }
+    .rota-input:focus { border-color: var(--gold); }
+    .rota-del-btn { width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* Staff chips */
+    .rota-staff-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; min-height: 28px; }
+    .staff-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--card2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 10px; font-size: 13px; color: var(--text); }
+    .chip-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
+    .chip-remove:hover { color: var(--red); }
+    .rota-add-staff-row { display: flex; gap: 8px; align-items: center; }
+
+    /* Date range row */
+    .rota-date-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+    .rota-date-field { display: flex; flex-direction: column; gap: 4px; }
+    .rota-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+    input[type="date"].rota-input { color-scheme: dark; }
+
+    /* Week strip */
+    .rota-week-strip-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .rota-week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .week-strip-day { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 6px; text-align: center; min-width: 0; }
+    .week-strip-day.today { border-color: var(--gold); background: rgba(212,168,67,0.08); }
+    .week-strip-day-label { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--gold); letter-spacing: 0.05em; }
+    .week-strip-day.today .week-strip-day-label { color: var(--gold-light); }
+    .week-strip-day-date { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 4px; }
+    .week-strip-names { font-size: 11px; color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .week-strip-dm { font-size: 10px; color: var(--gold-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Rota grid — weekly layout */
+    .rota-grid-card { padding: 14px 16px; }
+    .rota-week-block { margin-bottom: 18px; }
+    .rota-week-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .rota-week-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 12px; }
+    .rota-empty-cell { background: var(--dark) !important; opacity: 0.4; }
+    .rota-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 12px; }
+    .rota-table th, .rota-table td,
+    .rota-week-table th, .rota-week-table td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; }
+    .rota-table th { background: var(--card2); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rota-table th.rota-today-col { background: rgba(212,168,67,0.15); color: var(--gold); }
+    .rota-table td.rota-today-col { background: rgba(212,168,67,0.07); }
+    .rota-row-label { background: var(--card2) !important; color: var(--text) !important; font-weight: 600; text-align: left !important; min-width: 110px; font-size: 11px !important; }
+    .rota-dm-row td { border-top: 2px solid var(--gold-dim); }
+    .rota-access-banner { background: rgba(212,168,67,0.08); border: 1px solid var(--gold-dim); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .rota-dm-badge { font-size: 9px; color: var(--gold-dim); font-family: 'DM Mono', monospace; margin-top: 2px; white-space: nowrap; }
+    .rota-cell-input { background: transparent; border: none; color: var(--text); font-size: 12px; width: 100%; min-width: 80px; outline: none; text-align: center; font-family: 'DM Sans', sans-serif; padding: 2px; }
+    .rota-cell-input:focus { background: rgba(212,168,67,0.08); border-radius: 3px; }
+    .rota-date-num { font-size: 9px; font-weight: normal; }
+
+    /* Rota tab panels */
+    .rota-tab-panel { display: none; }
+    .rota-tab-panel.active { display: block; }
+
+    /* ============================================================ */
+
     /* --- PRINT STYLESHEET --- */
     @media print {
+      .no-print { display: none !important; }
+
       .sidebar,
       .topbar,
       .floating-btn,
@@ -1598,6 +1677,22 @@
       body[data-sign-page="a4-landscape"] #signPaper { page: sign-a4-landscape; }
       body[data-sign-page="a3-portrait"]  #signPaper { page: sign-a3-portrait;  }
       body[data-sign-page="a3-landscape"] #signPaper { page: sign-a3-landscape; }
+
+      /* Rota print — grid only (no-print class hides everything else) */
+      @page rota-page { size: A4 landscape; margin: 10mm; }
+      #section-rota { page: rota-page; color: #000; }
+      .rota-grid-card { background: #fff !important; border: 1px solid #ccc !important; padding: 8px !important; }
+      .rota-card-title { color: #000 !important; }
+      .rota-week-block { margin-bottom: 12px; break-inside: avoid; }
+      .rota-week-label { color: #555 !important; }
+      .rota-week-table th, .rota-week-table td { border-color: #999 !important; color: #000 !important; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .rota-week-table th { background: #f0f0f0 !important; color: #333 !important; }
+      .rota-week-table th.rota-today-col { background: #ffe9a0 !important; color: #000 !important; }
+      .rota-week-table td.rota-today-col { background: #fffaed !important; }
+      .rota-row-label { background: #f5f5f5 !important; color: #000 !important; }
+      .rota-cell-input { color: #000 !important; background: transparent !important; }
+      .rota-dm-badge { color: #555 !important; }
+      .rota-empty-cell { background: #eee !important; opacity: 1 !important; }
     }
 
     /* --- RESPONSIVE (<=768px) --- */
@@ -1755,6 +1850,9 @@
     </div>
     <div class="nav-item" data-section="board" onclick="showSection('board',this)" role="button" tabindex="0" aria-label="Daily Info Board">
       <span class="nav-icon">📅</span> Daily Info Board
+    </div>
+    <div class="nav-item" data-section="rota" onclick="showSection('rota',this)" role="button" tabindex="0" aria-label="Night Rota and Contacts">
+      <span class="nav-icon">🗓️</span> Night Rota
     </div>
 
     <div class="tools-divider"></div>
@@ -2161,6 +2259,13 @@
       <div>
         <div class="quick-action-title">Resume Shift from File</div>
         <div class="quick-action-desc">Load a session saved on another device</div>
+      </div>
+    </div>
+    <div class="quick-action-card" onclick="showSection('rota', document.querySelector('[data-section=rota]'))" role="button" tabindex="0" aria-label="View tonight's team rota">
+      <div class="quick-action-icon">🗓️</div>
+      <div>
+        <div class="quick-action-title">Tonight's Team</div>
+        <div class="quick-action-desc" id="dashRotaSummary">No rota loaded</div>
       </div>
     </div>
   </div>
@@ -3245,6 +3350,154 @@
   </div><!-- /help-accordion -->
 </section>
 
+<!-- -----------------------------------------------------------
+     SECTION: NIGHT ROTA & CONTACTS
+----------------------------------------------------------- -->
+<section class="section" id="section-rota" aria-label="Night Rota and Contacts">
+  <div class="flex-between mb-12 no-print">
+    <div>
+      <div class="section-heading">Night Rota &amp; Contacts</div>
+      <div class="section-sub">Tonight's team, on-call contacts, and shift planner. Saved to your shared OneDrive folder.</div>
+    </div>
+    <div class="rota-actions-top no-print">
+      <button class="btn btn-gold" id="saveRotaBtn" onclick="saveRota()" aria-label="Save rota to OneDrive folder">&#128190; Save to Folder</button>
+      <button class="btn btn-ghost" onclick="printRota()" aria-label="Print rota">&#128424;&#65039; Print</button>
+    </div>
+  </div>
+
+  <!-- Folder nudge -->
+  <div class="card autosave-nudge no-print" id="rotaFolderNudge" style="display:none" role="note" aria-label="OneDrive folder not configured">
+    <div>
+      <h3>&#128193; Set Up OneDrive Folder First</h3>
+      <p>The rota is saved to and loaded from your shared OneDrive folder. Set up the folder on the Dashboard first, then come back to plan the rota.</p>
+    </div>
+    <div class="autosave-nudge-actions">
+      <button class="btn btn-gold" onclick="setupAutoSaveFolder()" aria-label="Choose OneDrive folder">Choose Folder</button>
+    </div>
+  </div>
+
+  <!-- Role access banner -->
+  <div id="rotaAccessBanner" style="display:none" class="rota-access-banner no-print" role="alert" aria-live="polite">
+    <span>&#128274;</span> <strong>Read-only view.</strong> Only a <em>Night Supervisor</em> can edit and save the rota. Update your role in your profile if this is you.
+  </div>
+
+  <!-- Tab Buttons -->
+  <div class="checklist-tabs no-print" role="tablist" aria-label="Rota tabs">
+    <button class="tab-btn rota-tab-btn active" data-tab="tonight" onclick="switchRotaTab('tonight')" role="tab" aria-selected="true">Tonight &amp; Contacts</button>
+    <button class="tab-btn rota-tab-btn" data-tab="planner" onclick="switchRotaTab('planner')" role="tab" aria-selected="false">Rota Planner</button>
+  </div>
+
+  <!-- ===== TAB: TONIGHT & CONTACTS ===== -->
+  <div class="rota-tab-panel no-print active" data-tab="tonight">
+
+    <!-- Tonight's Team -->
+    <div class="card rota-card mb-12">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">&#127769; Tonight's Team</h3>
+        <span class="rota-date-badge" id="rotaTonightDate"></span>
+      </div>
+      <div id="rotaTonightPanel">
+        <p class="muted-text" style="padding:12px 0">Loading rota&hellip;</p>
+      </div>
+    </div>
+
+    <!-- On-Call Contacts -->
+    <div class="card rota-card mb-12">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">&#128222; On-Call Contacts</h3>
+        <button class="btn btn-ghost btn-sm no-print" onclick="addContactRow()" aria-label="Add on-call contact">+ Add</button>
+      </div>
+      <div class="rota-contact-header no-print">
+        <span>Role</span><span>Name</span><span>Mobile / Number</span><span></span>
+      </div>
+      <div id="rotaOnCallList"></div>
+    </div>
+
+    <!-- Emergency & Property Numbers -->
+    <div class="card rota-card">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">&#128680; Emergency &amp; Property Numbers</h3>
+        <button class="btn btn-ghost btn-sm no-print" onclick="addEmergencyRow()" aria-label="Add emergency number">+ Add</button>
+      </div>
+      <p class="section-sub no-print" style="margin-bottom:10px">Police non-emergency, alarm company, maintenance on-call, lift engineer, etc.</p>
+      <div class="rota-contact-header rota-emergency-header no-print">
+        <span>Label</span><span>Contact Name</span><span></span>Number</span><span></span>
+      </div>
+      <div id="rotaEmergencyList"></div>
+    </div>
+
+  </div><!-- /tonight tab -->
+
+  <!-- ===== TAB: ROTA PLANNER ===== -->
+  <div class="rota-tab-panel" data-tab="planner">
+
+    <!-- Staff Base List -->
+    <div class="card rota-card mb-12 no-print">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">&#128101; Night Staff</h3>
+        <span class="section-sub">Names appear as options in the Night Staff rows of the grid.</span>
+      </div>
+      <div id="rotaStaffChips" class="rota-staff-chips"></div>
+      <div class="rota-add-staff-row">
+        <input type="text" id="rotaNewStaffInput" class="rota-input" placeholder="Add staff member name&hellip;" aria-label="New staff member name" onkeydown="if(event.key==='Enter')addStaffChip()">
+        <button class="btn btn-gold btn-sm" onclick="addStaffChip()" aria-label="Add staff member">+ Add</button>
+      </div>
+    </div>
+
+    <!-- DM Names List -->
+    <div class="card rota-card mb-12 no-print">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">&#128084; Duty Managers</h3>
+        <span class="section-sub">Names appear as options in the Duty Manager row only.</span>
+      </div>
+      <div id="rotaDmChips" class="rota-staff-chips"></div>
+      <div class="rota-add-staff-row">
+        <input type="text" id="rotaNewDmInput" class="rota-input" placeholder="Add duty manager name&hellip;" aria-label="New duty manager name" onkeydown="if(event.key==='Enter')addDmChip()">
+        <button class="btn btn-gold btn-sm" onclick="addDmChip()" aria-label="Add duty manager">+ Add</button>
+      </div>
+    </div>
+
+    <!-- Date Range + Generate -->
+    <div class="card rota-card mb-12 no-print">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">&#128197; Date Range</h3>
+      </div>
+      <div class="rota-date-row">
+        <div class="rota-date-field">
+          <label for="rotaStartDate" class="rota-label">From</label>
+          <input type="date" id="rotaStartDate" class="rota-input" aria-label="Rota start date">
+        </div>
+        <div class="rota-date-field">
+          <label for="rotaEndDate" class="rota-label">To</label>
+          <input type="date" id="rotaEndDate" class="rota-input" aria-label="Rota end date">
+        </div>
+        <button class="btn btn-gold" onclick="generateRotaGrid()" aria-label="Generate rota grid">Generate Grid</button>
+      </div>
+    </div>
+
+    <!-- Rest of Week Strip -->
+    <div class="rota-week-strip-wrap mb-12 no-print">
+      <div class="rota-card-header" style="margin-bottom:8px">
+        <h3 class="rota-card-title" style="font-size:13px">This Week at a Glance</h3>
+      </div>
+      <div id="rotaWeekStrip" class="rota-week-strip"></div>
+    </div>
+
+    <!-- Rota Grid -->
+    <div class="card rota-card rota-grid-card">
+      <div class="rota-card-header">
+        <h3 class="rota-card-title">Shift Grid</h3>
+        <span class="section-sub" id="rotaGridRange"></span>
+      </div>
+      <div id="rotaGridContainer">
+        <p class="muted-text" style="padding:16px 0">Select a date range above and click <strong>Generate Grid</strong> to start planning.</p>
+      </div>
+    </div>
+
+  </div><!-- /planner tab -->
+
+</section>
+
     </div><!-- /content -->
   </main><!-- /main -->
 </div><!-- /app -->
@@ -3273,6 +3526,7 @@ const sectionTitles = {
   checkin:    'GROUP CHECK-IN',
   signs:      'SIGN GENERATOR',
   board:      'DAILY INFO BOARD',
+  rota:       'NIGHT ROTA & CONTACTS',
   help:       'HELP & GUIDE'
 };
 
@@ -3316,6 +3570,11 @@ function showSection(id, navEl) {
   if (id === 'signs') {
     document.body.dataset.signPage = `${signState.size.toLowerCase()}-${signState.orient}`;
     requestAnimationFrame(() => requestAnimationFrame(autoScaleSignText));
+  }
+
+  // Rota section: lazy-load from OneDrive folder on first visit
+  if (id === 'rota') {
+    initRotaSection();
   }
 
   closeSidebar();
@@ -3569,6 +3828,10 @@ function saveProfile() {
   localStorage.setItem('shiftCompanion_staffRole',  staffRole);
   localStorage.setItem('shiftCompanion_staffShift', staffShift);
   updateSidebarStaffCard();
+  // Re-apply rota access in case role changed
+  if (document.getElementById('section-rota')?.classList.contains('active')) {
+    applyRotaAccessControl();
+  }
   closeModal('profileModal');
 }
 
@@ -5809,6 +6072,562 @@ async function scanDirForShiftFiles(dirHandle, results) {
   }
 }
 
+// =============================================================
+// ROTA & CONTACTS
+// =============================================================
+
+const ROTA_FILENAME = 'hotelcompanion_rota.json';
+
+let rotaData = {
+  version:  1,
+  staff:    [],
+  dmStaff:  [],
+  rota:     { startDate: null, endDate: null, nights: [] },
+  contacts: { onCall: [], emergency: [] }
+};
+
+// ---- File I/O ----
+
+async function loadRotaFromFolder() {
+  if (!autoSaveFolderHandle) return false;
+  try {
+    const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') return false;
+    const fh   = await autoSaveFolderHandle.getFileHandle(ROTA_FILENAME);
+    const text = await (await fh.getFile()).text();
+    const data = JSON.parse(text);
+    if (!data || data.version !== 1) return false;
+    rotaData = {
+      version:  1,
+      staff:    Array.isArray(data.staff)    ? data.staff    : [],
+      rota:     data.rota     || { startDate: null, endDate: null, nights: [] },
+      contacts: data.contacts || { onCall: [], emergency: [] }
+    };
+    if (!Array.isArray(rotaData.contacts.onCall))     rotaData.contacts.onCall    = [];
+    if (!Array.isArray(rotaData.contacts.emergency))  rotaData.contacts.emergency = [];
+    if (!Array.isArray(rotaData.rota.nights))         rotaData.rota.nights        = [];
+    return true;
+  } catch { return false; }
+}
+
+async function saveRotaToFolder() {
+  if (!autoSaveFolderHandle) {
+    alert('No folder configured.\nPlease set up your auto-save folder from the Dashboard first, then try saving the rota again.');
+    return false;
+  }
+  try {
+    const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      const req = await autoSaveFolderHandle.requestPermission({ mode: 'readwrite' });
+      if (req !== 'granted') { alert('Folder permission denied.'); return false; }
+    }
+    const fh       = await autoSaveFolderHandle.getFileHandle(ROTA_FILENAME, { create: true });
+    const writable = await fh.createWritable();
+    await writable.write(JSON.stringify(rotaData, null, 2));
+    await writable.close();
+    return true;
+  } catch (e) {
+    console.error('Rota save failed:', e);
+    alert('Rota could not be saved: ' + e.message);
+    return false;
+  }
+}
+
+// ---- Collect from DOM ----
+
+function collectRotaContacts() {
+  rotaData.contacts.onCall = [...document.querySelectorAll('#rotaOnCallList .rota-contact-row')].map(row => ({
+    role:   row.querySelector('.contact-role')?.value   || '',
+    name:   row.querySelector('.contact-name')?.value   || '',
+    mobile: row.querySelector('.contact-mobile')?.value || ''
+  })).filter(r => r.role || r.name || r.mobile);
+
+  rotaData.contacts.emergency = [...document.querySelectorAll('#rotaEmergencyList .rota-emergency-row')].map(row => ({
+    label:  row.querySelector('.emergency-label')?.value  || '',
+    name:   row.querySelector('.emergency-name')?.value   || '',
+    number: row.querySelector('.emergency-number')?.value || ''
+  })).filter(r => r.label || r.number);
+}
+
+function collectRotaGridValues() {
+  document.querySelectorAll('#rotaGridBody td[data-date] .rota-cell-input').forEach(input => {
+    const td    = input.closest('td');
+    const date  = td.dataset.date;
+    // Each input carries its own data-key; fall back to td data-row for legacy cells
+    const key   = input.dataset.key || td.dataset.row;
+    const validKeys = ['staff1','staff2','dutyManager','dmSunAm'];
+    if (!validKeys.includes(key)) return;
+    const night = rotaData.rota.nights.find(n => n.date === date);
+    if (night) night[key] = input.value.trim();
+  });
+}
+
+function collectRotaStaff() {
+  rotaData.staff   = [...document.querySelectorAll('#rotaStaffChips .staff-chip')].map(c => c.dataset.name).filter(Boolean);
+  rotaData.dmStaff = [...document.querySelectorAll('#rotaDmChips .staff-chip')].map(c => c.dataset.name).filter(Boolean);
+}
+
+// ---- Tonight helpers ----
+
+function todayDateStr() {
+  const d   = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+// Night shift ends at 07:00 — before then we are still on the previous day's shift.
+function shiftDateStr() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  // If before 07:00 the shift started on the previous calendar day
+  const base = now.getHours() < 7 ? new Date(now.getTime() - 24 * 60 * 60 * 1000) : now;
+  return `${base.getFullYear()}-${pad(base.getMonth()+1)}-${pad(base.getDate())}`;
+}
+
+function getTonightData() {
+  return rotaData.rota.nights.find(n => n.date === shiftDateStr()) || null;
+}
+
+// ---- Render ----
+
+function renderRotaTonightPanel() {
+  const panel = document.getElementById('rotaTonightPanel');
+  const badge = document.getElementById('rotaTonightDate');
+  if (badge) badge.textContent = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+
+  const tonight = getTonightData();
+  if (panel) {
+    if (!tonight) {
+      panel.innerHTML = `<div class="rota-empty-tonight">
+        <p class="muted-text">No rota entry for tonight. Add shifts in the Rota Planner tab, then save.</p>
+        <button class="btn btn-gold no-print" onclick="switchRotaTab('planner')">Open Rota Planner &#8594;</button>
+      </div>`;
+    } else {
+      const shiftDow    = new Date(shiftDateStr() + 'T00:00:00').getDay();
+      const isSatNight  = shiftDow === 6;
+      const dmOnTonight = shiftDow === 5 || shiftDow === 6;
+      // For Saturday: determine which DM slot is currently active by clock time
+      const nowHour     = new Date().getHours();
+      // Before 07:00 means we're on Sunday morning
+      const isSunAm     = new Date().getHours() < 7 && shiftDow === 6;
+      panel.innerHTML = `<div class="rota-tonight-grid">
+        <div class="rota-tonight-item">
+          <div class="rota-tonight-label">Night Staff 1</div>
+          <div class="rota-tonight-name">${escapeHtml(tonight.staff1 || '\u2014')}</div>
+        </div>
+        <div class="rota-tonight-item">
+          <div class="rota-tonight-label">Night Staff 2</div>
+          <div class="rota-tonight-name">${escapeHtml(tonight.staff2 || '\u2014')}</div>
+        </div>
+        ${isSatNight ? `
+        <div class="rota-tonight-item rota-dm-highlight${isSunAm ? '' : ''}">
+          <div class="rota-tonight-label">DM &mdash; Sat Eve <span class="rota-dm-badge" style="vertical-align:middle">until 23:00</span></div>
+          <div class="rota-tonight-name" style="${isSunAm ? 'opacity:0.45' : ''}">${escapeHtml(tonight.dutyManager || '\u2014')}</div>
+        </div>
+        <div class="rota-tonight-item rota-dm-highlight">
+          <div class="rota-tonight-label">DM &mdash; Sun AM <span class="rota-dm-badge" style="vertical-align:middle">from 06:00</span></div>
+          <div class="rota-tonight-name" style="${!isSunAm ? 'opacity:0.45' : ''}">${escapeHtml(tonight.dmSunAm || '\u2014')}</div>
+        </div>` : dmOnTonight ? `
+        <div class="rota-tonight-item rota-dm-highlight">
+          <div class="rota-tonight-label">Duty Manager <span class="rota-dm-badge" style="vertical-align:middle">until 23:00</span></div>
+          <div class="rota-tonight-name">${escapeHtml(tonight.dutyManager || '\u2014')}</div>
+        </div>` : `
+        <div class="rota-tonight-item" style="opacity:0.5">
+          <div class="rota-tonight-label">Duty Manager</div>
+          <div class="rota-tonight-name" style="font-size:13px;color:var(--muted)">Not on cover tonight</div>
+        </div>`}
+      </div>`;
+    }
+  }
+
+  // Update Dashboard card
+  const dash = document.getElementById('dashRotaSummary');
+  if (dash) {
+    if (!tonight) {
+      dash.textContent = 'No rota loaded';
+    } else {
+      const names = [tonight.staff1, tonight.staff2].filter(Boolean).join(' & ');
+      dash.textContent = names || 'View tonight\'s team';
+    }
+  }
+}
+
+function renderRotaContacts() {
+  const onCallList = document.getElementById('rotaOnCallList');
+  if (onCallList) {
+    const oc = rotaData.contacts.onCall.length ? rotaData.contacts.onCall : [{ role:'Duty Manager', name:'', mobile:'' }];
+    onCallList.innerHTML = oc.map((c, i) => buildContactRow(c, i)).join('');
+  }
+  const emList = document.getElementById('rotaEmergencyList');
+  if (emList) {
+    const em = rotaData.contacts.emergency.length ? rotaData.contacts.emergency : [{ label:'Alarm Company', name:'', number:'' }, { label:'Maintenance On-Call', name:'', number:'' }];
+    emList.innerHTML = em.map((e, i) => buildEmergencyRow(e, i)).join('');
+  }
+}
+
+function buildContactRow(c, i) {
+  return `<div class="rota-contact-row" data-idx="${i}">
+    <input class="rota-input contact-role"   type="text" placeholder="Role (e.g. Duty Manager)" value="${escapeHtml(c.role||'')}"   aria-label="Contact role">
+    <input class="rota-input contact-name"   type="text" placeholder="Name"                      value="${escapeHtml(c.name||'')}"   aria-label="Contact name">
+    <input class="rota-input contact-mobile" type="tel"  placeholder="Mobile / Number"            value="${escapeHtml(c.mobile||'')}" aria-label="Contact mobile">
+    <button class="btn btn-ghost rota-del-btn no-print" onclick="removeContactRow(this)" aria-label="Remove contact">&#10005;</button>
+  </div>`;
+}
+
+function buildEmergencyRow(e, i) {
+  return `<div class="rota-emergency-row" data-idx="${i}">
+    <input class="rota-input emergency-label"  type="text" placeholder="Label (e.g. Alarm Company)" value="${escapeHtml(e.label||'')}"  aria-label="Emergency label">
+    <input class="rota-input emergency-name"   type="text" placeholder="Contact name (optional)"    value="${escapeHtml(e.name||'')}"   aria-label="Emergency contact name">
+    <input class="rota-input emergency-number" type="tel"  placeholder="Number"                      value="${escapeHtml(e.number||'')}" aria-label="Emergency number">
+    <button class="btn btn-ghost rota-del-btn no-print" onclick="removeEmergencyRow(this)" aria-label="Remove emergency contact">&#10005;</button>
+  </div>`;
+}
+
+function addContactRow() {
+  const list = document.getElementById('rotaOnCallList');
+  if (!list) return;
+  list.insertAdjacentHTML('beforeend', buildContactRow({ role:'', name:'', mobile:'' }, list.children.length));
+}
+function removeContactRow(btn) { btn.closest('.rota-contact-row')?.remove(); }
+
+function addEmergencyRow() {
+  const list = document.getElementById('rotaEmergencyList');
+  if (!list) return;
+  list.insertAdjacentHTML('beforeend', buildEmergencyRow({ label:'', name:'', number:'' }, list.children.length));
+}
+function removeEmergencyRow(btn) { btn.closest('.rota-emergency-row')?.remove(); }
+
+// ---- Staff chips ----
+
+function renderRotaDmChips() {
+  const container = document.getElementById('rotaDmChips');
+  if (!container) return;
+  container.innerHTML = (rotaData.dmStaff||[]).map(name =>
+    `<span class="staff-chip" data-name="${escapeHtml(name)}">${escapeHtml(name)}<button class="chip-remove" onclick="removeDmChip(this)" aria-label="Remove ${escapeHtml(name)}">&#215;</button></span>`
+  ).join('');
+}
+
+function addDmChip() {
+  const input = document.getElementById('rotaNewDmInput');
+  const name  = input?.value.trim();
+  if (!name) return;
+  if (!rotaData.dmStaff) rotaData.dmStaff = [];
+  if (!rotaData.dmStaff.includes(name)) {
+    rotaData.dmStaff.push(name);
+    renderRotaDmChips();
+    updateRotaDmDatalist();
+  }
+  if (input) input.value = '';
+}
+
+function removeDmChip(btn) {
+  const chip = btn.closest('.staff-chip');
+  const name = chip?.dataset.name;
+  if (name) { rotaData.dmStaff = (rotaData.dmStaff||[]).filter(s => s !== name); chip.remove(); updateRotaDmDatalist(); }
+}
+
+function updateRotaDmDatalist() {
+  const dl = document.getElementById('rotaDmList');
+  if (dl) dl.innerHTML = (rotaData.dmStaff||[]).map(s => `<option value="${escapeHtml(s)}">`).join('');
+}
+
+function renderRotaStaffChips() {
+  const container = document.getElementById('rotaStaffChips');
+  if (!container) return;
+  container.innerHTML = rotaData.staff.map(name =>
+    `<span class="staff-chip" data-name="${escapeHtml(name)}">${escapeHtml(name)}<button class="chip-remove" onclick="removeStaffChip(this)" aria-label="Remove ${escapeHtml(name)}">&#215;</button></span>`
+  ).join('');
+}
+
+function addStaffChip() {
+  const input = document.getElementById('rotaNewStaffInput');
+  const name  = input?.value.trim();
+  if (!name) return;
+  if (!rotaData.staff.includes(name)) {
+    rotaData.staff.push(name);
+    renderRotaStaffChips();
+    updateRotaDatalist();
+  }
+  if (input) input.value = '';
+}
+
+function removeStaffChip(btn) {
+  const chip = btn.closest('.staff-chip');
+  const name = chip?.dataset.name;
+  if (name) { rotaData.staff = rotaData.staff.filter(s => s !== name); chip.remove(); updateRotaDatalist(); }
+}
+
+function updateRotaDatalist() {
+  const dl = document.getElementById('rotaStaffList');
+  if (dl) dl.innerHTML = rotaData.staff.map(s => `<option value="${escapeHtml(s)}">`).join('');
+}
+
+// ---- Rota grid ----
+
+function generateRotaGrid() {
+  const startVal = document.getElementById('rotaStartDate')?.value;
+  const endVal   = document.getElementById('rotaEndDate')?.value;
+  if (!startVal || !endVal) { alert('Please select both a start date and an end date.'); return; }
+  const start = new Date(startVal + 'T00:00:00');
+  const end   = new Date(endVal   + 'T00:00:00');
+  if (end < start) { alert('End date must be after the start date.'); return; }
+  const days = Math.round((end - start) / 86400000) + 1;
+  if (days > 366) { alert('Range is too long. Please choose up to 1 year (366 days).'); return; }
+
+  rotaData.rota.startDate = startVal;
+  rotaData.rota.endDate   = endVal;
+
+  // Preserve any existing night entries
+  const existing = {};
+  rotaData.rota.nights.forEach(n => { existing[n.date] = n; });
+
+  const pad    = n => String(n).padStart(2, '0');
+  const nights = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    const ds = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    nights.push(existing[ds] || { date: ds, staff1: '', staff2: '', dutyManager: '' });
+  }
+  rotaData.rota.nights = nights;
+
+  renderRotaGrid();
+}
+
+function renderRotaGrid() {
+  const container = document.getElementById('rotaGridContainer');
+  if (!container) return;
+  const nights = rotaData.rota.nights;
+  if (!nights.length) {
+    container.innerHTML = '<p class="muted-text" style="padding:16px 0">Generate a grid above to start planning.</p>';
+    return;
+  }
+
+  const today   = shiftDateStr();
+  const pad     = n => String(n).padStart(2, '0');
+
+  // Index nights by date string for quick lookup
+  const byDate  = {};
+  nights.forEach(n => { byDate[n.date] = n; });
+
+  // Find the Monday on or before the first night
+  const firstDate = new Date(nights[0].date + 'T00:00:00');
+  const lastDate  = new Date(nights[nights.length - 1].date + 'T00:00:00');
+  // dow: 0=Sun,1=Mon,...,6=Sat. Shift so Mon=0
+  const dowMon    = (firstDate.getDay() + 6) % 7; // days since Monday
+  const weekStart = new Date(firstDate);
+  weekStart.setDate(weekStart.getDate() - dowMon);
+
+  const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // Build one table per week
+  const makeDmCell = (n) => {
+    if (!n) return `<td class="rota-empty-cell"></td>`;
+    const dow     = new Date(n.date + 'T00:00:00').getDay();
+    const isToday = n.date === today;
+    if (dow === 6) {
+      const valEve   = n.dutyManager || '';
+      const valSunAm = n.dmSunAm    || '';
+      return `<td data-date="${n.date}" data-row="dutyManager" class="${isToday ? 'rota-today-col' : ''}" style="vertical-align:top">
+        <div class="rota-dm-badge" style="margin-bottom:3px">until 23:00</div>
+        <input class="rota-cell-input" data-key="dutyManager" list="rotaDmList" type="text" value="${escapeHtml(valEve)}" placeholder="\u2014" aria-label="Sat DM until 23:00">
+        <div class="rota-dm-badge" style="margin-top:5px;margin-bottom:3px">Sun from 06:00</div>
+        <input class="rota-cell-input" data-key="dmSunAm" list="rotaDmList" type="text" value="${escapeHtml(valSunAm)}" placeholder="\u2014" aria-label="Sun AM DM">
+      </td>`;
+    }
+    const val      = n.dutyManager || '';
+    const timeNote = dow === 5 ? 'until 23:00' : '';
+    return `<td data-date="${n.date}" data-row="dutyManager" class="${isToday ? 'rota-today-col' : ''}">
+      <input class="rota-cell-input" data-key="dutyManager" list="rotaDmList" type="text" value="${escapeHtml(val)}" placeholder="${timeNote ? '\u2014' : ''}" aria-label="DM for ${n.date}">
+      ${timeNote ? `<div class="rota-dm-badge">${timeNote}</div>` : ''}
+    </td>`;
+  };
+
+  const makeStaffCell = (n, rowKey) => {
+    if (!n) return `<td class="rota-empty-cell"></td>`;
+    const val     = n[rowKey] || '';
+    const isToday = n.date === today;
+    return `<td data-date="${n.date}" data-row="${rowKey}" class="${isToday ? 'rota-today-col' : ''}">
+      <input class="rota-cell-input" list="rotaStaffList" type="text" value="${escapeHtml(val)}" placeholder="\u2014" aria-label="${rowKey} for ${n.date}">
+    </td>`;
+  };
+
+  let weekTables = '';
+  let cursor = new Date(weekStart);
+
+  while (cursor <= lastDate) {
+    // Build the 7 days of this week (Mon–Sun)
+    const week = [];
+    for (let d = 0; d < 7; d++) {
+      const ds = `${cursor.getFullYear()}-${pad(cursor.getMonth()+1)}-${pad(cursor.getDate())}`;
+      // Only include days that are within our rota range
+      const inRange = cursor >= firstDate && cursor <= lastDate;
+      week.push(inRange ? (byDate[ds] || null) : null);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // Week label: Mon date – Sun date
+    const wStart = new Date(cursor); wStart.setDate(wStart.getDate() - 7);
+    const wEnd   = new Date(cursor); wEnd.setDate(wEnd.getDate() - 1);
+    const wLabel = `${wStart.toLocaleDateString('en-GB', {day:'numeric',month:'short'})} – ${wEnd.toLocaleDateString('en-GB', {day:'numeric',month:'short'})}`;
+
+    // Header row: Mon–Sun with date
+    const headerRow = week.map((n, i) => {
+      const isToday = n?.date === today;
+      const dayLabel = DAY_NAMES[i];
+      // Compute actual date for this slot
+      const slotDate = new Date(wStart); slotDate.setDate(slotDate.getDate() + i);
+      const dateLabel = slotDate.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+      return `<th class="${isToday ? 'rota-today-col' : ''}${!n ? ' rota-empty-cell' : ''}">${dayLabel}<br><span class="rota-date-num">${dateLabel}</span></th>`;
+    }).join('');
+
+    weekTables += `
+      <div class="rota-week-block">
+        <div class="rota-week-label">${wLabel}</div>
+        <table class="rota-table rota-week-table">
+          <thead><tr><th class="rota-row-label">Role</th>${headerRow}</tr></thead>
+          <tbody>
+            <tr><td class="rota-row-label">Staff 1</td>${week.map(n => makeStaffCell(n, 'staff1')).join('')}</tr>
+            <tr><td class="rota-row-label">Staff 2</td>${week.map(n => makeStaffCell(n, 'staff2')).join('')}</tr>
+            <tr class="rota-dm-row no-print"><td class="rota-row-label">DM</td>${week.map(n => makeDmCell(n)).join('')}</tr>
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  const datalist = `<datalist id="rotaStaffList">${rotaData.staff.map(s => `<option value="${escapeHtml(s)}">`).join('')}</datalist>
+    <datalist id="rotaDmList">${(rotaData.dmStaff||[]).map(s => `<option value="${escapeHtml(s)}">`).join('')}</datalist>`;
+
+  const rangeLabel = document.getElementById('rotaGridRange');
+  if (rangeLabel) rangeLabel.textContent = `${nights[0].date} \u2013 ${nights[nights.length-1].date}`;
+
+  container.innerHTML = datalist + `<div id="rotaGridBody">${weekTables}</div>`;
+
+  renderRotaWeekStrip();
+}
+
+function renderRotaWeekStrip() {
+  const strip = document.getElementById('rotaWeekStrip');
+  if (!strip) return;
+  const pad   = n => String(n).padStart(2, '0');
+  // Start from the current shift date (yesterday if before 07:00)
+  const now   = new Date();
+  const base  = now.getHours() < 7 ? new Date(now.getTime() - 24 * 60 * 60 * 1000) : now;
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d    = new Date(base);
+    d.setDate(d.getDate() + i);
+    const ds   = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const night = rotaData.rota.nights.find(n => n.date === ds);
+    const label = i === 0 ? 'Tonight' : d.toLocaleDateString('en-GB', { weekday: 'short' });
+    const date  = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const names = night ? ([night.staff1, night.staff2].filter(Boolean).join(' & ') || '—') : '—';
+    const dm      = night?.dutyManager || '';
+    const dmSunAm = night?.dmSunAm    || '';
+    const dow     = d.getDay();
+    const dmNight = dow === 5 || dow === 6;
+    const dmLine  = dow === 6
+      ? (dm || dmSunAm ? `<div class="week-strip-dm">${dm ? 'Eve: ' + escapeHtml(dm) : ''}${dm && dmSunAm ? ' / ' : ''}${dmSunAm ? 'AM: ' + escapeHtml(dmSunAm) : ''}</div>` : '')
+      : (dm && dmNight ? `<div class="week-strip-dm">DM: ${escapeHtml(dm)}</div>` : '');
+    html += `<div class="week-strip-day${i === 0 ? ' today' : ''}">
+      <div class="week-strip-day-label">${label}</div>
+      <div class="week-strip-day-date">${date}</div>
+      <div class="week-strip-names">${escapeHtml(names)}</div>
+      ${dmLine}
+    </div>`;
+  }
+  strip.innerHTML = html;
+}
+
+// ---- Tab switching ----
+
+function switchRotaTab(tab) {
+  document.querySelectorAll('.rota-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+    b.setAttribute('aria-selected', b.dataset.tab === tab);
+  });
+  document.querySelectorAll('.rota-tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === tab));
+}
+
+// ---- Save + Print ----
+
+async function saveRota() {
+  collectRotaContacts();
+  collectRotaGridValues();
+  collectRotaStaff();
+  const ok = await saveRotaToFolder();
+  if (ok) {
+    const btn = document.getElementById('saveRotaBtn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '&#10003; Saved!';
+      btn.disabled    = true;
+      setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+    }
+    renderRotaTonightPanel();
+    renderRotaWeekStrip();
+  }
+}
+
+function printRota() { window.print(); }
+
+// ---- Init called when section is first navigated to ----
+
+function applyRotaAccessControl() {
+  const isSupervisor = staffRole === 'Night Supervisor';
+  const banner = document.getElementById('rotaAccessBanner');
+  if (banner) banner.style.display = isSupervisor ? 'none' : '';
+
+  // Disable/enable all rota inputs and save button
+  const section = document.getElementById('section-rota');
+  if (!section) return;
+  section.querySelectorAll('input, select, textarea').forEach(el => {
+    el.disabled = !isSupervisor;
+  });
+  const saveBtn = document.getElementById('saveRotaBtn');
+  if (saveBtn) saveBtn.style.display = isSupervisor ? '' : 'none';
+  // Add/remove buttons (contacts, staff, emergency)
+  section.querySelectorAll('.btn-ghost:not(.no-print-keep), .btn-gold').forEach(btn => {
+    if (btn.id !== 'saveRotaBtn') btn.style.pointerEvents = isSupervisor ? '' : 'none';
+  });
+  section.querySelectorAll('.rota-del-btn, .chip-remove').forEach(btn => {
+    btn.style.display = isSupervisor ? '' : 'none';
+  });
+  section.querySelectorAll('button.btn-ghost[onclick*="addContact"], button.btn-ghost[onclick*="addEmergency"], button.btn-ghost[onclick*="addStaff"]').forEach(btn => {
+    btn.style.display = isSupervisor ? '' : 'none';
+  });
+}
+
+let rotaLoaded = false;
+async function initRotaSection() {
+  if (rotaLoaded) { renderRotaTonightPanel(); renderRotaWeekStrip(); applyRotaAccessControl(); return; }
+  rotaLoaded = true;
+
+  // Nudge if no folder
+  const nudge = document.getElementById('rotaFolderNudge');
+  if (nudge) nudge.style.display = autoSaveFolderHandle ? 'none' : '';
+
+  const loaded = await loadRotaFromFolder();
+  renderRotaTonightPanel();
+  renderRotaContacts();
+  renderRotaStaffChips();
+  renderRotaDmChips();
+
+  if (rotaData.rota.startDate) {
+    const si = document.getElementById('rotaStartDate');
+    if (si) si.value = rotaData.rota.startDate;
+  }
+  if (rotaData.rota.endDate) {
+    const ei = document.getElementById('rotaEndDate');
+    if (ei) ei.value = rotaData.rota.endDate;
+  }
+  if (rotaData.rota.nights.length) renderRotaGrid();
+  renderRotaWeekStrip();
+  applyRotaAccessControl();
+}
+
+// =============================================================
+
 // -- INIT --
 function init() {
   loadState();
@@ -5919,6 +6738,14 @@ function init() {
       requestAnimationFrame(() => requestAnimationFrame(autoScaleSignText));
     }, 150);
   });
+
+  // Rota: attempt silent pre-load so Dashboard card is populated on first visit
+  (async () => {
+    if (autoSaveFolderHandle) {
+      await loadRotaFromFolder();
+      renderRotaTonightPanel();
+    }
+  })();
 }
 
 document.addEventListener('DOMContentLoaded', init);
