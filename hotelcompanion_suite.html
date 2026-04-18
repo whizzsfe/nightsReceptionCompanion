@@ -1632,8 +1632,8 @@
       #signLogoPreview { max-width: 60mm !important; max-height: 35mm !important; }
 
       /* Daily Info Board print */
-      /* Named page for A3 landscape — overrides the default @page only when #section-board is printed */
-      @page board-page { size: A3 landscape; margin: 8mm; }
+      /* Named page for A4 landscape */
+      @page board-page { size: A4 landscape; margin: 6mm; }
       @page { size: A4 portrait; margin: 12mm; }
       #section-board { page: board-page; }
       /* Hide UI chrome */
@@ -1641,7 +1641,7 @@
       #section-board .section-sub { display: none !important; }
       #section-board .board-top-row { display: none !important; }
       /* Remove overflow / min-width constraints so table reflows to printable area */
-      #section-board .board-table-wrap { overflow: visible !important; margin-bottom: 6px !important; }
+      #section-board .board-table-wrap { overflow: visible !important; margin-bottom: 4px !important; }
       #section-board .board-table { min-width: 0 !important; }
       /* Colour adjustments */
       #section-board { color: #000; }
@@ -1657,11 +1657,11 @@
       .board-table td.row-header { background: #f5f5f5 !important; color: #444 !important; }
       .principle-widget { border-color: #ccc !important; background: #f9f9f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .principle-text { color: #000; }
-      /* Compact font sizes & padding to fit A3 with minimum margins */
-      .board-table th { font-size: 8px !important; padding: 4px 3px !important; line-height: 1.3 !important; }
-      .board-table td { font-size: 9px !important; padding: 1px 2px !important; }
-      .board-table td.row-header { font-size: 8px !important; padding: 3px 6px !important; min-width: 80px !important; white-space: nowrap !important; }
-      .board-date-sub { font-size: 7px !important; }
+      /* Compact font sizes & padding to fit A4 landscape with small margins */
+      .board-table th { font-size: 6.5px !important; padding: 3px 2px !important; line-height: 1.2 !important; }
+      .board-table td { font-size: 7.5px !important; padding: 1px 2px !important; }
+      .board-table td.row-header { font-size: 6.5px !important; padding: 2px 4px !important; min-width: 68px !important; white-space: nowrap !important; }
+      .board-date-sub { font-size: 6px !important; }
       /* Strip all browser input chrome — no borders, no dark backgrounds, plain text only */
       .board-input,
       .board-info-input,
@@ -1679,51 +1679,50 @@
         box-shadow: none !important;
         color: #000 !important;
       }
-      .board-input { font-size: 9px !important; padding: 2px 1px !important; }
-      .board-info-input { font-size: 9px !important; padding: 2px 4px !important; }
-      .vip-input { font-size: 8px !important; padding: 1px 3px !important; }
-      .board-staff-input { font-size: 9px !important; padding: 2px 4px !important; }
+      .board-input { font-size: 7.5px !important; padding: 1px 1px !important; }
+      .board-info-input { font-size: 7.5px !important; padding: 1px 3px !important; }
+      .vip-input { font-size: 7px !important; padding: 1px 2px !important; }
+      .board-staff-input { font-size: 7.5px !important; padding: 1px 3px !important; }
       .board-info-table td { padding: 1px 0 !important; }
-      .board-info-table td.info-label { font-size: 8px !important; padding: 2px 6px !important; white-space: nowrap !important; }
-      .vip-table th { font-size: 8px !important; padding: 3px 4px !important; }
+      .board-info-table td.info-label { font-size: 6.5px !important; padding: 2px 4px !important; white-space: nowrap !important; }
+      .vip-table th { font-size: 6.5px !important; padding: 2px 3px !important; }
       .vip-table td { padding: 1px !important; }
-      .staff-assign-table th { font-size: 8px !important; padding: 4px 6px !important; }
+      .staff-assign-table th { font-size: 6.5px !important; padding: 3px 4px !important; }
       .staff-assign-table td { padding: 1px 2px !important; }
-      .staff-assign-table td.row-label { font-size: 8px !important; padding: 3px 5px !important; white-space: nowrap !important; }
-      .board-section-title { font-size: 8px !important; margin-bottom: 4px !important; padding: 2px 0 2px 6px !important; color: #333; border-left-color: #999; }
+      .staff-assign-table td.row-label { font-size: 6.5px !important; padding: 2px 4px !important; white-space: nowrap !important; }
+      .board-section-title { font-size: 7px !important; margin-bottom: 3px !important; padding: 2px 0 2px 5px !important; color: #333; border-left-color: #999; }
       /* Switch flex rows to CSS grid — Chrome print engine respects grid columns reliably */
       #section-board .board-mid-row {
         display: grid !important;
-        grid-template-columns: 250px 1fr !important;
-        gap: 8px !important;
-        margin-bottom: 8px !important;
+        grid-template-columns: 195px 1fr !important;
+        gap: 6px !important;
+        margin-bottom: 6px !important;
         page-break-inside: avoid !important;
       }
       #section-board .board-staff-row {
         display: grid !important;
-        grid-template-columns: 1fr 130px !important;
-        gap: 8px !important;
-        margin-bottom: 8px !important;
+        grid-template-columns: 1fr 100px !important;
+        gap: 6px !important;
+        margin-bottom: 6px !important;
         page-break-inside: avoid !important;
       }
       /* Constrain both grid children */
-      #section-board .board-daily-info { width: 250px !important; max-width: 250px !important; }
+      #section-board .board-daily-info { width: 195px !important; max-width: 195px !important; }
       #section-board .board-daily-info .board-info-table { width: 100% !important; table-layout: fixed !important; }
-      #section-board .board-vip-section { justify-self: end !important; width: 210px !important; min-width: 0 !important; }
-      .vip-table { font-size: 8px !important; }
+      #section-board .board-vip-section { justify-self: end !important; width: 160px !important; min-width: 0 !important; }
+      .vip-table { font-size: 7px !important; }
       .vip-table th:first-child { width: 50% !important; }
       .vip-table th:not(:first-child) { width: 25% !important; }
-      .principle-widget { padding: 10px 8px !important; min-height: 60px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .principle-text { font-size: 16px !important; }
-      .principle-label { font-size: 8px !important; margin-bottom: 4px !important; }
-      /* Placeholder text invisible on print */
+      .principle-widget { padding: 8px 6px !important; min-height: 50px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .principle-text { font-size: 13px !important; }
+      .principle-label { font-size: 6.5px !important; margin-bottom: 3px !important; }
+      /* Notes textarea — A4 compact */
+      #boardNotes { border: 1px solid #999 !important; font-size: 8px !important; padding: 4px 6px !important; resize: none !important; }
       .board-input::placeholder,
       .board-info-input::placeholder,
       .vip-input::placeholder,
       .board-staff-input::placeholder,
       #boardNotes::placeholder { color: transparent !important; }
-      /* Notes textarea — covered by the shared rule above, just keep sizing */
-      #boardNotes { border: 1px solid #999 !important; font-size: 10px !important; padding: 6px 10px !important; resize: none !important; }
       /* Sign generator: data-sign-page attribute selects the correct pre-declared named page */
       body[data-sign-page="a4-portrait"]  #signPaper { page: sign-a4-portrait;  }
       body[data-sign-page="a4-landscape"] #signPaper { page: sign-a4-landscape; }
@@ -3350,9 +3349,9 @@
           <li><strong>Shift Checklist</strong> — Shift Checklist section → Print</li>
           <li><strong>Group Check-in List</strong> — Group Check-in → Print (portrait or landscape)</li>
           <li><strong>Sign Generator</strong> — Sign Generator → Print (A4 or A3)</li>
-          <li><strong>Daily Info Board</strong> — Daily Info Board → Print (landscape, A3 size recommended)</li>
+          <li><strong>Daily Info Board</strong> — Daily Info Board → Print (A4 landscape)</li>
         </ul>
-        <div class="help-tip">In the browser print dialog, set <strong>Margins to None</strong> and tick <strong>Print backgrounds</strong> for the best results. For the Daily Info Board, set paper size to A3 landscape.</div>
+        <div class="help-tip">In the browser print dialog, set <strong>Margins to None</strong> and tick <strong>Print backgrounds</strong> for the best results. For the Daily Info Board, select <strong>A4 Landscape</strong> in the print dialog.</div>
       </div>
     </details>
 
@@ -3459,7 +3458,7 @@
           <li><strong>Special Notes / Info</strong> — free text for anything else the team needs to know tonight.</li>
         </ul>
         <p>Board data is saved when <strong>Persist Data</strong> is on, so you can reload without losing your entries. Click <strong>Reset</strong> to clear all fields and start fresh for a new night.</p>
-        <div class="help-tip">Set paper to <strong>A3 Landscape</strong> in the print dialog for the best fit. A4 Landscape also works if A3 is not available.</div>
+        <div class="help-tip">Set paper to <strong>A4 Landscape</strong> in the print dialog for the best fit.</div>
       </div>
     </details>
 
