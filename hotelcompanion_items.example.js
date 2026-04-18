@@ -3,6 +3,10 @@
 // Copy this file and rename to hotelcompanion_items.js to use as a starter,
 // or use hotelcompanion_editor.html to customise and export hotelcompanion_items.js.
 //
+// COPYRIGHT: © 2026 Night Receptionist Companion Suite
+// Base design: YSEKventures — ysekventures.gumroad.com
+// Implemented & enhanced: Whizzsfe Web Services — whizzsfe.com
+//
 // Schema fields:
 //   id             — stable unique string, never changed after creation
 //   label          — task title shown as the checklist item heading

@@ -1,6 +1,10 @@
 ﻿<!--
   DELIVERY VERSION: A
   RATIONALE: Single file distributed via OneDrive sync folder, opened via file:// on company PCs. Offline-first, no server required.
+
+  COPYRIGHT: © 2026 Night Receptionist Companion Suite
+  Base design: YSEKventures — ysekventures.gumroad.com
+  Implemented & enhanced: Whizzsfe Web Services — whizzsfe.com
 --><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -307,6 +311,19 @@
     .theme-btn:hover { border-color: var(--gold); color: var(--gold); }
     .theme-btn.active { background: rgba(var(--gold-rgb),0.15); border-color: var(--gold); color: var(--gold); }
     .theme-btn:focus { outline: 2px solid var(--gold); }
+    /* Sidebar copyright footer */
+    .sidebar-copyright {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px 12px 14px;
+      border-top: 1px solid var(--border);
+      line-height: 1.7;
+    }
+    .sidebar-copyright a { color: var(--muted); text-decoration: none; }
+    .sidebar-copyright a:hover { color: var(--gold); }
+    .print-copyright { display: none; }
     .toggle-pill {
       width: 40px;
       height: 22px;
@@ -1744,6 +1761,20 @@
       .rota-cell-input { color: #000 !important; background: transparent !important; }
       .rota-dm-badge { color: #555 !important; }
       .rota-empty-cell { background: #eee !important; opacity: 1 !important; }
+      .print-copyright {
+        display: block !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 8pt;
+        color: #666;
+        border-top: 1px solid #ccc;
+        padding: 4pt 0 3pt;
+        font-family: serif;
+        background: #fff;
+      }
     }
 
     /* --- RESPONSIVE (<=768px) --- */
@@ -2024,6 +2055,12 @@
       <button class="theme-btn" id="themeBtnLight" onclick="setTheme('light')" aria-label="Light theme">☀ Light</button>
       <button class="theme-btn" id="themeBtnAuto"  onclick="setTheme('auto')"  aria-label="Use system theme">🖥 Auto</button>
     </div>
+  </div>
+  <!-- Copyright footer -->
+  <div class="sidebar-copyright no-print">
+    <div>© 2026 Night Receptionist Companion Suite</div>
+    <div>Design: <a href="https://ysekventures.gumroad.com" target="_blank" rel="noopener noreferrer">YSEKventures</a></div>
+    <div>Built by: <a href="https://whizzsfe.com" target="_blank" rel="noopener noreferrer">Whizzsfe Web Services</a></div>
   </div>
 </aside>
 
@@ -7831,5 +7868,9 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', init);
 
 </script>
+<!-- Print-only copyright footer -->
+<div class="print-copyright">
+  © 2026 Night Receptionist Companion Suite &nbsp;|&nbsp; Base design: YSEKventures (ysekventures.gumroad.com) &nbsp;|&nbsp; Implemented &amp; enhanced: Whizzsfe Web Services (whizzsfe.com)
+</div>
 </body>
 </html>

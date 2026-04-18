@@ -5,6 +5,10 @@
 //
 // DELIVERY VERSION: A
 // RATIONALE: Single file distributed via OneDrive sync folder, opened via file:// on company PCs. Offline-first, no server required.
+//
+// COPYRIGHT: © 2026 Night Receptionist Companion Suite
+// Base design: YSEKventures — ysekventures.gumroad.com
+// Implemented & enhanced: Whizzsfe Web Services — whizzsfe.com
 
 window.HOTELCOMPANION_SCRIPTS = {
   version: 1,
