@@ -5,6 +5,7 @@
 # Place the exported files in the same folder as hotelcompanion_suite.html on OneDrive.
 hotelcompanion_items.js
 hotelcompanion_scripts.js
+hotelcompanion_config.js
 
 # OS & editor noise
 .DS_Store

@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="hotelcompanion_config.js" onerror="console.info('hotelcompanion_config.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_items.js" onerror="console.info('hotelcompanion_items.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_scripts.js" onerror="console.info('hotelcompanion_scripts.js not found — using Smart Defaults.')"></script>
   <!-- Sign generator: all 4 page variants declared statically. JS only sets data-sign-page on <body>. -->
@@ -2510,7 +2511,7 @@
   <div class="handover-form" id="handoverFormCard">
 
     <div class="handover-form-header">
-      <img src="hotelLogo.jpg" class="handover-form-logo" alt="Hotel logo" onerror="this.style.display='none'">
+      <img src="hotelLogo.jpg" id="handoverFormLogo" class="handover-form-logo" alt="Hotel logo" onerror="this.style.display='none'">
       <div>
         <div class="handover-form-title">Front Office Nights — Morning Handover</div>
         <div style="font-size:13px;color:var(--muted);font-family:'DM Mono',monospace;" id="printHotelName"></div>
@@ -3909,9 +3910,9 @@
 // -------------------------------------------------------------
 
 // =============================================================
-// SITE CONFIGURATION — edit this line to rename the OneDrive folder
+// SITE CONFIGURATION — loaded from hotelcompanion_config.js if present
 // =============================================================
-const SHIFT_BASE_FOLDER = 'shiftLogs';
+const SHIFT_BASE_FOLDER = window.HOTELCOMPANION_CONFIG?.shiftBaseFolder || 'shiftLogs';
 // =============================================================
 
 // -- Section title map --
@@ -3935,14 +3936,14 @@ const sectionTitles = {
 let staffName    = '';
 let staffRole    = 'Night Auditor';
 let staffShift   = 'Night (10:30pm–7am)';
-let persistData  = true;
+let persistData  = window.HOTELCOMPANION_CONFIG?.persistDefault ?? true;
 let shiftStart   = null;
 let checkState   = {};        // { [itemId]: false | ISO-timestamp-string }
 let checklistTab = 'preAudit';
 let shiftHistory = [];
 let lastCheckInTime = null;
-let currentHotelName = 'Lingfield Park Marriott Hotel & Country Club';
-let brandColour  = '#D4A843';
+let currentHotelName = window.HOTELCOMPANION_CONFIG?.hotelName   || 'Night Hotel';
+let brandColour      = window.HOTELCOMPANION_CONFIG?.brandColour || '#D4A843';
 let brandLogo    = null;
 
 // Night Log state
@@ -4081,9 +4082,9 @@ function loadState() {
   if (histRaw) { try { shiftHistory = JSON.parse(histRaw); } catch(e){} }
 
   // Brand
-  currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || 'Lingfield Park Marriott Hotel & Country Club';
-  brandColour      = localStorage.getItem('shiftCompanion_brandColour')    || '#D4A843';
-  brandLogo        = localStorage.getItem('shiftCompanion_brandLogo')      || null;
+  currentHotelName = localStorage.getItem('shiftCompanion_brandHotelName') || window.HOTELCOMPANION_CONFIG?.hotelName   || 'Night Hotel';
+  brandColour      = localStorage.getItem('shiftCompanion_brandColour')    || window.HOTELCOMPANION_CONFIG?.brandColour || '#D4A843';
+  brandLogo        = localStorage.getItem('shiftCompanion_brandLogo')      || window.HOTELCOMPANION_CONFIG?.logoPath    || null;
 
   // Session (only restore if persist on)
   if (persistData) {
@@ -4351,8 +4352,13 @@ function applyAndSaveBrand() {
       localStorage.setItem('shiftCompanion_brandLogo', brandLogo);
       const si = document.getElementById('sidebarLogoImg');
       if (si) { si.src = brandLogo; si.style.display = 'block'; }
+      // Save config after logo is loaded (async)
+      saveConfigToFolder();
     };
     reader.readAsDataURL(logoInput.files[0]);
+  } else {
+    // No new logo uploaded — save config immediately
+    saveConfigToFolder();
   }
 
   applyBrandColour(brandColour);
@@ -4390,8 +4396,25 @@ function applyBrandOnLoad() {
   if (brandColour) applyBrandColour(brandColour);
   if (currentHotelName) applyBrandName(currentHotelName);
   if (brandLogo) {
+    // Sidebar
     const si = document.getElementById('sidebarLogoImg');
     if (si) { si.src = brandLogo; si.style.display = 'block'; }
+    // Handover print header
+    const hl = document.getElementById('handoverFormLogo');
+    if (hl) { hl.src = brandLogo; hl.style.display = ''; }
+    // Group Check-in print logo + toolbar preview
+    const cl = document.getElementById('checkinPrintLogo');
+    if (cl) { cl.src = brandLogo; cl.style.display = ''; }
+    const cp = document.getElementById('checkinLogoPreview');
+    if (cp) { cp.src = brandLogo; cp.style.display = ''; }
+    // Sign Generator — seed signLogoImage so updateSignPreview() uses it
+    signLogoImage = brandLogo;
+    const sl = document.getElementById('signLogoPreview');
+    if (sl) sl.src = brandLogo;
+    const st = document.getElementById('signLogoThumb');
+    const sw = document.getElementById('signLogoThumbWrap');
+    if (st) st.src = brandLogo;
+    if (sw) sw.style.display = 'block';
   }
 }
 
@@ -5666,10 +5689,11 @@ function removeSignBgImage() {
 }
 
 function signDefaultLogoLoaded() {
-  // hotelLogo.jpg loaded successfully — show the remove button
+  // hotelLogo.jpg loaded successfully — track it in signLogoImage if not already set by brandLogo
+  if (!signLogoImage) signLogoImage = 'hotelLogo.jpg';
   const thumb = document.getElementById('signLogoThumb');
   const wrap  = document.getElementById('signLogoThumbWrap');
-  if (thumb) thumb.src = 'hotelLogo.jpg';
+  if (thumb) thumb.src = signLogoImage;
   if (wrap)  wrap.style.display = 'block';
 }
 
@@ -6172,6 +6196,60 @@ async function getShiftMonthFolder(rootHandle) {
   const yr   = await base.getDirectoryHandle(year, { create: true });
   const mo   = await yr.getDirectoryHandle(monthFolder, { create: true });
   return mo;
+}
+
+// -- Write hotelcompanion_config.js to the OneDrive folder --
+async function saveConfigToFolder() {
+  try {
+    const rootHandle = autoSaveFolderHandle || await getStoredFolderHandle();
+    if (!rootHandle) {
+      // No folder configured — fall back to a browser download
+      const content = buildConfigFileContent();
+      const blob = new Blob([content], { type: 'text/javascript' });
+      if (window.showSaveFilePicker) {
+        try {
+          const fh = await window.showSaveFilePicker({
+            suggestedName: 'hotelcompanion_config.js',
+            types: [{ description: 'JavaScript file', accept: { 'text/javascript': ['.js'] } }]
+          });
+          const writable = await fh.createWritable();
+          await writable.write(content);
+          await writable.close();
+        } catch (err) {
+          if (err.name !== 'AbortError') fallbackDownload(blob, 'hotelcompanion_config.js');
+        }
+      } else {
+        fallbackDownload(blob, 'hotelcompanion_config.js');
+      }
+      return;
+    }
+    // Folder is set — write directly to root (same level as hotelcompanion_suite.html)
+    const fileHandle = await rootHandle.getFileHandle('hotelcompanion_config.js', { create: true });
+    const writable   = await fileHandle.createWritable();
+    await writable.write(buildConfigFileContent());
+    await writable.close();
+  } catch (err) {
+    console.warn('saveConfigToFolder failed:', err);
+  }
+}
+
+function buildConfigFileContent() {
+  // logoPath: only write a path if the logo is a plain file path (not a base64 data URL)
+  const logoValue = (brandLogo && !brandLogo.startsWith('data:'))
+    ? JSON.stringify(brandLogo)
+    : JSON.stringify(window.HOTELCOMPANION_CONFIG?.logoPath || 'hotelLogo.jpg');
+  return (
+`// hotelcompanion_config.js — generated by Brand Customisation on ${new Date().toLocaleString('en-GB')}
+// Place this file in the same OneDrive folder as hotelcompanion_suite.html.
+window.HOTELCOMPANION_CONFIG = {
+  hotelName:       ${JSON.stringify(currentHotelName)},
+  brandColour:     ${JSON.stringify(brandColour)},
+  logoPath:        ${logoValue},
+  shiftBaseFolder: ${JSON.stringify(window.HOTELCOMPANION_CONFIG?.shiftBaseFolder || SHIFT_BASE_FOLDER)},
+  persistDefault:  ${window.HOTELCOMPANION_CONFIG?.persistDefault ?? true}
+};
+`
+  );
 }
 
 // -- Write JSON to a named file in a directory handle --
