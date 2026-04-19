@@ -85,6 +85,7 @@ function createWindow(htmlFile) {
   // Inject override files after the page has fully loaded.
   // This replicates the <script src="…"> behaviour from the HTML-only version.
   win.webContents.on('did-finish-load', () => {
+    console.log('[main] did-finish-load fired for:', htmlFile);
     for (const filename of OVERRIDE_FILES) {
       const filepath = path.join(EXE_DIR, filename);
       if (fs.existsSync(filepath)) {
@@ -99,6 +100,22 @@ function createWindow(htmlFile) {
         }
       }
     }
+
+    // Override window.print() to route through IPC → webContents.print().
+    win.webContents.executeJavaScript(`
+      (function() {
+        console.log('[print-setup] electronAPI present:', typeof window.electronAPI);
+        if (window.electronAPI) {
+          window.print = function () {
+            console.log('[print] window.print called — routing to IPC');
+            window.electronAPI.printPage();
+          };
+          console.log('[print-setup] window.print override installed');
+        } else {
+          console.warn('[print-setup] window.electronAPI not found — print override skipped');
+        }
+      })();
+    `).catch(err => console.error('[print-setup] executeJavaScript error:', err));
   });
 
   // Open external links in the system browser, not a new Electron window.
@@ -152,6 +169,31 @@ app.whenReady().then(() => {
               const editor = createWindow('hotelcompanion_editor.html');
               editor.setTitle('Night Companion — Content Editor');
             }
+          },
+        },
+        { type: 'separator' },
+        {
+          // Ctrl+P in Electron does NOT call window.print() — it must be
+          // explicitly wired here. This is the guaranteed print path.
+          label: 'Print Current Page',
+          accelerator: 'CmdOrCtrl+P',
+          click(_item, focusedWindow) {
+            if (!focusedWindow) return;
+            console.log('[print] Ctrl+P menu shortcut — calling webContents.print()');
+            focusedWindow.webContents.print(
+              { silent: false, printBackground: true },
+              (success, reason) => {
+                if (!success) console.warn('[print] failed:', reason);
+              }
+            );
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Toggle Developer Tools',
+          accelerator: 'F12',
+          click(_item, focusedWindow) {
+            if (focusedWindow) focusedWindow.webContents.openDevTools({ mode: 'detach' });
           },
         },
       ],
@@ -268,4 +310,23 @@ ipcMain.handle('app:exeDir', () => EXE_DIR);
 // Close the window that sent the message (ipcMain.on, not handle — fire-and-forget)
 ipcMain.on('window:close', (event) => {
   BrowserWindow.fromWebContents(event.sender)?.close();
+});
+
+/** Trigger the native print dialog. Routes window.print() calls from the
+ *  renderer through the main process to avoid Electron 41 / Chromium 146
+ *  user-gesture restrictions on window.print(). */
+ipcMain.handle('window:print', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) { console.warn('[print] No window found for sender'); return; }
+  console.log('[print] IPC received — opening print dialog via webContents.print()');
+  win.webContents.print(
+    { silent: false, printBackground: true },
+    (success, failureReason) => {
+      if (success) {
+        console.log('[print] Print job sent successfully');
+      } else {
+        console.warn('[print] webContents.print failed:', failureReason);
+      }
+    }
+  );
 });

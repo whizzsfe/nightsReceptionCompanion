@@ -54,4 +54,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   /** Close the current window (triggers app quit if it's the last window). */
   closeWindow: () =>
     ipcRenderer.send('window:close'),
+
+  /** Trigger the native print dialog for the current window.
+   *  window.print() is overridden in the renderer to call this so it works
+   *  reliably in Electron 41 / Chromium 146. */
+  printPage: () =>
+    ipcRenderer.invoke('window:print'),
 });

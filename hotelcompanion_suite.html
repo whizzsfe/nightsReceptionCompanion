@@ -2797,7 +2797,7 @@
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm no-print" onclick="loadHistoryFromFolder()" aria-label="Sync history from OneDrive folder">📁 Sync from Folder</button>
-      <button class="btn btn-ghost btn-sm no-print" onclick="window.print()" aria-label="Print shift history report">🖨️ Print Report</button>
+      <button class="btn btn-ghost btn-sm no-print" onclick="triggerPrint()" aria-label="Print shift history report">🖨️ Print Report</button>
       <button class="btn btn-danger btn-sm no-print" id="clearHistoryBtn" aria-label="Clear all shift history">&#128465; Clear</button>
     </div>
   </div>
@@ -3040,7 +3040,7 @@
       <div class="section-heading">Group Check-in</div>
       <div class="section-sub no-print">Print-ready group arrival list.</div>
     </div>
-    <button class="btn btn-gold" onclick="window.print()" aria-label="Print group check-in list">🖨️ Print</button>
+    <button class="btn btn-gold" onclick="triggerPrint()" aria-label="Print group check-in list">🖨️ Print</button>
   </div>
 
   <div class="card mb-16 no-print">
@@ -3127,7 +3127,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('signPrintModal')" aria-label="Cancel">Cancel</button>
-      <button class="btn btn-gold" onclick="closeModal('signPrintModal');setTimeout(()=>window.print(),80);" aria-label="Open print dialog">Open Print Dialog →</button>
+      <button class="btn btn-gold" onclick="closeModal('signPrintModal');setTimeout(()=>triggerPrint(),80);" aria-label="Open print dialog">Open Print Dialog →</button>
     </div>
   </div>
 </div>
@@ -3266,7 +3266,7 @@
     </div>
     <div class="flex-row">
       <button class="btn btn-ghost btn-sm" onclick="resetBoard()" aria-label="Reset board data">&#x21BA; Reset</button>
-      <button class="btn btn-gold btn-sm" onclick="window.print()" aria-label="Print info board">&#x1F5A8;&#xFE0F; Print</button>
+      <button class="btn btn-gold btn-sm" onclick="triggerPrint()" aria-label="Print info board">&#x1F5A8;&#xFE0F; Print</button>
     </div>
   </div>
 
@@ -4050,6 +4050,18 @@
 <script>
 'use strict';
 // -------------------------------------------------------------
+// PRINT HELPER — routes window.print() through Electron IPC when running
+// inside the desktop app (window.electronAPI available), otherwise falls
+// back to the native browser print dialog.
+// -------------------------------------------------------------
+function triggerPrint() {
+  if (window.electronAPI && typeof window.electronAPI.printPage === 'function') {
+    window.electronAPI.printPage();
+  } else {
+    window.print();
+  }
+}
+// -------------------------------------------------------------
 // CHUNK 7 — STATE, NAVIGATION, PERSIST, CLOCK, PROFILE, BRAND
 // -------------------------------------------------------------
 
@@ -4763,7 +4775,7 @@ function printHandover() {
   const staffEl = document.getElementById('handoverPrintStaff');
   if (dateEl)  dateEl.textContent  = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
   if (staffEl) staffEl.textContent = (staffName || '—') + (staffRole ? ' · ' + staffRole : '');
-  window.print();
+  triggerPrint();
 }
 
 // -- Utility --
@@ -7404,7 +7416,7 @@ async function saveRota() {
   }
 }
 
-function printRota() { window.print(); }
+function printRota() { triggerPrint(); }
 
 // ---- Init called when section is first navigated to ----
 
