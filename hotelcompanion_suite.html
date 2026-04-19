@@ -1920,6 +1920,12 @@
         font-family: serif;
         background: #fff;
       }
+      /* Sign Generator prints the sign only — no copyright footer */
+      #section-signs.active ~ .print-copyright,
+      #section-signs.active + .print-copyright,
+      body:has(#section-signs.active) .print-copyright {
+        display: none !important;
+      }
     }
 
     /* --- RESPONSIVE (<=768px) --- */
