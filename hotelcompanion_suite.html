@@ -2841,6 +2841,10 @@
       <div class="history-stat-value" id="hStatTopType" style="font-size:14px;padding-top:6px;">—</div>
       <div class="history-stat-label">Most Common Type</div>
     </div>
+    <div class="history-stat-card">
+      <div class="history-stat-value" id="hStatFloorWalks">—</div>
+      <div class="history-stat-label">Floor Checks Logged</div>
+    </div>
   </div>
 
   <!-- Charts (populated from night log entries across all shifts) -->
@@ -2881,6 +2885,7 @@
       <thead>
         <tr>
           <th>Date</th>
+          <th>Time</th>
           <th>Staff</th>
           <th>Floor</th>
           <th>Category</th>
@@ -4723,7 +4728,7 @@ function renderChecklist(tab) {
     const checked = checkState[item.id];
     const isRestricted = item.dayRestriction && item.dayRestriction !== 'every';
     div.innerHTML = `
-      <div class="check-box ${checked ? 'checked' : ''}" aria-hidden="true">${checked ? '?' : ''}</div>
+      <div class="check-box ${checked ? 'checked' : ''}" aria-hidden="true">${checked ? '✓' : ''}</div>
       <div class="check-item-main">
         <div class="check-label">${escapeHtml(item.label)}</div>
         ${checked ? `<span class="check-time">✓ ${new Date(checked).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>` : ''}
@@ -6052,42 +6057,79 @@ function renderHistory() {
   } else {
     if (empty) empty.classList.add('hidden');
     list.innerHTML = [...filtered].reverse().map(s => {
-      const idx     = shiftHistory.indexOf(s);
-      const date    = s.date       || '—';
-      const staff   = s.staffName  || '—';
-      const role    = s.staffRole  || '—';
-      const hn      = s.handoverNotes  || '';
-      const sn      = s.shiftNotes     || '';
-      const bb      = s.breakfastBags  || '';
-      const tx      = s.handoverTaxis  || '';
-      const wu      = s.wakeUpCalls    || '';
-      const issues  = s.incidentCount ?? 0;
-      const clPct   = s.checklistPct ?? 0;
+      const date      = s.date        || '—';
+      const staff     = s.staffName   || '—';
+      const role      = s.staffRole   || '—';
+      const shift     = s.staffShift  || '';
+      const hn        = s.handoverNotes || '';
+      const sn        = s.shiftNotes    || '';
+      const bb        = s.breakfastBags || '';
+      const tx        = s.handoverTaxis || '';
+      const wu        = s.wakeUpCalls   || '';
+      const clPct     = s.checklistPct  ?? 0;
+      // Use full logEntries where available, fall back to legacy incidents array
+      const logIssues = s.logEntries
+        ? s.logEntries.filter(e => e.type === 'issue')
+        : (s.incidents || []);
+      // Floor walk data — floorWalkState is { floor: walkCount }
+      const fwState    = s.floorWalkState || {};
+      const fwFloors   = Object.keys(fwState).filter(f => (fwState[f] || 0) > 0);
+      const totalWalks = Object.values(fwState).reduce((a, n) => a + (n || 0), 0);
+      // Shift start time
+      const startTime = s.shiftStart
+        ? new Date(s.shiftStart).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        : null;
+      // Lone worker last check-in
+      const checkInTime = s.lastCheckInTime
+        ? new Date(s.lastCheckInTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        : null;
       return `
         <div class="history-entry">
           <div class="history-entry-header">
-            <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span class="history-staff">${escapeHtml(staff)}</span>
               <span class="history-role">${escapeHtml(role)}</span>
+              ${shift ? `<span class="badge badge-muted" style="font-size:10px;">${escapeHtml(shift)}</span>` : ''}
             </div>
             <div class="history-meta">
-              <span>${escapeHtml(date)}</span>
+              <span>${escapeHtml(date)}${startTime ? ` · ${startTime}` : ''}</span>
               <button class="btn btn-ghost btn-sm" onclick="toggleHistoryDetail(this)" aria-label="Expand shift details">▼ Details</button>
             </div>
           </div>
-          <div class="history-stats">
+          <div class="history-stats" style="flex-wrap:wrap;gap:6px 16px;">
             <span>Checklist: <strong>${clPct}%</strong></span>
-            <span>Incidents: <strong>${issues}</strong></span>
+            <span>Incidents: <strong>${logIssues.length}</strong></span>
+            ${totalWalks > 0 ? `<span>Floor Checks: <strong>${totalWalks}</strong> (${fwFloors.length} floor${fwFloors.length !== 1 ? 's' : ''})</span>` : ''}
+            ${checkInTime ? `<span style="color:var(--green);font-size:12px;">✓ Check-in: <strong>${checkInTime}</strong></span>` : ''}
           </div>
           <div class="history-detail hidden">
             ${sn ? `<div class="history-section-label">Shift Notes</div><div class="history-section-body">${escapeHtml(sn)}</div>` : ''}
-            ${hn ? `<div class="history-section-label">Handover Notes</div><div class="history-section-body">${escapeHtml(hn)}</div>` : ''}
-            ${(bb || tx || wu) ? `<div class="history-section-label">Breakfast Bags / Taxis / Wake-up Calls</div><div class="history-section-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-              <div><em style="color:var(--muted);font-size:11px">Breakfast Bags</em><br>${escapeHtml(bb) || '<span style="color:var(--muted)">—</span>'}</div>
-              <div><em style="color:var(--muted);font-size:11px">Taxis</em><br>${escapeHtml(tx) || '<span style="color:var(--muted)">—</span>'}</div>
-              <div><em style="color:var(--muted);font-size:11px">Wake-up Calls</em><br>${escapeHtml(wu) || '<span style="color:var(--muted)">—</span>'}</div>
+            ${hn || s.handoverStaff2 ? `<div class="history-section-label">Handover Notes</div><div class="history-section-body">
+              ${s.handoverStaff2 ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">2nd Staff: <strong style="color:var(--text);">${escapeHtml(s.handoverStaff2)}</strong></div>` : ''}
+              ${hn ? escapeHtml(hn) : ''}
             </div>` : ''}
-            ${!sn && !hn && !bb && !tx && !wu ? '<p style="color:var(--muted)">No notes recorded.</p>' : ''}
+            ${(bb || tx || wu) ? `<div class="history-section-label">Breakfast Bags / Taxis / Wake-up Calls</div>
+              <div class="history-section-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                <div><em style="color:var(--muted);font-size:11px;">Breakfast Bags</em><br>${escapeHtml(bb) || '<span style="color:var(--muted);">—</span>'}</div>
+                <div><em style="color:var(--muted);font-size:11px;">Taxis</em><br>${escapeHtml(tx) || '<span style="color:var(--muted);">—</span>'}</div>
+                <div><em style="color:var(--muted);font-size:11px;">Wake-up Calls</em><br>${escapeHtml(wu) || '<span style="color:var(--muted);">—</span>'}</div>
+              </div>` : ''}
+            ${fwFloors.length > 0 ? `<div class="history-section-label">Floor Walk Results</div>
+              <div class="history-section-body">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  ${fwFloors.map(f => `<span style="padding:4px 10px;border-radius:4px;font-size:12px;font-family:'DM Mono',monospace;background:rgba(76,175,130,0.12);color:var(--green);border:1px solid rgba(76,175,130,0.3);">✓ ${escapeHtml(f)} &times;${fwState[f]}</span>`).join('')}
+                </div>
+              </div>` : ''}
+            ${logIssues.length > 0 ? `<div class="history-section-label">Incidents (${logIssues.length})</div>
+              <div class="history-section-body">
+                ${logIssues.map(e => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
+                  <span class="badge badge-${e.severity === 'high' ? 'red' : e.severity === 'medium' ? 'gold' : 'muted'}" style="font-size:10px;">${escapeHtml(e.severity || '—')}</span>
+                  <strong style="margin-left:6px;">${escapeHtml(e.title || '—')}</strong>
+                  <span style="color:var(--muted);font-size:11px;margin-left:6px;">${escapeHtml(e.floor || '')}${e.category ? ' · ' + escapeHtml(e.category) : ''}</span>
+                  ${e.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px;">${escapeHtml(e.description)}</div>` : ''}
+                </div>`).join('')}
+              </div>` : ''}
+            ${!sn && !hn && !bb && !tx && !wu && logIssues.length === 0 && fwFloors.length === 0 ? '<p style="color:var(--muted);">No notes recorded.</p>' : ''}
           </div>
         </div>`;
     }).join('');
@@ -6105,18 +6147,31 @@ function clearHistoryFilters() {
 }
 
 function renderHistoryCharts(filteredShifts) {
+  const shifts = filteredShifts || shiftHistory;
   const allIssues = [];
-  (filteredShifts || shiftHistory).forEach(s => {
-    (s.incidents || []).forEach(e => { if (e.type === 'issue' || !e.type) allIssues.push({ ...e, _shiftDate: s.date }); });
+  shifts.forEach(s => {
+    const issues = s.logEntries
+      ? s.logEntries.filter(e => e.type === 'issue')
+      : (s.incidents || []);
+    issues.forEach(e => allIssues.push({ ...e, _shiftDate: s.date }));
   });
-  renderBarChart('chartCategory', countBy(allIssues, 'category'),  'Issues by Category');
-  renderBarChart('chartFloor',    countBy(allIssues, 'floor'),     'Issues by Floor');
-  renderBarChart('chartSeverity', countBy(allIssues, 'severity'),  'Issues by Severity');
-  const acData = {
-    'No Incidents': (filteredShifts || shiftHistory).filter(s => (s.incidentCount||0) === 0).length,
-    'Had Incidents': (filteredShifts || shiftHistory).filter(s => (s.incidentCount||0) > 0).length,
-  };
-  renderBarChart('chartAllClear', acData, 'Shifts: Incidents vs Clear');
+  renderBarChart('chartCategory', countBy(allIssues, 'category'), 'Issues by Category');
+  renderBarChart('chartFloor',    countBy(allIssues, 'floor'),    'Issues by Floor');
+  renderBarChart('chartSeverity', countBy(allIssues, 'severity'), 'Issues by Severity');
+  // Floor walk chart — walks per floor across all filtered shifts
+  const floorWalkCounts = {};
+  shifts.forEach(s => {
+    if (s.logEntries) {
+      s.logEntries.filter(e => e.type === 'floor_walk').forEach(e => {
+        if (e.floor) floorWalkCounts[e.floor] = (floorWalkCounts[e.floor] || 0) + 1;
+      });
+    } else {
+      Object.entries(s.floorWalkState || {}).forEach(([floor, count]) => {
+        if (count > 0) floorWalkCounts[floor] = (floorWalkCounts[floor] || 0) + count;
+      });
+    }
+  });
+  renderBarChart('chartAllClear', floorWalkCounts, 'Floor Walks by Floor');
 }
 
 function renderHistoryEntries() {
@@ -6127,7 +6182,10 @@ function renderHistoryEntries() {
 
   const rows = [];
   shiftHistory.forEach(s => {
-    (s.incidents || []).forEach(e => rows.push({ ...e, _shiftDate: s.date, _staffName: s.staffName }));
+    const issues = s.logEntries
+      ? s.logEntries.filter(e => e.type === 'issue')
+      : (s.incidents || []);
+    issues.forEach(e => rows.push({ ...e, _shiftDate: s.date, _staffName: s.staffName }));
   });
 
   const filteredRows = rows.filter(e => {
@@ -6142,16 +6200,22 @@ function renderHistoryEntries() {
     return;
   }
   if (empty) empty.classList.add('hidden');
-  tbody.innerHTML = filteredRows.map(e => `
+  tbody.innerHTML = filteredRows.map(e => {
+    const entryTime = e.timestamp
+      ? new Date(e.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      : '—';
+    return `
     <tr>
       <td style="white-space:nowrap">${escapeHtml(e._shiftDate||'—')}</td>
+      <td style="white-space:nowrap;font-family:'DM Mono',monospace;font-size:12px;">${entryTime}</td>
       <td>${escapeHtml(e._staffName||'—')}</td>
       <td>${escapeHtml(e.floor||'—')}</td>
       <td>${escapeHtml(e.category||'—')}</td>
       <td><span class="badge badge-${e.severity==='high'?'red':e.severity==='medium'?'gold':'muted'}">${e.severity||'—'}</span></td>
       <td>${escapeHtml(e.title||'—')}</td>
       <td><span class="badge ${e.rectified?'badge-green':'badge-muted'}">${e.rectified?'Resolved':'Pending'}</span></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function filterHistoryEntries() {
@@ -6162,7 +6226,7 @@ function toggleHistoryDetail(btn) {
   const detail = btn.closest('.history-entry').querySelector('.history-detail');
   if (!detail) return;
   detail.classList.toggle('hidden');
-  btn.textContent = detail.classList.contains('hidden') ? '? Details' : '? Hide';
+  btn.textContent = detail.classList.contains('hidden') ? '▼ Details' : '▲ Hide';
 }
 
 function updateHistoryStats(filtered) {
@@ -6172,21 +6236,34 @@ function updateHistoryStats(filtered) {
   setEl('hStatShifts', total);
 
   if (total === 0) {
-    setEl('hStatAvgChecklist',  '—');
-    setEl('hStatIncidents',     '—');
-    setEl('hStatTopType',       '—');
+    setEl('hStatAvgChecklist', '—');
+    setEl('hStatIncidents',    '—');
+    setEl('hStatTopType',      '—');
+    setEl('hStatFloorWalks',   '—');
     return;
   }
-  const avgCl    = Math.round(set.reduce((a,s) => a + (s.checklistPct||0), 0) / total);
-  const totalInc = set.reduce((a,s) => a + (s.incidentCount||0), 0);
+  const avgCl = Math.round(set.reduce((a,s) => a + (s.checklistPct||0), 0) / total);
+
+  // Use logEntries where available for accurate counts
+  const totalInc = set.reduce((a,s) => {
+    const issues = s.logEntries ? s.logEntries.filter(e => e.type === 'issue') : (s.incidents || []);
+    return a + issues.length;
+  }, 0);
+  const totalFW = set.reduce((a,s) => {
+    if (s.logEntries) return a + s.logEntries.filter(e => e.type === 'floor_walk').length;
+    return a + Object.values(s.floorWalkState || {}).reduce((x, n) => x + (n||0), 0);
+  }, 0);
+
   setEl('hStatAvgChecklist', avgCl + '%');
   setEl('hStatIncidents',    totalInc);
+  setEl('hStatFloorWalks',   totalFW);
 
   // Most common incident category
   const catMap = {};
-  set.forEach(s => (s.incidents||[]).forEach(e => {
-    if (e.category) catMap[e.category] = (catMap[e.category]||0)+1;
-  }));
+  set.forEach(s => {
+    const issues = s.logEntries ? s.logEntries.filter(e => e.type === 'issue') : (s.incidents || []);
+    issues.forEach(e => { if (e.category) catMap[e.category] = (catMap[e.category]||0)+1; });
+  });
   const top = Object.entries(catMap).sort((a,b) => b[1]-a[1])[0];
   setEl('hStatTopType', top ? top[0] : '—');
 }
@@ -6205,10 +6282,11 @@ async function confirmEndShift() {
   const shiftEl    = document.getElementById('shiftNotes');
 
   const handoverNotes  = handoverEl?.value || '';
-  const shiftNotes    = shiftEl?.value    || '';
-  const breakfastBags = document.getElementById('breakfastBags')?.value || '';
-  const handoverTaxis = document.getElementById('handoverTaxis')?.value || '';
-  const wakeUpCalls   = document.getElementById('wakeUpCalls')?.value   || '';
+  const shiftNotes     = shiftEl?.value    || '';
+  const handoverStaff2 = document.getElementById('handoverStaff2')?.value || '';
+  const breakfastBags  = document.getElementById('breakfastBags')?.value || '';
+  const handoverTaxis  = document.getElementById('handoverTaxis')?.value || '';
+  const wakeUpCalls    = document.getElementById('wakeUpCalls')?.value   || '';
 
   // Checklist % 
   const preItems  = getActiveChecklistItems('preAudit');
@@ -6217,24 +6295,36 @@ async function confirmEndShift() {
   const done      = allItems.filter(i => checkState[i.id]).length;
   const clPct     = allItems.length > 0 ? Math.round((done / allItems.length) * 100) : 0;
 
-  // Build history entry — strip photo data before saving (keeps localStorage small)
+  // Build history entry — full data including photos (for file export)
   const entry = {
-    date:          new Date().toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }),
-    staffName:     staffName,
-    staffRole:     staffRole,
-    staffShift:    staffShift,
+    date:           new Date().toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }),
+    shiftStart:     shiftStart || Date.now(),
+    staffName:      staffName,
+    staffRole:      staffRole,
+    staffShift:     staffShift,
     shiftNotes,
     handoverNotes,
+    handoverStaff2,
     breakfastBags,
     handoverTaxis,
     wakeUpCalls,
-    checklistPct:  clPct,
-    incidentCount: logEntries.filter(e => e.type === 'issue').length,
-    incidents:     logEntries.filter(e => e.type === 'issue').map(({ imageBase64: _img, ...rest }) => rest)
+    checklistPct:   clPct,
+    checklistState: { ...checkState },
+    incidentCount:  logEntries.filter(e => e.type === 'issue').length,
+    incidents:      logEntries.filter(e => e.type === 'issue').map(({ imageBase64: _img, ...rest }) => rest),
+    logEntries:     JSON.parse(JSON.stringify(logEntries)),
+    floorWalkState: { ...floorWalkState },
+    boardData:      collectBoardData(),
+    lastCheckInTime: lastCheckInTime || null,
   };
 
-  // Save to history (always) — cap at 365 entries (rolling year)
-  shiftHistory.push(entry);
+  // Save to history (always) — strip photos here to protect localStorage quota
+  const entryForStorage = {
+    ...entry,
+    incidents:  entry.incidents,  // already stripped above
+    logEntries: entry.logEntries.map(({ imageBase64: _img, ...rest }) => rest),
+  };
+  shiftHistory.push(entryForStorage);
   if (shiftHistory.length > 365) shiftHistory = shiftHistory.slice(-365);
   try {
     localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory));
