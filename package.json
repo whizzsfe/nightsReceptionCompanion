@@ -1,0 +1,67 @@
+{
+  "name": "night-receptionist-companion",
+  "version": "1.0.0-alpha.1",
+  "description": "Night Receptionist Companion Suite — hotel front-office tool for night staff",
+  "main": "main.js",
+  "author": "Whizzsfe Web Services <hello@whizzsfe.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "start": "electron .",
+    "prebuild": "node scripts/prebuild.js",
+    "build": "electron-builder --win --x64",
+    "build:dir": "electron-builder --win --x64 --dir"
+  },
+  "build": {
+    "appId": "com.whizzsfe.nightcompanion",
+    "productName": "Night Receptionist Companion",
+    "copyright": "© 2026 Whizzsfe Web Services",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "!app/hotelLogo.jpg",
+      "!app/hotelLogo.ico"
+    ],
+    "extraFiles": [
+      {
+        "from": "hotelcompanion_config.example.js",
+        "to": "hotelcompanion_config.example.js"
+      },
+      {
+        "from": "hotelcompanion_items.example.js",
+        "to": "hotelcompanion_items.example.js"
+      },
+      {
+        "from": "hotelcompanion_scripts.example.js",
+        "to": "hotelcompanion_scripts.example.js"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "app/hotelLogo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Night Receptionist Companion",
+      "installerHeader": "app/hotelLogo.ico"
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  }
+}

@@ -7,6 +7,14 @@ hotelcompanion_items.js
 hotelcompanion_scripts.js
 hotelcompanion_config.js
 
+# Electron build output
+dist/
+node_modules/
+app/hotelcompanion_suite.html
+app/hotelcompanion_editor.html
+app/hotelLogo.jpg
+app/hotelLogo.ico
+
 # OS & editor noise
 .DS_Store
 Thumbs.db
