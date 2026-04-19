@@ -7,7 +7,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "start": "electron .",
-    "prebuild": "New-Item -ItemType Directory -Force -Path app | Out-Null ; Copy-Item hotelcompanion_suite.html app\\hotelcompanion_suite.html -Force ; Copy-Item hotelcompanion_editor.html app\\hotelcompanion_editor.html -Force ; Copy-Item hotelLogo.jpg app\\hotelLogo.jpg -Force ; Copy-Item hotelLogo.ico app\\hotelLogo.ico -Force",
+    "prebuild": "node scripts/prebuild.js",
     "build": "electron-builder --win --x64",
     "build:dir": "electron-builder --win --x64 --dir"
   },
