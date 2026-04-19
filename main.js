@@ -3,7 +3,7 @@
 // Night Receptionist Companion Suite v1.0.0
 // © 2026 Whizzsfe Web Services — whizzsfe.com
 
-const { app, BrowserWindow, ipcMain, dialog, shell, session } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, session, Menu } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 
@@ -132,6 +132,32 @@ app.whenReady().then(() => {
   });
 
   createWindow('hotelcompanion_suite.html');
+
+  // ---------------------------------------------------------------------------
+  // App menu — adds "Open Content Editor" under a Manager menu
+  // ---------------------------------------------------------------------------
+  const menuTemplate = [
+    {
+      label: 'Manager',
+      submenu: [
+        {
+          label: 'Open Content Editor',
+          click() {
+            const existing = BrowserWindow.getAllWindows().find(w =>
+              w.webContents.getURL().includes('hotelcompanion_editor')
+            );
+            if (existing) {
+              existing.focus();
+            } else {
+              const editor = createWindow('hotelcompanion_editor.html');
+              editor.setTitle('Night Companion — Content Editor');
+            }
+          },
+        },
+      ],
+    },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 });
 
 app.on('window-all-closed', () => {
