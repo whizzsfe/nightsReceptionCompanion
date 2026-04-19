@@ -6037,7 +6037,7 @@ function clearHistory() {
 }
 
 // -- End Shift --
-function confirmEndShift() {
+async function confirmEndShift() {
   // Collect current state for saving
   const handoverEl = document.getElementById('handoverNotes');
   const shiftEl    = document.getElementById('shiftNotes');
@@ -6083,20 +6083,25 @@ function confirmEndShift() {
       try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
     }
   }
-  exportCompletedShift(entry);  // write to OneDrive folder + delete session file (no-op if not configured)
+  await exportCompletedShift(entry);  // write completed shift + delete session file
 
-  // Clear all session data from localStorage
-  const sessionKeys = [
-    'shiftCompanion_shiftNotes', 'shiftCompanion_handoverNotes',
-    'shiftCompanion_breakfastBags', 'shiftCompanion_handoverTaxis', 'shiftCompanion_wakeUpCalls',
-    'shiftCompanion_lastCheckIn', 'shiftCompanion_nightLogEntries',
-    'shiftCompanion_checklistState',
-    'shiftCompanion_boardData', 'shiftCompanion_shiftStart',
-    'shiftCompanion_handoverStaff2',
-    'shiftCompanion_nightlogLeader', 'shiftCompanion_nightlogStart',
-    'shiftCompanion_floorWalkState'
-  ];
-  sessionKeys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+  // Clear localStorage. In Electron the app quits immediately so a full clear is fine.
+  // In browser mode the tab may stay open and the user might reopen the file, so
+  // preserve history, profile, and brand — only remove session data.
+  try {
+    if (window.electronAPI) {
+      localStorage.clear();
+    } else {
+      ['shiftCompanion_shiftNotes','shiftCompanion_handoverNotes',
+       'shiftCompanion_breakfastBags','shiftCompanion_handoverTaxis','shiftCompanion_wakeUpCalls',
+       'shiftCompanion_lastCheckIn','shiftCompanion_nightLogEntries',
+       'shiftCompanion_checklistState','shiftCompanion_boardData','shiftCompanion_shiftStart',
+       'shiftCompanion_handoverStaff2','shiftCompanion_nightlogLeader',
+       'shiftCompanion_nightlogStart','shiftCompanion_floorWalkState',
+       'shiftCompanion_persist'
+      ].forEach(k => localStorage.removeItem(k));
+    }
+  } catch {}
 
   // Reset in-memory session state
   checkState        = {};
@@ -6104,7 +6109,6 @@ function confirmEndShift() {
   floorWalkState    = {};
   nlPhotoBase64     = null;
   shiftStart        = Date.now();
-  try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
   lastCheckInTime   = null;
   if (shiftEl)    shiftEl.value    = '';
   if (handoverEl) handoverEl.value = '';
@@ -6117,19 +6121,21 @@ function confirmEndShift() {
 
   closeModal('endShiftModal');
 
-  renderChecklist('preAudit');
-  renderHistory();
-  renderNightLogEntries();
-  updateDashboardStats();
-  updateCheckInDisplay();
-
-  // Navigate to dashboard then show new-shift prompt
-  showSection('dashboard', document.querySelector('[data-section=dashboard]'));
-
-  // Pre-clear name so new person must type theirs
-  const nsName = document.getElementById('newShiftName');
-  if (nsName) nsName.value = '';
-  document.getElementById('newShiftModal').classList.add('open');
+  // Export is done — close immediately.
+  if (window.electronAPI) {
+    window.electronAPI.closeWindow();
+  } else {
+    window.close();
+    setTimeout(() => {
+      document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    height:100vh;background:#0A0A0A;color:#F0EDE8;font-family:'DM Sans',sans-serif;gap:16px;">
+          <div style="font-size:3rem;">&#10003;</div>
+          <h1 style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:#D4A843;margin:0;">Shift Ended</h1>
+          <p style="color:#888880;margin:0;">You can close this tab now.</p>
+        </div>`;
+    }, 400);
+  }
 }
 
 function startNewShift() {
@@ -6201,6 +6207,16 @@ async function getShiftMonthFolder(rootHandle) {
 // -- Save hotelcompanion_config.js — always prompts so the user can place it next to the HTML file --
 async function saveConfigToFolder() {
   const content = buildConfigFileContent();
+  // Electron: write directly to the exe directory — no dialog needed.
+  if (window.electronAPI) {
+    try {
+      await window.electronAPI.writeFile('hotelcompanion_config.js', content);
+      alert('hotelcompanion_config.js saved.\n\nYour settings will be restored automatically on next launch.');
+    } catch(e) {
+      alert('Could not save config file: ' + e.message);
+    }
+    return;
+  }
   const blob = new Blob([content], { type: 'text/javascript' });
   if (window.showSaveFilePicker) {
     try {
@@ -6308,9 +6324,28 @@ function updateAutoSaveStatus(active, lastSaved) {
   }
 }
 
+// -- Electron: build relative path for a shift file --
+function electronShiftPath(filename) {
+  const now  = new Date();
+  const year = now.getFullYear().toString();
+  const mm   = String(now.getMonth() + 1).padStart(2, '0');
+  const mon  = now.toLocaleDateString('en-GB', { month: 'short' });
+  return `${SHIFT_BASE_FOLDER}/${year}/${year}-${mm} ${mon}/${filename}`;
+}
+
 // -- Single auto-save write --
 async function autoSaveTick() {
   if (!autoSaveFolderHandle) return;
+  // Electron path: write via IPC
+  if (window.electronAPI && autoSaveFolderHandle === '__electron__') {
+    try {
+      await window.electronAPI.writeFile(electronShiftPath(sessionFilename()), JSON.stringify(buildSessionSnapshot(), null, 2));
+      const t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      updateAutoSaveStatus(true, t);
+    } catch(e) { console.warn('Auto-save tick failed (Electron):', e); }
+    return;
+  }
+  // FSAPI path (OneDrive / browser)
   try {
     const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
     if (perm !== 'granted') {
@@ -6338,6 +6373,38 @@ function stopAutoSaveInterval() {
 
 // -- Silently load + merge history from folder on startup --
 async function silentlyLoadHistory(rootHandle) {
+  // Electron path
+  if (window.electronAPI) {
+    try {
+      const allPaths = await window.electronAPI.scanDir(SHIFT_BASE_FOLDER);
+      const shiftPaths = (allPaths || []).filter(p => {
+        const name = p.split('/').pop();
+        return name.endsWith('.json') && name.startsWith('shift_') && !name.startsWith('shift_session_');
+      });
+      if (shiftPaths.length === 0) return;
+      const existingIds = new Set(shiftHistory.map(s => s._shiftId).filter(Boolean));
+      let added = 0;
+      for (const relPath of shiftPaths) {
+        try {
+          const text = await window.electronAPI.readFile(relPath);
+          if (!text) continue;
+          const data = JSON.parse(text);
+          if (data.schemaVersion !== 1 || data.type !== 'shift' || !data.shift) continue;
+          if (existingIds.has(data.shiftId)) continue;
+          existingIds.add(data.shiftId);
+          shiftHistory.push({ ...data.shift, _shiftId: data.shiftId });
+          added++;
+        } catch {}
+      }
+      if (added > 0) {
+        shiftHistory.sort((a, b) => new Date(b.date||0) - new Date(a.date||0));
+        try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
+        renderHistory();
+      }
+    } catch {}  // fully silent on startup
+    return;
+  }
+  // FSAPI path
   try {
     const files = [];
     await scanDirForShiftFiles(rootHandle, files);
@@ -6365,6 +6432,7 @@ async function silentlyLoadHistory(rootHandle) {
 
 // -- Show / hide the dashboard nudge card --
 function showAutoSaveNudge(show, reauth) {
+  if (window.electronAPI) return; // never needed in Electron
   const card = document.getElementById('autoSaveNudgeCard');
   if (!card) return;
   if (!show) { card.style.display = 'none'; return; }
@@ -6378,6 +6446,16 @@ function showAutoSaveNudge(show, reauth) {
 
 // -- Init: restore handle from IDB, start interval, load history --
 async function initAutoSave() {
+  // Electron: auto-save is always available — no folder picker or IDB needed.
+  if (window.electronAPI) {
+    autoSaveFolderHandle = '__electron__';
+    const btn = document.getElementById('autoSaveSetupBtn');
+    if (btn) btn.style.display = 'none';
+    startAutoSaveInterval();
+    updateAutoSaveStatus(true, null);
+    silentlyLoadHistory(null);
+    return;
+  }
   if (!window.showDirectoryPicker) return; // API unavailable
   const handle = await getStoredFolderHandle();
   if (!handle) {
@@ -6401,6 +6479,15 @@ async function initAutoSave() {
 
 // -- "Set folder" button handler --
 async function setupAutoSaveFolder() {
+  // Electron: auto-save is always on — no picker needed.
+  if (window.electronAPI) {
+    autoSaveFolderHandle = '__electron__';
+    startAutoSaveInterval();
+    updateAutoSaveStatus(true, null);
+    showAutoSaveNudge(false);
+    alert('Auto-save is active.\nShift files are saved to the shiftLogs folder next to the application.');
+    return;
+  }
   if (!window.showDirectoryPicker) {
     alert('Your browser does not support the File System Access API.\nAuto-save is unavailable.'); return;
   }
@@ -6419,6 +6506,25 @@ async function setupAutoSaveFolder() {
 
 // -- Export completed shift JSON at End Shift --
 async function exportCompletedShift(entry) {
+  // Electron path
+  if (window.electronAPI) {
+    try {
+      const payload = {
+        schemaVersion: 1,
+        type:          'shift',
+        shiftId:       'shift_' + (shiftStart || Date.now()),
+        exportedAt:    new Date().toISOString(),
+        shift:         entry,
+      };
+      await window.electronAPI.writeFile(
+        electronShiftPath(completedShiftFilename()),
+        JSON.stringify(payload, null, 2)
+      );
+      // Delete the in-progress session file now that the shift is complete
+      await window.electronAPI.deleteFile(electronShiftPath(sessionFilename()));
+    } catch(e) { console.warn('Completed shift export failed (Electron):', e); }
+    return;
+  }
   if (!autoSaveFolderHandle) return;
   try {
     const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
@@ -6444,6 +6550,26 @@ async function exportCompletedShift(entry) {
 
 // -- Resume Shift from File (Dashboard button) --
 async function resumeShiftFromFile() {
+  // Electron path
+  if (window.electronAPI) {
+    const filePath = await window.electronAPI.openDialog({
+      title: 'Open Shift Session File',
+      filters: [{ name: 'Shift Session JSON', extensions: ['json'] }],
+      properties: ['openFile'],
+    });
+    if (!filePath) return;
+    const text = await window.electronAPI.readFile(filePath);
+    if (!text) { alert('Could not read the selected file.'); return; }
+    let data;
+    try { data = JSON.parse(text); } catch { alert('File is not valid JSON.'); return; }
+    if (data.schemaVersion !== 1 || data.type !== 'shift_session') {
+      alert('This does not appear to be a shift session file.\nOnly files named shift_session_\u2026.json can be resumed here.'); return;
+    }
+    const savedAt = new Date(data.savedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    if (!confirm(`Resume shift for ${data.staffName || 'Unknown'}, last saved at ${savedAt}?\n\nThis will replace your current in-progress session.`)) return;
+    restoreSessionSnapshot(data);
+    return;
+  }
   if (!window.showOpenFilePicker) {
     alert('Your browser does not support the File System Access API.'); return;
   }
@@ -6505,6 +6631,39 @@ function restoreSessionSnapshot(data) {
 
 // -- Manual "Sync from Folder" button (History section) --
 async function loadHistoryFromFolder() {
+  // Electron path
+  if (window.electronAPI) {
+    const allPaths = await window.electronAPI.scanDir(SHIFT_BASE_FOLDER);
+    const shiftPaths = (allPaths || []).filter(p => {
+      const name = p.split('/').pop();
+      return name.endsWith('.json') && name.startsWith('shift_') && !name.startsWith('shift_session_');
+    });
+    if (shiftPaths.length === 0) {
+      alert('No completed shift files found in the shiftLogs folder.'); return;
+    }
+    const existingIds = new Set(shiftHistory.map(s => s._shiftId).filter(Boolean));
+    let added = 0;
+    for (const relPath of shiftPaths) {
+      try {
+        const text = await window.electronAPI.readFile(relPath);
+        if (!text) continue;
+        const data = JSON.parse(text);
+        if (data.schemaVersion !== 1 || data.type !== 'shift' || !data.shift) continue;
+        if (existingIds.has(data.shiftId)) continue;
+        existingIds.add(data.shiftId);
+        const entry = { ...data.shift, _shiftId: data.shiftId };
+        if (entry.incidents) entry.incidents = entry.incidents.map(({ imageBase64: _img, ...rest }) => rest);
+        shiftHistory.push(entry);
+        added++;
+      } catch {}
+    }
+    if (shiftHistory.length > 365) shiftHistory = shiftHistory.slice(-365);
+    shiftHistory.sort((a, b) => new Date(b.date||0) - new Date(a.date||0));
+    try { localStorage.setItem('shiftCompanion_history', JSON.stringify(shiftHistory)); } catch {}
+    renderHistory();
+    alert(`Sync complete. ${added} new shift${added !== 1 ? 's' : ''} added. (${shiftPaths.length - added} already present.)`);
+    return;
+  }
   if (!window.showDirectoryPicker) {
     alert('Your browser does not support the File System Access API.'); return;
   }
@@ -6592,6 +6751,25 @@ let rotaData = {
 // ---- File I/O ----
 
 async function loadRotaFromFolder() {
+  // Electron path
+  if (window.electronAPI) {
+    try {
+      const text = await window.electronAPI.readFile(ROTA_FILENAME);
+      if (!text) return false;
+      const data = JSON.parse(text);
+      if (!data || data.version !== 1) return false;
+      rotaData = {
+        version:  1,
+        staff:    Array.isArray(data.staff)    ? data.staff    : [],
+        rota:     data.rota     || { startDate: null, endDate: null, nights: [] },
+        contacts: data.contacts || { onCall: [], emergency: [] }
+      };
+      if (!Array.isArray(rotaData.contacts.onCall))     rotaData.contacts.onCall    = [];
+      if (!Array.isArray(rotaData.contacts.emergency))  rotaData.contacts.emergency = [];
+      if (!Array.isArray(rotaData.rota.nights))         rotaData.rota.nights        = [];
+      return true;
+    } catch { return false; }
+  }
   if (!autoSaveFolderHandle) return false;
   try {
     const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
@@ -6614,6 +6792,16 @@ async function loadRotaFromFolder() {
 }
 
 async function saveRotaToFolder() {
+  // Electron path
+  if (window.electronAPI) {
+    try {
+      await window.electronAPI.writeFile(ROTA_FILENAME, JSON.stringify(rotaData, null, 2));
+      return true;
+    } catch(e) {
+      alert('Rota could not be saved: ' + e.message);
+      return false;
+    }
+  }
   if (!autoSaveFolderHandle) {
     alert('No folder configured.\nPlease set up your auto-save folder from the Dashboard first, then try saving the rota again.');
     return false;
