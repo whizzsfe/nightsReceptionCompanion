@@ -15,6 +15,7 @@
     "appId": "com.whizzsfe.nightcompanion",
     "productName": "Night Receptionist Companion",
     "copyright": "© 2026 Whizzsfe Web Services",
+    "publish": null,
     "directories": {
       "output": "dist"
     },
