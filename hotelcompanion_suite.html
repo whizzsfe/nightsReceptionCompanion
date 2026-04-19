@@ -6198,38 +6198,26 @@ async function getShiftMonthFolder(rootHandle) {
   return mo;
 }
 
-// -- Write hotelcompanion_config.js to the OneDrive folder --
+// -- Save hotelcompanion_config.js — always prompts so the user can place it next to the HTML file --
 async function saveConfigToFolder() {
-  try {
-    const rootHandle = autoSaveFolderHandle || await getStoredFolderHandle();
-    if (!rootHandle) {
-      // No folder configured — fall back to a browser download
-      const content = buildConfigFileContent();
-      const blob = new Blob([content], { type: 'text/javascript' });
-      if (window.showSaveFilePicker) {
-        try {
-          const fh = await window.showSaveFilePicker({
-            suggestedName: 'hotelcompanion_config.js',
-            types: [{ description: 'JavaScript file', accept: { 'text/javascript': ['.js'] } }]
-          });
-          const writable = await fh.createWritable();
-          await writable.write(content);
-          await writable.close();
-        } catch (err) {
-          if (err.name !== 'AbortError') fallbackDownload(blob, 'hotelcompanion_config.js');
-        }
-      } else {
-        fallbackDownload(blob, 'hotelcompanion_config.js');
-      }
-      return;
+  const content = buildConfigFileContent();
+  const blob = new Blob([content], { type: 'text/javascript' });
+  if (window.showSaveFilePicker) {
+    try {
+      const fh = await window.showSaveFilePicker({
+        suggestedName: 'hotelcompanion_config.js',
+        types: [{ description: 'JavaScript file', accept: { 'text/javascript': ['.js'] } }]
+      });
+      const writable = await fh.createWritable();
+      await writable.write(content);
+      await writable.close();
+      alert('hotelcompanion_config.js saved.\n\nMake sure it is in the same folder as hotelcompanion_suite.html so it loads automatically next time.');
+    } catch (err) {
+      if (err.name !== 'AbortError') fallbackDownload(blob, 'hotelcompanion_config.js');
     }
-    // Folder is set — write directly to root (same level as hotelcompanion_suite.html)
-    const fileHandle = await rootHandle.getFileHandle('hotelcompanion_config.js', { create: true });
-    const writable   = await fileHandle.createWritable();
-    await writable.write(buildConfigFileContent());
-    await writable.close();
-  } catch (err) {
-    console.warn('saveConfigToFolder failed:', err);
+  } else {
+    fallbackDownload(blob, 'hotelcompanion_config.js');
+    alert('hotelcompanion_config.js downloaded.\n\nMove it to the same folder as hotelcompanion_suite.html so it loads automatically next time.');
   }
 }
 
