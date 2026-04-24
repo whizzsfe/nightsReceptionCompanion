@@ -6,6 +6,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, session, Menu, powerMonitor } = require('electron');
 const path = require('path');
 const fs   = require('fs');
+const { pathToFileURL }  = require('url');
 
 // ---------------------------------------------------------------------------
 // Paths
@@ -152,7 +153,11 @@ app.whenReady().then(() => {
   // Pre-compute a normalised file:// prefix for EXE_DIR so we can detect
   // requests that are already pointing at the correct location and avoid
   // re-intercepting them (which would cause an infinite redirect loop).
-  const EXE_DIR_URL_PREFIX = 'file:///' + EXE_DIR.replace(/\\/g, '/').replace(/\/$/, '') + '/';
+  // pathToFileURL handles spaces and other special chars correctly — a manual
+  // replace(/\\/g, '/') would leave literal spaces while Chromium percent-encodes
+  // them (%20), breaking the startsWith guard and causing ERR_TOO_MANY_REDIRECTS
+  // on any install path that contains spaces (e.g. 'Night Receptionist Companion').
+  const EXE_DIR_URL_PREFIX = pathToFileURL(EXE_DIR).href.replace(/\/?$/, '/');
 
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const url = details.url;
@@ -173,7 +178,7 @@ app.whenReady().then(() => {
     if (urlBasename === 'hotelLogo.ico' || urlBasename === 'hotelLogo.jpg') {
       const clientFile = path.join(EXE_DIR, urlBasename);
       if (fs.existsSync(clientFile)) {
-        callback({ redirectURL: EXE_DIR_URL_PREFIX + urlBasename });
+        callback({ redirectURL: pathToFileURL(clientFile).href });
         return;
       }
     }
@@ -184,7 +189,7 @@ app.whenReady().then(() => {
     if (OVERRIDE_FILES.includes(urlBasename)) {
       const clientFile = path.join(EXE_DIR, urlBasename);
       if (fs.existsSync(clientFile)) {
-        callback({ redirectURL: EXE_DIR_URL_PREFIX + urlBasename });
+        callback({ redirectURL: pathToFileURL(clientFile).href });
         return;
       }
       // File absent — let the request proceed; onerror in HTML handles it.
