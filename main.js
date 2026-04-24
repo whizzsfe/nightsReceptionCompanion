@@ -3,7 +3,7 @@
 // Night Receptionist Companion Suite v1.0.0
 // © 2026 Whizzsfe Web Services — whizzsfe.com
 
-const { app, BrowserWindow, ipcMain, dialog, shell, session, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, session, Menu, powerMonitor } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 
@@ -68,8 +68,10 @@ function createWindow(htmlFile) {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
-      // Allow local file:// resources (images, etc.) relative to app/
       webSecurity: true,
+      // Prevent Windows power management from heavily throttling the renderer
+      // when the window is not focused — avoids black/blank screens on idle.
+      backgroundThrottling: false,
     },
     icon: resolveWindowIcon(),
     title: 'Night Receptionist Companion',
@@ -118,6 +120,17 @@ function createWindow(htmlFile) {
     `).catch(err => console.error('[print-setup] executeJavaScript error:', err));
   });
 
+  // Auto-reload if the renderer process crashes or is killed.
+  // This covers GPU context loss and Chromium renderer crashes that produce
+  // a blank/black page.
+  win.webContents.on('render-process-gone', (_event, details) => {
+    console.warn('[renderer] render-process-gone:', details.reason, '— reloading');
+    // Small delay so any crash dialog has time to close before reload.
+    setTimeout(() => {
+      if (!win.isDestroyed()) win.reload();
+    }, 500);
+  });
+
   // Open external links in the system browser, not a new Electron window.
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -137,16 +150,51 @@ app.whenReady().then(() => {
   // from EXE_DIR when present — so the client can replace logos without
   // rebuilding. Works for both the sidebar img and the sign generator preview.
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
-    if (details.url.includes('hotelLogo.')) {
-      const basename = details.url.includes('hotelLogo.ico') ? 'hotelLogo.ico' : 'hotelLogo.jpg';
-      const clientFile = path.join(EXE_DIR, basename);
+    const url = details.url;
+    // Extract the bare filename from the URL (ignore query strings).
+    const urlBasename = url.split('/').pop().split('?')[0];
+
+    // Redirect logo files to the client's EXE_DIR version.
+    if (urlBasename === 'hotelLogo.ico' || urlBasename === 'hotelLogo.jpg') {
+      const clientFile = path.join(EXE_DIR, urlBasename);
       if (fs.existsSync(clientFile)) {
         callback({ redirectURL: 'file:///' + clientFile.replace(/\\/g, '/') });
         return;
       }
     }
+
+    // Redirect override JS files to EXE_DIR.
+    // In packaged builds these files are extraFiles placed next to the exe, not
+    // bundled inside the asar. Without this redirect, the relative <script src>
+    // tags in the HTML resolve to the asar-internal path and return 404.
+    if (OVERRIDE_FILES.includes(urlBasename)) {
+      const clientFile = path.join(EXE_DIR, urlBasename);
+      if (fs.existsSync(clientFile)) {
+        callback({ redirectURL: 'file:///' + clientFile.replace(/\\/g, '/') });
+        return;
+      }
+      // File doesn't exist yet (optional override) — let the browser proceed;
+      // the onerror handler in the HTML will catch it gracefully.
+    }
+
     callback({});
   });
+
+  // ---------------------------------------------------------------------------
+  // Power events — reload all windows when the system wakes from sleep or the
+  // screen is unlocked. On Windows hotel PCs the GPU context is often lost
+  // during sleep, which causes the Electron window to stay black.
+  // ---------------------------------------------------------------------------
+  function reloadAllWindows() {
+    for (const w of BrowserWindow.getAllWindows()) {
+      if (!w.isDestroyed()) {
+        console.log('[power] reloading window after system resume/unlock');
+        w.reload();
+      }
+    }
+  }
+  powerMonitor.on('resume', reloadAllWindows);
+  powerMonitor.on('unlock-screen', reloadAllWindows);
 
   createWindow('hotelcompanion_suite.html');
 
