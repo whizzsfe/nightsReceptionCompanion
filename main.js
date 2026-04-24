@@ -150,28 +150,32 @@ app.whenReady().then(() => {
   // Intercept file:// requests for logo files and serve the client's version
   // from EXE_DIR when present — so the client can replace logos without
   // rebuilding. Works for both the sidebar img and the sign generator preview.
-  // Pre-compute a normalised file:// prefix for EXE_DIR so we can detect
-  // requests that are already pointing at the correct location and avoid
-  // re-intercepting them (which would cause an infinite redirect loop).
-  // pathToFileURL handles spaces and other special chars correctly — a manual
-  // replace(/\\/g, '/') would leave literal spaces while Chromium percent-encodes
-  // them (%20), breaking the startsWith guard and causing ERR_TOO_MANY_REDIRECTS
-  // on any install path that contains spaces (e.g. 'Night Receptionist Companion').
+  // Pre-compute the exact file:// URL prefix for EXE_DIR (trailing slash).
+  // pathToFileURL handles spaces and special chars correctly.
   const EXE_DIR_URL_PREFIX = pathToFileURL(EXE_DIR).href.replace(/\/?$/, '/');
 
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const url = details.url;
 
-    // If the request is already coming from EXE_DIR, leave it alone.
-    // Without this guard the handler would redirect the already-redirected
-    // request back to itself, causing ERR_TOO_MANY_REDIRECTS.
-    if (url.startsWith(EXE_DIR_URL_PREFIX)) {
+    // Extract the bare filename from the URL (ignore query strings/fragments).
+    const urlBasename = url.split('/').pop().split('?')[0].split('#')[0];
+
+    // Detect whether this request is already pointing directly inside EXE_DIR
+    // (not a subdirectory). We compare the URL's parent directory against the
+    // exact EXE_DIR prefix.
+    //
+    // We CANNOT use a plain startsWith(EXE_DIR_URL_PREFIX) guard because
+    // EXE_DIR is a parent of resources/app.asar/, so asar-internal requests
+    // also start with EXE_DIR_URL_PREFIX — they would be skipped and 404.
+    //
+    // Instead we check: strip the basename, and the remainder must equal
+    // EXE_DIR_URL_PREFIX exactly (i.e. the file lives directly in EXE_DIR).
+    const urlParent = url.slice(0, url.lastIndexOf('/') + 1).split('?')[0];
+    if (urlParent === EXE_DIR_URL_PREFIX) {
+      // Already redirected to EXE_DIR — leave it alone to avoid looping.
       callback({});
       return;
     }
-
-    // Extract the bare filename from the URL (ignore query strings/fragments).
-    const urlBasename = url.split('/').pop().split('?')[0].split('#')[0];
 
     // Redirect logo files to the client's EXE_DIR version (so the hotel can
     // replace logos without rebuilding).
