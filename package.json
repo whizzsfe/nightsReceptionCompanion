@@ -1,6 +1,6 @@
 {
   "name": "night-receptionist-companion",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "Night Receptionist Companion Suite — hotel front-office tool for night staff",
   "main": "main.js",
   "author": "Whizzsfe Web Services <hello@whizzsfe.com>",
@@ -8,8 +8,8 @@
   "scripts": {
     "start": "electron .",
     "prebuild": "node scripts/prebuild.js",
-    "build": "electron-builder --win --x64",
-    "build:dir": "electron-builder --win --x64 --dir"
+    "build": "electron-builder --win --x64 --publish never",
+    "build:dir": "electron-builder --win --x64 --dir --publish never"
   },
   "build": {
     "appId": "com.whizzsfe.nightcompanion",

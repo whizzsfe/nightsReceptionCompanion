@@ -34,9 +34,7 @@ jobs:
         run: npm run build
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          # Prevent electron-builder from trying to publish — we upload via action-gh-release
           EP_DRAFT: false
-          ELECTRON_BUILDER_NO_PUBLISH: always
 
       - name: Upload release
         uses: softprops/action-gh-release@v2
