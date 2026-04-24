@@ -58,7 +58,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Night Receptionist Companion",
-      "installerHeader": "app/hotelLogo.ico"
+      "installerHeader": "app/hotelLogo.ico",
+      "include": "build/installer.nsh"
     }
   },
   "devDependencies": {
