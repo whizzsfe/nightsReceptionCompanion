@@ -149,32 +149,45 @@ app.whenReady().then(() => {
   // Intercept file:// requests for logo files and serve the client's version
   // from EXE_DIR when present — so the client can replace logos without
   // rebuilding. Works for both the sidebar img and the sign generator preview.
+  // Pre-compute a normalised file:// prefix for EXE_DIR so we can detect
+  // requests that are already pointing at the correct location and avoid
+  // re-intercepting them (which would cause an infinite redirect loop).
+  const EXE_DIR_URL_PREFIX = 'file:///' + EXE_DIR.replace(/\\/g, '/').replace(/\/$/, '') + '/';
+
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const url = details.url;
-    // Extract the bare filename from the URL (ignore query strings).
-    const urlBasename = url.split('/').pop().split('?')[0];
 
-    // Redirect logo files to the client's EXE_DIR version.
+    // If the request is already coming from EXE_DIR, leave it alone.
+    // Without this guard the handler would redirect the already-redirected
+    // request back to itself, causing ERR_TOO_MANY_REDIRECTS.
+    if (url.startsWith(EXE_DIR_URL_PREFIX)) {
+      callback({});
+      return;
+    }
+
+    // Extract the bare filename from the URL (ignore query strings/fragments).
+    const urlBasename = url.split('/').pop().split('?')[0].split('#')[0];
+
+    // Redirect logo files to the client's EXE_DIR version (so the hotel can
+    // replace logos without rebuilding).
     if (urlBasename === 'hotelLogo.ico' || urlBasename === 'hotelLogo.jpg') {
       const clientFile = path.join(EXE_DIR, urlBasename);
       if (fs.existsSync(clientFile)) {
-        callback({ redirectURL: 'file:///' + clientFile.replace(/\\/g, '/') });
+        callback({ redirectURL: EXE_DIR_URL_PREFIX + urlBasename });
         return;
       }
     }
 
     // Redirect override JS files to EXE_DIR.
-    // In packaged builds these files are extraFiles placed next to the exe, not
-    // bundled inside the asar. Without this redirect, the relative <script src>
-    // tags in the HTML resolve to the asar-internal path and return 404.
+    // In packaged builds these are extraFiles placed next to the exe, not
+    // bundled in the asar. Without this, the <script src> tags 404.
     if (OVERRIDE_FILES.includes(urlBasename)) {
       const clientFile = path.join(EXE_DIR, urlBasename);
       if (fs.existsSync(clientFile)) {
-        callback({ redirectURL: 'file:///' + clientFile.replace(/\\/g, '/') });
+        callback({ redirectURL: EXE_DIR_URL_PREFIX + urlBasename });
         return;
       }
-      // File doesn't exist yet (optional override) — let the browser proceed;
-      // the onerror handler in the HTML will catch it gracefully.
+      // File absent — let the request proceed; onerror in HTML handles it.
     }
 
     callback({});
