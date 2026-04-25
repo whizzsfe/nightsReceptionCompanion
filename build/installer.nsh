@@ -18,19 +18,24 @@
 
 ; ---------------------------------------------------------------------------
 ; Helper: copy one file from $INSTDIR to backup dir $R0 (if it exists)
+; Destination uses a trailing backslash so NSIS CopyFiles copies the file
+; INTO the directory (preserving the original filename) rather than treating
+; the destination string as a directory name — which causes it to nest the
+; file one level deeper and break the restore FileExists check.
 ; ---------------------------------------------------------------------------
 !macro _HC_Backup filename
   ${If} ${FileExists} "$INSTDIR\${filename}"
-    CopyFiles /SILENT "$INSTDIR\${filename}" "$R0\${filename}"
+    CopyFiles /SILENT "$INSTDIR\${filename}" "$R0\"
   ${EndIf}
 !macroend
 
 ; ---------------------------------------------------------------------------
 ; Helper: restore one file from backup dir $R0 to $INSTDIR (if it exists)
+; Same trailing-backslash convention on the destination.
 ; ---------------------------------------------------------------------------
 !macro _HC_Restore filename
   ${If} ${FileExists} "$R0\${filename}"
-    CopyFiles /SILENT "$R0\${filename}" "$INSTDIR\${filename}"
+    CopyFiles /SILENT "$R0\${filename}" "$INSTDIR\"
   ${EndIf}
 !macroend
 
