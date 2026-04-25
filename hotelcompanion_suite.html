@@ -6813,12 +6813,37 @@ function showAutoSaveNudge(show, reauth) {
 // -- Auto-resume: scan for an in-progress session file and offer to restore it --
 // Called after autoSaveFolderHandle is set. Finds the newest shift_session_*.json
 // that is less than 16 hours old and shows the resume banner — no modal/confirm blocker.
+// Clear in-memory and localStorage session state when we can confirm no active shift exists
+// (session file is absent from the folder we have access to).
+// Called by checkForSessionResume() when the scan succeeds but finds nothing.
+function clearStaleSessionState() {
+  // Reset in-memory state
+  checkState = {}; logEntries = []; floorWalkState = {}; nlPhotoBase64 = null; lastCheckInTime = null;
+  // Clear DOM textareas
+  ['shiftNotes','handoverNotes','handoverStaff2','breakfastBags','handoverTaxis','wakeUpCalls']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  // Clear localStorage session keys (same set as End Shift, minus the persist toggle)
+  ['shiftCompanion_shiftNotes','shiftCompanion_handoverNotes','shiftCompanion_handoverStaff2',
+   'shiftCompanion_breakfastBags','shiftCompanion_handoverTaxis','shiftCompanion_wakeUpCalls',
+   'shiftCompanion_lastCheckIn','shiftCompanion_nightLogEntries','shiftCompanion_checklistState',
+   'shiftCompanion_boardData','shiftCompanion_shiftStart','shiftCompanion_nightlogLeader',
+   'shiftCompanion_nightlogStart','shiftCompanion_floorWalkState',
+  ].forEach(k => localStorage.removeItem(k));
+  // Re-render affected sections
+  try { renderChecklist(checklistTab); } catch {}
+  try { renderNightLogEntries(); } catch {}
+  updateDashboardStats();
+  console.info('[session] no active session file found — stale localStorage state cleared');
+}
+
 async function checkForSessionResume() {
   const MAX_AGE_MS = 16 * 60 * 60 * 1000; // 16 hours
-  let sessionData = null;
+  let sessionData     = null;
+  let folderAccessible = false; // true once we've successfully scanned the folder
 
   try {
     if (window.electronAPI) {
+      folderAccessible = true;
       const allPaths = await window.electronAPI.scanDir(SHIFT_BASE_FOLDER);
       const sessionPaths = (allPaths || [])
         .filter(p => p.split('/').pop().startsWith('shift_session_') && p.endsWith('.json'))
@@ -6839,6 +6864,7 @@ async function checkForSessionResume() {
     }
     // FSAPI path (OneDrive browser) — scan current month folder
     else if (autoSaveFolderHandle && autoSaveFolderHandle !== '__electron__') {
+      folderAccessible = true;
       const dir = await getShiftMonthFolder(autoSaveFolderHandle);
       for await (const [name, handle] of dir.entries()) {
         if (!name.startsWith('shift_session_') || !name.endsWith('.json')) continue;
@@ -6856,9 +6882,16 @@ async function checkForSessionResume() {
         } catch { continue; }
       }
     }
-  } catch { return; } // fully silent on any error
+  } catch { return; } // fully silent on any error — don't clear data if scan failed
 
-  if (!sessionData) return;
+  if (!sessionData) {
+    // Folder was accessible but no active session file found.
+    // This means any session data still in localStorage is stale (e.g. the shift was
+    // ended on another terminal while this PC was closed). Clear it so PC1 doesn't
+    // restart with an orphaned shift state.
+    if (folderAccessible) clearStaleSessionState();
+    return;
+  }
 
   // Build a personalised description using only the locally saved staff name (profile).
   // If no profile is set yet, omit the greeting so the message still reads naturally.
