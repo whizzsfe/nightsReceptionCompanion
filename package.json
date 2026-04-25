@@ -28,14 +28,6 @@
     ],
     "extraFiles": [
       {
-        "from": "hotelLogo.jpg",
-        "to": "hotelLogo.jpg"
-      },
-      {
-        "from": "hotelLogo.ico",
-        "to": "hotelLogo.ico"
-      },
-      {
         "from": "hotelcompanion_config.example.js",
         "to": "hotelcompanion_config.example.js"
       },
