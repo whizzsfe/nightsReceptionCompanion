@@ -60,7 +60,9 @@
   ;   /Q  — quiet (no per-file output)
   ;   /Y  — overwrite without prompting
   ${If} ${FileExists} "$INSTDIR\shiftLogs"
-    ExecWait 'xcopy "$INSTDIR\shiftLogs" "$R0\shiftLogs" /E /I /Q /Y'
+    ; Route through cmd.exe so xcopy is resolved from System32 and path
+    ; quoting works correctly even when $INSTDIR contains spaces.
+    ExecWait '$SYSDIR\cmd.exe /C xcopy "$INSTDIR\shiftLogs" "$R0\shiftLogs\" /E /I /Q /Y'
   ${EndIf}
 !macroend
 
@@ -81,7 +83,8 @@
 
     ; Restore shift logs folder tree recursively via xcopy
     ${If} ${FileExists} "$R0\shiftLogs"
-      ExecWait 'xcopy "$R0\shiftLogs" "$INSTDIR\shiftLogs" /E /I /Q /Y'
+      ; Route through cmd.exe — same reason as backup step above.
+      ExecWait '$SYSDIR\cmd.exe /C xcopy "$R0\shiftLogs" "$INSTDIR\shiftLogs\" /E /I /Q /Y'
     ${EndIf}
 
     ; Clean up the temp backup

@@ -1,6 +1,6 @@
 {
   "name": "night-receptionist-companion",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "Night Receptionist Companion Suite — hotel front-office tool for night staff",
   "main": "main.js",
   "author": "Whizzsfe Web Services <hello@whizzsfe.com>",
@@ -27,6 +27,14 @@
       "!app/hotelLogo.ico"
     ],
     "extraFiles": [
+      {
+        "from": "hotelLogo.jpg",
+        "to": "hotelLogo.jpg"
+      },
+      {
+        "from": "hotelLogo.ico",
+        "to": "hotelLogo.ico"
+      },
       {
         "from": "hotelcompanion_config.example.js",
         "to": "hotelcompanion_config.example.js"
