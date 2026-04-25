@@ -6685,6 +6685,12 @@ function electronShiftPath(filename) {
 // -- Single auto-save write --
 async function autoSaveTick() {
   if (!autoSaveFolderHandle) return;
+  // Don't write a session file until the shift has actually started.
+  // shiftStart is always set by loadState(), so we also require staffName —
+  // the profile is only confirmed once the user has entered their name.
+  // Without this guard the app creates a phantom session file on every open,
+  // causing a spurious resume banner on the next launch.
+  if (!shiftStart || !staffName) return;
   // Electron path: write via IPC
   if (window.electronAPI && autoSaveFolderHandle === '__electron__') {
     try {
@@ -6726,7 +6732,7 @@ function stopAutoSaveInterval() {
 // to the OneDrive session file so a second PC sees changes within OneDrive's lag.
 let _saveOnChangeTimer = null;
 function saveOnChange(immediate = false) {
-  if (!autoSaveFolderHandle) return;
+  if (!autoSaveFolderHandle || !staffName) return; // no folder or no confirmed profile
   if (immediate) {
     clearTimeout(_saveOnChangeTimer);
     _saveOnChangeTimer = null;
