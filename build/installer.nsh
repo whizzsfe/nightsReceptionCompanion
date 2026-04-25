@@ -53,10 +53,14 @@
   !insertmacro _HC_Backup "hotelLogo.jpg"
   !insertmacro _HC_Backup "hotelLogo.ico"
 
-  ; Copy entire shiftLogs folder tree into the backup directory
+  ; Copy entire shiftLogs folder tree (including subdirectories) into backup.
+  ; CopyFiles in NSIS is not recursive — use xcopy with /E /I /Q /Y flags:
+  ;   /E  — copy all subdirectories including empty ones
+  ;   /I  — treat destination as directory (not a file)
+  ;   /Q  — quiet (no per-file output)
+  ;   /Y  — overwrite without prompting
   ${If} ${FileExists} "$INSTDIR\shiftLogs"
-    CreateDirectory "$R0\shiftLogs"
-    CopyFiles /SILENT "$INSTDIR\shiftLogs\" "$R0\shiftLogs\"
+    ExecWait 'xcopy "$INSTDIR\shiftLogs" "$R0\shiftLogs" /E /I /Q /Y'
   ${EndIf}
 !macroend
 
@@ -75,9 +79,9 @@
     !insertmacro _HC_Restore "hotelLogo.jpg"
     !insertmacro _HC_Restore "hotelLogo.ico"
 
-    ; Restore shift logs folder tree
+    ; Restore shift logs folder tree recursively via xcopy
     ${If} ${FileExists} "$R0\shiftLogs"
-      CopyFiles /SILENT "$R0\shiftLogs\" "$INSTDIR\shiftLogs\"
+      ExecWait 'xcopy "$R0\shiftLogs" "$INSTDIR\shiftLogs" /E /I /Q /Y'
     ${EndIf}
 
     ; Clean up the temp backup
