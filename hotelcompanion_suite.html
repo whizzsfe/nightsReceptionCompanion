@@ -6758,12 +6758,12 @@ async function checkForSessionResume() {
 
   if (!sessionData) return;
 
-  // Build a personalised description using the locally saved staff name (profile)
-  // falling back to the name stored in the session file itself.
-  const nameToShow = staffName || sessionData.staffName || 'your previous session';
-  const savedAt    = new Date(sessionData.savedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  // Build a personalised description using only the locally saved staff name (profile).
+  // If no profile is set yet, omit the greeting so the message still reads naturally.
+  const savedAt = new Date(sessionData.savedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const greeting = staffName ? `Hi ${staffName} — an` : 'An';
   const desc = document.getElementById('sessionResumeDesc');
-  if (desc) desc.textContent = `Hi ${nameToShow} — an in-progress shift was last saved at ${savedAt}. Resume to restore your notes, checklist progress, and log entries.`;
+  if (desc) desc.textContent = `${greeting} in-progress shift was last saved at ${savedAt}. Resume to restore your notes, checklist progress, and log entries.`;
 
   const banner = document.getElementById('sessionResumeBanner');
   const btn    = document.getElementById('sessionResumeBtn');
