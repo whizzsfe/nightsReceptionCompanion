@@ -31,6 +31,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteFile: (relPath) =>
     ipcRenderer.invoke('fs:delete', relPath),
 
+  /** Return the last-modified timestamp (ms) of a file, or null if absent.
+   *  Used by the session-sync poller to detect external changes. */
+  fileMtime: (relPath) =>
+    ipcRenderer.invoke('fs:mtime', relPath),
+
   // ── Native dialogs ────────────────────────────────────────────────────────
 
   /** Open a native "Save As" dialog. Returns the chosen file path or null. */

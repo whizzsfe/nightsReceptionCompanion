@@ -400,3 +400,18 @@ ipcMain.handle('window:print', (event) => {
     }
   );
 });
+
+// ---------------------------------------------------------------------------
+// IPC handlers — fs:watch / fs:unwatch / fs:mtime
+// Used by the session-sync feature: PC2 polls the session file mtime so it
+// can detect when PC1 saves (live sync) or when the shift is ended (status:ended).
+// ---------------------------------------------------------------------------
+
+/** Return the mtime (ms since epoch) of a file, or null if absent. */
+ipcMain.handle('fs:mtime', (_event, relPath) => {
+  try {
+    return fs.statSync(safeResolvePath(relPath)).mtimeMs;
+  } catch {
+    return null; // file absent — treat as deleted
+  }
+});

@@ -2476,23 +2476,54 @@
 ----------------------------------------------------------- -->
 <div class="modal-overlay" id="endShiftModal" role="dialog" aria-modal="true" aria-labelledby="endShiftModalTitle">
   <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title" id="endShiftModalTitle">End Shift</span>
-      <button class="modal-close" onclick="closeModal('endShiftModal')" aria-label="Close end shift modal">×</button>
+    <!-- Confirmation panel (default) -->
+    <div id="endShiftConfirmPanel">
+      <div class="modal-header">
+        <span class="modal-title" id="endShiftModalTitle">End Shift</span>
+        <button class="modal-close" onclick="closeModal('endShiftModal')" aria-label="Close end shift modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--text);margin-bottom:12px;">Are you sure you want to end this shift?</p>
+        <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:1.9;margin-bottom:0;">
+          <li>The shift summary will be saved to history.</li>
+          <li>Your handover notes will be passed to the next shift.</li>
+          <li>All session data (checklist, audit, notes, Night Log) will be cleared.</li>
+          <li>Your profile and shift history are never deleted.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('endShiftModal')" aria-label="Cancel end shift">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmEndShift()" aria-label="Confirm end shift">Yes, End Shift</button>
+      </div>
     </div>
-    <div class="modal-body">
-      <p style="font-size:14px;color:var(--text);margin-bottom:12px;">Are you sure you want to end this shift?</p>
-      <ul style="font-size:13px;color:var(--muted);padding-left:18px;line-height:1.9;margin-bottom:0;">
-        <li>The shift summary will be saved to history.</li>
-        <li>Your handover notes will be passed to the next shift.</li>
-        <li>All session data (checklist, audit, notes, Night Log) will be cleared.</li>
-        <li>Your profile and shift history are never deleted.</li>
-      </ul>
+    <!-- Sync countdown panel (shown after confirm, while status:ended propagates) -->
+    <div id="endShiftSyncPanel" style="display:none;padding:28px 24px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:12px;">🔄</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:var(--gold);margin:0 0 8px;">Syncing to Other Terminals</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 20px;">Other open terminals will be notified and locked out automatically. Please wait for the sync to complete.</p>
+      <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;margin-bottom:12px;">
+        <div id="endShiftSyncBar" style="height:100%;background:var(--gold);width:0%;transition:width 0.5s linear;"></div>
+      </div>
+      <div id="endShiftSyncCounter" style="font-family:'DM Mono',monospace;font-size:22px;color:var(--gold);margin-bottom:4px;">15</div>
+      <div style="font-size:12px;color:var(--muted);">seconds</div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('endShiftModal')" aria-label="Cancel end shift">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmEndShift()" aria-label="Confirm end shift">Yes, End Shift</button>
-    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     SESSION ENDED LOCK OVERLAY
+     Shown on PC2 when the session file's status becomes "ended" (i.e. the
+     shift was ended on another terminal). Covers the entire UI — non-dismissable
+     except via the two explicit buttons.
+----------------------------------------------------------- -->
+<div id="sessionEndedOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(10,10,10,0.96);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;" role="alertdialog" aria-modal="true" aria-labelledby="sessionEndedTitle">
+  <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+  <h1 id="sessionEndedTitle" style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:3px;color:var(--gold);margin:0 0 12px;">Shift Ended</h1>
+  <p style="font-size:15px;color:var(--text);max-width:420px;margin:0 0 8px;">This shift was ended from another terminal.</p>
+  <p style="font-size:13px;color:var(--muted);max-width:420px;margin:0 0 32px;">This session is now locked. Please start a new shift or close the app.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn btn-gold" onclick="sessionEndedStartNew()" aria-label="Start a new shift">Start New Shift</button>
+    <button class="btn btn-ghost" onclick="sessionEndedClose()" aria-label="Close the application">Close App</button>
   </div>
 </div>
 
@@ -4233,6 +4264,12 @@ function togglePersist() {
   if (persistData) saveState();
 }
 
+// Textarea input handlers — called by oninput on shift notes and handover notes.
+// Save to localStorage immediately (if persist on) and trigger a debounced session
+// file write so the second PC sees text changes within ~2 seconds.
+function onShiftNotesInput()    { saveState(); saveOnChange(); }
+function onHandoverNotesInput() { saveState(); saveOnChange(); }
+
 // -- Save / Load state --
 function saveState() {
   if (!persistData) return;
@@ -4765,6 +4802,7 @@ function toggleCheck(id, tab) {
   renderChecklist(tab || checklistTab);
   updateDashboardStats();
   saveState();
+  saveOnChange(true); // immediate: another PC should see this tick right away
 }
 
 function updateChecklistProgress(tab) {
@@ -5135,6 +5173,7 @@ function addLogEntry() {
   logEntries.push(entry);
   renderNightLogEntries();
   updateDashboardStats();
+  saveOnChange(true); // immediate: sync new log entry to session file now
 
   // Reset form
   ['nlFloor','nlCategory','nlTitle','nlDescription','nlReporter'].forEach(id => {
@@ -5384,6 +5423,7 @@ function submitQuickLog() {
   renderNightLogEntries();
   updateDashboardStats();
   saveState();
+  saveOnChange(true); // immediate: sync new quick-log entry now
   closeModal('quickLogModal');
 
   // Flash quick log button green
@@ -6289,6 +6329,51 @@ function clearHistory() {
 
 // -- End Shift --
 async function confirmEndShift() {
+  // Step 1: Write status:ended to the session file so PC2 detects the shift is over,
+  // then show the 15-second sync countdown before completing the end-shift flow.
+  // This gives OneDrive time to propagate the ended status to other terminals.
+  const SYNC_WAIT_MS = 15000;
+  const SYNC_TICK_MS = 500;
+
+  // Switch modal to countdown panel
+  document.getElementById('endShiftConfirmPanel').style.display = 'none';
+  document.getElementById('endShiftSyncPanel').style.display = '';
+
+  // Write status:ended into the session file immediately
+  const endedSnapshot = { ...buildSessionSnapshot(), status: 'ended', endedAt: new Date().toISOString() };
+  try {
+    if (window.electronAPI && autoSaveFolderHandle === '__electron__') {
+      await window.electronAPI.writeFile(electronShiftPath(sessionFilename()), JSON.stringify(endedSnapshot, null, 2));
+    } else if (autoSaveFolderHandle && autoSaveFolderHandle !== '__electron__') {
+      const perm = await autoSaveFolderHandle.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') {
+        const dir = await getShiftMonthFolder(autoSaveFolderHandle);
+        await writeToFolder(dir, sessionFilename(), endedSnapshot);
+      }
+    }
+  } catch(e) { console.warn('[end-shift] status:ended write failed:', e); }
+
+  // Run the countdown bar + counter
+  await new Promise(resolve => {
+    let elapsed = 0;
+    const bar     = document.getElementById('endShiftSyncBar');
+    const counter = document.getElementById('endShiftSyncCounter');
+    const tick = setInterval(() => {
+      elapsed += SYNC_TICK_MS;
+      const pct = Math.min(100, (elapsed / SYNC_WAIT_MS) * 100);
+      const secsLeft = Math.max(0, Math.ceil((SYNC_WAIT_MS - elapsed) / 1000));
+      if (bar)     bar.style.width = pct + '%';
+      if (counter) counter.textContent = secsLeft;
+      if (elapsed >= SYNC_WAIT_MS) { clearInterval(tick); resolve(); }
+    }, SYNC_TICK_MS);
+  });
+
+  // Reset sync panel for next time
+  document.getElementById('endShiftConfirmPanel').style.display = '';
+  document.getElementById('endShiftSyncPanel').style.display = 'none';
+  const bar = document.getElementById('endShiftSyncBar');
+  if (bar) bar.style.width = '0%';
+
   // Collect current state for saving
   const handoverEl = document.getElementById('handoverNotes');
   const shiftEl    = document.getElementById('shiftNotes');
@@ -6635,6 +6720,23 @@ function stopAutoSaveInterval() {
   if (autoSaveInterval) { clearInterval(autoSaveInterval); autoSaveInterval = null; }
 }
 
+// -- Debounced save-on-change --
+// Triggered immediately on checklist/log changes; debounced 2s on textarea input.
+// Replaces waiting up to 5 min for the interval tick, enabling near-instant sync
+// to the OneDrive session file so a second PC sees changes within OneDrive's lag.
+let _saveOnChangeTimer = null;
+function saveOnChange(immediate = false) {
+  if (!autoSaveFolderHandle) return;
+  if (immediate) {
+    clearTimeout(_saveOnChangeTimer);
+    _saveOnChangeTimer = null;
+    autoSaveTick();
+  } else {
+    clearTimeout(_saveOnChangeTimer);
+    _saveOnChangeTimer = setTimeout(autoSaveTick, 2000);
+  }
+}
+
 // -- Silently load + merge history from folder on startup --
 async function silentlyLoadHistory(rootHandle) {
   // Electron path
@@ -6770,9 +6872,106 @@ async function checkForSessionResume() {
   if (btn) btn.onclick = () => {
     banner.style.display = 'none';
     restoreSessionSnapshot(sessionData);
+    startSessionPoller(); // start watching for status:ended from another terminal
   };
   if (banner) banner.style.display = '';
+  // Also start the poller immediately even if the user doesn't click Resume —
+  // the session is active on this machine either way once the banner is shown.
+  startSessionPoller();
 }
+
+// -- Session-ended poller (PC2) --
+// After a session file is found and resumed (or detected on startup), we poll
+// its mtime every 30s. If the file is gone or contains status:"ended", we lock
+// this terminal out so it can't be used accidentally after the shift has ended
+// on another PC.
+let _sessionPollInterval = null;
+let _lastOwnWriteAt      = 0; // timestamp of our most recent write — used to ignore our own saves
+
+function startSessionPoller() {
+  if (_sessionPollInterval) return; // already running
+  _sessionPollInterval = setInterval(pollSessionFile, 30_000);
+}
+function stopSessionPoller() {
+  if (_sessionPollInterval) { clearInterval(_sessionPollInterval); _sessionPollInterval = null; }
+}
+
+async function pollSessionFile() {
+  if (!autoSaveFolderHandle) return;
+  const IGNORE_OWN_WRITE_MS = 5000; // ignore changes within 5s of our own save
+  // Don't react to our own saves
+  if (Date.now() - _lastOwnWriteAt < IGNORE_OWN_WRITE_MS) return;
+
+  try {
+    let text = null;
+
+    if (window.electronAPI && autoSaveFolderHandle === '__electron__') {
+      const mtime = await window.electronAPI.fileMtime(electronShiftPath(sessionFilename()));
+      if (mtime === null) { showSessionEndedOverlay(); return; } // file gone
+      // Only read the file content when mtime is newer than our last write
+      if (mtime > _lastOwnWriteAt + IGNORE_OWN_WRITE_MS) {
+        text = await window.electronAPI.readFile(electronShiftPath(sessionFilename()));
+      }
+    } else if (autoSaveFolderHandle && autoSaveFolderHandle !== '__electron__') {
+      try {
+        const dir  = await getShiftMonthFolder(autoSaveFolderHandle);
+        const fh   = await dir.getFileHandle(sessionFilename());
+        const file = await fh.getFile();
+        if (file.lastModified > _lastOwnWriteAt + IGNORE_OWN_WRITE_MS) {
+          text = await file.text();
+        }
+      } catch {
+        showSessionEndedOverlay(); return; // file gone
+      }
+    }
+
+    if (text) {
+      try {
+        const data = JSON.parse(text);
+        if (data.status === 'ended') { showSessionEndedOverlay(); return; }
+      } catch {}
+    }
+  } catch(e) { console.warn('[session-poll] error:', e); }
+}
+
+function showSessionEndedOverlay() {
+  stopSessionPoller();
+  stopAutoSaveInterval(); // stop writing — shift is over
+  const overlay = document.getElementById('sessionEndedOverlay');
+  if (overlay) { overlay.style.display = 'flex'; }
+  // Prevent interaction with the app underneath
+  document.getElementById('mainArea')?.setAttribute('inert', '');
+  document.getElementById('sidebar')?.setAttribute('inert', '');
+}
+
+function sessionEndedStartNew() {
+  // Clear in-memory state, hide overlay, open new shift modal
+  checkState = {}; logEntries = []; floorWalkState = {}; nlPhotoBase64 = null;
+  shiftStart = Date.now(); lastCheckInTime = null;
+  ['shiftNotes','handoverNotes','handoverStaff2','breakfastBags','handoverTaxis','wakeUpCalls']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('mainArea')?.removeAttribute('inert');
+  document.getElementById('sidebar')?.removeAttribute('inert');
+  const overlay = document.getElementById('sessionEndedOverlay');
+  if (overlay) overlay.style.display = 'none';
+  openModal('newShiftModal');
+}
+
+function sessionEndedClose() {
+  if (window.electronAPI) {
+    window.electronAPI.closeWindow();
+  } else {
+    window.close();
+  }
+}
+
+// Patch autoSaveTick to record our own write timestamp so the poller can
+// ignore changes we made ourselves.
+const _origAutoSaveTick = autoSaveTick;
+autoSaveTick = async function() {
+  _lastOwnWriteAt = Date.now();
+  await _origAutoSaveTick();
+};
 
 // -- Init: restore handle from IDB, start interval, load history --
 async function initAutoSave() {
