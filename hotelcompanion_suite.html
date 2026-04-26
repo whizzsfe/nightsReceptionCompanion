@@ -2224,7 +2224,7 @@
       <span class="modal-title" id="newShiftModalTitle">&#127769; New Shift Starting</span>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Previous shift ended. Please confirm who is starting this shift.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Please confirm who is starting this shift.</p>
       <div class="form-group">
         <label for="newShiftName">Your Name</label>
         <input type="text" id="newShiftName" placeholder="e.g. Alex Johnson" maxlength="60" autocomplete="name">
@@ -2255,6 +2255,30 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-gold" onclick="startNewShift()" aria-label="Start new shift">Start Shift ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------------------------------------------------
+     SESSION RESUME MODAL
+     Shown on startup when an in-progress session file is found.
+     Not closeable — user must choose Resume or Start Fresh.
+----------------------------------------------------------- -->
+<div class="modal-overlay" id="sessionResumeModal" role="dialog" aria-modal="true" aria-labelledby="sessionResumeModalTitle" style="z-index:1200;">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header" style="border-bottom:2px solid var(--gold);">
+      <span class="modal-title" id="sessionResumeModalTitle">&#128260; Shift In Progress</span>
+    </div>
+    <div class="modal-body">
+      <p id="sessionResumeModalDesc" style="font-size:13px;color:var(--muted);margin-bottom:16px;">An in-progress shift was found. Would you like to resume where you left off, or start a fresh shift?</p>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:4px;">
+        <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Last saved session</div>
+        <div id="sessionResumeModalInfo" style="font-size:14px;color:var(--text);">Loading…</div>
+      </div>
+    </div>
+    <div class="modal-footer" style="gap:10px;">
+      <button class="btn btn-gold" id="sessionResumeModalBtn" aria-label="Resume the previous shift session">&#128260; Resume Shift</button>
+      <button class="btn btn-ghost" id="sessionFreshBtn" aria-label="Discard the previous session and start a fresh shift">Start Fresh</button>
     </div>
   </div>
 </div>
@@ -2583,17 +2607,7 @@
     </div>
   </div>
 
-  <!-- Session Resume Banner — shown automatically when an in-progress shift file is found -->
-  <div class="card autosave-nudge" id="sessionResumeBanner" style="display:none" role="note" aria-label="In-progress shift found">
-    <div>
-      <h3>🔄 Resume Your Shift</h3>
-      <p id="sessionResumeDesc">An in-progress shift was found. Resume to restore your notes, checklist progress, and log entries.</p>
-    </div>
-    <div class="autosave-nudge-actions">
-      <button class="btn btn-gold" id="sessionResumeBtn" aria-label="Resume previous shift session">Resume Shift</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('sessionResumeBanner').style.display='none'" aria-label="Dismiss and start fresh">Start Fresh</button>
-    </div>
-  </div>
+  <!-- Session resume is handled via #sessionResumeModal on startup -->
 
   <!-- Lone Worker Safety -->
   <div class="card lone-worker-card">
@@ -4225,10 +4239,10 @@ function closeModal(id) {
   if (m) m.classList.remove('open');
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => { if (m.id !== 'newShiftModal') m.classList.remove('open'); });
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => { if (m.id !== 'newShiftModal' && m.id !== 'sessionResumeModal') m.classList.remove('open'); });
 });
 document.querySelectorAll && document.addEventListener('click', e => {
-  if (e.target.classList && e.target.classList.contains('modal-overlay') && e.target.id !== 'newShiftModal') e.target.classList.remove('open');
+  if (e.target.classList && e.target.classList.contains('modal-overlay') && e.target.id !== 'newShiftModal' && e.target.id !== 'sessionResumeModal') e.target.classList.remove('open');
 });
 
 // -- Live clock --
@@ -4347,14 +4361,11 @@ function loadState() {
   if (btn) { btn.classList.toggle('on', persistData); btn.setAttribute('aria-pressed', persistData); }
   if (desc) desc.textContent = persistData ? 'On — saving session data' : 'Off — session only';
 
-  // Restore shift start time (always-saved so timer survives reload)
+  // Restore shift start time — only set if a saved value exists.
+  // shiftStart stays null until the user explicitly starts or resumes a shift,
+  // which prevents a phantom session file being written on every app open.
   const savedShiftStart = localStorage.getItem('shiftCompanion_shiftStart');
-  if (savedShiftStart) {
-    shiftStart = parseInt(savedShiftStart, 10);
-  } else {
-    shiftStart = Date.now();
-    try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
-  }
+  if (savedShiftStart) shiftStart = parseInt(savedShiftStart, 10);
   updateShiftTimer();
 }
 
@@ -4449,6 +4460,12 @@ function saveProfile() {
   // Re-apply rota access in case role changed
   if (document.getElementById('section-rota')?.classList.contains('active')) {
     applyRotaAccessControl();
+  }
+  // First use: start the shift timer now that we have a name
+  if (!shiftStart) {
+    shiftStart = Date.now();
+    try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
+    if (autoSaveFolderHandle) startAutoSaveInterval();
   }
   closeModal('profileModal');
 }
@@ -6497,8 +6514,13 @@ function startNewShift() {
   localStorage.setItem('shiftCompanion_staffName',  staffName);
   localStorage.setItem('shiftCompanion_staffRole',  staffRole);
   localStorage.setItem('shiftCompanion_staffShift', staffShift);
+  // Officially start the shift — set shiftStart now so the session file uses this timestamp
+  shiftStart = Date.now();
+  try { localStorage.setItem('shiftCompanion_shiftStart', shiftStart.toString()); } catch {}
   updateSidebarStaffCard();
   document.getElementById('newShiftModal').classList.remove('open');
+  // Begin auto-saving now that the shift is officially underway
+  if (autoSaveFolderHandle) startAutoSaveInterval();
 }
 
 
@@ -6844,8 +6866,11 @@ function clearStaleSessionState() {
 
 async function checkForSessionResume() {
   const MAX_AGE_MS = 16 * 60 * 60 * 1000; // 16 hours
-  let sessionData     = null;
-  let folderAccessible = false; // true once we've successfully scanned the folder
+  let sessionData      = null;
+  let folderAccessible = false;
+
+  // Track how to delete the found session file if user chooses "Start Fresh"
+  let _deleteFoundSession = async () => {};
 
   try {
     if (window.electronAPI) {
@@ -6853,7 +6878,7 @@ async function checkForSessionResume() {
       const allPaths = await window.electronAPI.scanDir(SHIFT_BASE_FOLDER);
       const sessionPaths = (allPaths || [])
         .filter(p => p.split('/').pop().startsWith('shift_session_') && p.endsWith('.json'))
-        .sort()   // filenames are timestamped — sort descending gives newest last
+        .sort()
         .reverse();
       for (const relPath of sessionPaths) {
         try {
@@ -6864,6 +6889,7 @@ async function checkForSessionResume() {
           const age = Date.now() - new Date(data.savedAt).getTime();
           if (age > MAX_AGE_MS) continue;
           sessionData = data;
+          _deleteFoundSession = async () => { try { await window.electronAPI.deleteFile(relPath); } catch {} };
           break;
         } catch { continue; }
       }
@@ -6872,6 +6898,8 @@ async function checkForSessionResume() {
     else if (autoSaveFolderHandle && autoSaveFolderHandle !== '__electron__') {
       folderAccessible = true;
       const dir = await getShiftMonthFolder(autoSaveFolderHandle);
+      let foundName = null;
+      let foundDir  = dir;
       for await (const [name, handle] of dir.entries()) {
         if (!name.startsWith('shift_session_') || !name.endsWith('.json')) continue;
         try {
@@ -6881,41 +6909,72 @@ async function checkForSessionResume() {
           if (data.schemaVersion !== 1 || data.type !== 'shift_session') continue;
           const age = Date.now() - new Date(data.savedAt).getTime();
           if (age > MAX_AGE_MS) continue;
-          // Take newest (iterate all, keep most recent)
           if (!sessionData || new Date(data.savedAt) > new Date(sessionData.savedAt)) {
             sessionData = data;
+            foundName   = name;
+            foundDir    = dir;
           }
         } catch { continue; }
+      }
+      if (foundName) {
+        _deleteFoundSession = async () => { try { await foundDir.removeEntry(foundName); } catch {} };
       }
     }
   } catch { return; } // fully silent on any error — don't clear data if scan failed
 
   if (!sessionData) {
-    // Folder was accessible but no active session file found.
-    // This means any session data still in localStorage is stale (e.g. the shift was
-    // ended on another terminal while this PC was closed). Clear it so PC1 doesn't
-    // restart with an orphaned shift state.
-    if (folderAccessible) clearStaleSessionState();
+    // Folder accessible but no session file found — clear any stale localStorage state
+    if (folderAccessible) {
+      clearStaleSessionState();
+      shiftStart = null; // ensure we start clean
+    }
+    // If a shift is already underway (shiftStart restored from localStorage by loadState),
+    // begin auto-saving immediately.
+    if (autoSaveFolderHandle && shiftStart && staffName) {
+      startAutoSaveInterval();
+    } else if (folderAccessible && staffName && !shiftStart) {
+      // Returning user with no active session — prompt to start a fresh shift
+      // so the timer and session file start at the correct time.
+      openModal('newShiftModal');
+    }
     return;
   }
 
-  // Build a personalised description using only the locally saved staff name (profile).
-  // If no profile is set yet, omit the greeting so the message still reads naturally.
-  const savedAt = new Date(sessionData.savedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  const greeting = staffName ? `Hi ${staffName} — an` : 'An';
-  const desc = document.getElementById('sessionResumeDesc');
-  if (desc) desc.textContent = `${greeting} in-progress shift was last saved at ${savedAt}. Resume to restore your notes, checklist progress, and log entries.`;
+  // A session file was found — show the Resume/Start Fresh modal.
+  const savedAt   = new Date(sessionData.savedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const shiftName = sessionData.staffName || staffName || 'Unknown';
+  const shiftDate = sessionData.savedAt
+    ? new Date(sessionData.savedAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+    : '';
 
-  const banner = document.getElementById('sessionResumeBanner');
-  const btn    = document.getElementById('sessionResumeBtn');
-  if (btn) btn.onclick = () => {
-    banner.style.display = 'none';
+  const infoEl = document.getElementById('sessionResumeModalInfo');
+  if (infoEl) infoEl.innerHTML =
+    `<strong>${escapeHtml(shiftName)}</strong> &mdash; last saved at <strong>${savedAt}</strong>${shiftDate ? ` on ${shiftDate}` : ''}`;
+
+  const descEl = document.getElementById('sessionResumeModalDesc');
+  if (descEl) descEl.textContent = `An in-progress shift was found. Resume to restore your notes, checklist progress, and log entries — or start a fresh shift.`;
+
+  const resumeBtn = document.getElementById('sessionResumeModalBtn');
+  const freshBtn  = document.getElementById('sessionFreshBtn');
+
+  if (resumeBtn) resumeBtn.onclick = () => {
+    document.getElementById('sessionResumeModal').classList.remove('open');
     restoreSessionSnapshot(sessionData);
-    startSessionPoller(); // start watching for status:ended from another terminal
+    startSessionPoller();
   };
-  if (banner) banner.style.display = '';
-  // Also start the poller immediately even if the user doesn't click Resume —
-  // the session is active on this machine either way once the banner is shown.
+
+  if (freshBtn) freshBtn.onclick = async () => {
+    document.getElementById('sessionResumeModal').classList.remove('open');
+    // Delete the old session file so it isn't offered again
+    await _deleteFoundSession();
+    clearStaleSessionState();
+    shiftStart = null;
+    // Open the new shift modal to confirm who is starting
+    openModal('newShiftModal');
+  };
+
+  document.getElementById('sessionResumeModal').classList.add('open');
+  // Start the poller so we detect if the shift ends on another terminal
   startSessionPoller();
 }
 
@@ -6985,8 +7044,9 @@ function showSessionEndedOverlay() {
 
 function sessionEndedStartNew() {
   // Clear in-memory state, hide overlay, open new shift modal
+  // shiftStart will be set properly when the user clicks "Start Shift" in the modal
   checkState = {}; logEntries = []; floorWalkState = {}; nlPhotoBase64 = null;
-  shiftStart = Date.now(); lastCheckInTime = null;
+  shiftStart = null; lastCheckInTime = null;
   ['shiftNotes','handoverNotes','handoverStaff2','breakfastBags','handoverTaxis','wakeUpCalls']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('mainArea')?.removeAttribute('inert');
@@ -7019,10 +7079,13 @@ async function initAutoSave() {
     autoSaveFolderHandle = '__electron__';
     const btn = document.getElementById('autoSaveSetupBtn');
     if (btn) btn.style.display = 'none';
-    startAutoSaveInterval();
+    // Don't start the auto-save interval yet — checkForSessionResume() decides
+    // whether to show the Resume/Start Fresh modal first. The interval is started
+    // from startNewShift(), restoreSessionSnapshot(), or (if shift already active
+    // from localStorage) from inside checkForSessionResume().
     updateAutoSaveStatus(true, null);
     silentlyLoadHistory(null);
-    checkForSessionResume(); // offer to restore any in-progress session file
+    await checkForSessionResume();
     return;
   }
   if (!window.showDirectoryPicker) return; // API unavailable
@@ -7035,10 +7098,10 @@ async function initAutoSave() {
   try {
     const perm = await handle.queryPermission({ mode: 'readwrite' });
     if (perm === 'granted') {
-      startAutoSaveInterval();
+      // Don't start the interval yet — let checkForSessionResume decide
       updateAutoSaveStatus(true, null);
-      silentlyLoadHistory(handle);  // fire-and-forget
-      checkForSessionResume();      // offer to restore any in-progress session file
+      silentlyLoadHistory(handle);
+      await checkForSessionResume();
     } else {
       const desc = document.getElementById('autoSaveDesc');
       if (desc) { desc.textContent = 'Re-authorise required'; }
@@ -7052,7 +7115,8 @@ async function setupAutoSaveFolder() {
   // Electron: auto-save is always on — no picker needed.
   if (window.electronAPI) {
     autoSaveFolderHandle = '__electron__';
-    startAutoSaveInterval();
+    // Start saving immediately only if a shift is already in progress
+    if (shiftStart && staffName) startAutoSaveInterval();
     updateAutoSaveStatus(true, null);
     showAutoSaveNudge(false);
     alert('Auto-save is active.\nShift files are saved to the shiftLogs folder next to the application.');
@@ -7065,9 +7129,14 @@ async function setupAutoSaveFolder() {
     const handle = await showDirectoryPicker({ mode: 'readwrite', id: 'shiftAutoSave' });
     autoSaveFolderHandle = handle;
     await storeFolderHandle(handle);
-    startAutoSaveInterval();
     updateAutoSaveStatus(true, null);
     showAutoSaveNudge(false); // dismiss nudge
+    // If a shift is already active, start saving immediately; otherwise scan for a session file
+    if (shiftStart && staffName) {
+      startAutoSaveInterval();
+    } else {
+      await checkForSessionResume();
+    }
     alert(`Auto-save folder set: ${handle.name}\nShift files will be written to ${handle.name}/${SHIFT_BASE_FOLDER}/YYYY/YYYY-MM MMM/`);
   } catch(e) {
     if (e.name !== 'AbortError') console.warn('Folder setup failed:', e);
@@ -7194,6 +7263,9 @@ function restoreSessionSnapshot(data) {
   updateDashboardStats();
   updateCheckInDisplay();
   if (persistData) saveState();
+
+  // Ensure auto-save is running now that the shift is resumed
+  if (autoSaveFolderHandle) startAutoSaveInterval();
 
   alert('Shift session restored.');
   showSection('dashboard', document.querySelector('[data-section=dashboard]'));
