@@ -3309,7 +3309,7 @@
             <div id="signBgLayer" style="display:none;"></div>
             <div id="signOvlLayer" style="background:transparent;"></div>
             <div id="signContent">
-              <img id="signLogoPreview" src="hotelLogo.jpg" alt="Logo" onload="signDefaultLogoLoaded()" onerror="this.style.display='none';">
+              <img id="signLogoPreview" src="hotelLogo.jpg" alt="Logo" onerror="this.style.display='none';">
               <div id="signTextWrap">
                 <div id="signBodyEl">Authorized Personnel Only</div>
                 <div id="signSubEl">Please present ID at the front desk.</div>
@@ -5932,6 +5932,13 @@ function signDefaultLogoLoaded() {
   if (thumb) thumb.src = signLogoImage;
   if (wrap)  wrap.style.display = 'block';
 }
+// Wire up after function is defined — handles cached images that fire onload before script runs
+(function() {
+  const _sl = document.getElementById('signLogoPreview');
+  if (!_sl) return;
+  if (_sl.complete && _sl.naturalWidth > 0) { signDefaultLogoLoaded(); }
+  else { _sl.addEventListener('load', signDefaultLogoLoaded); }
+})();
 
 function loadSignLogo(e) {
   const file = (e.target || e).files?.[0];
@@ -6974,8 +6981,10 @@ async function checkForSessionResume() {
   };
 
   document.getElementById('sessionResumeModal').classList.add('open');
-  // Start the poller so we detect if the shift ends on another terminal
-  startSessionPoller();
+  // NOTE: do NOT start the poller here — shiftStart is still null at this point,
+  // which would cause sessionFilename() to generate a wrong name, the poll to
+  // think the file is gone, and showSessionEndedOverlay() to fire prematurely.
+  // The poller is started in the Resume button handler after shiftStart is restored.
 }
 
 // -- Session-ended poller (PC2) --
@@ -6996,9 +7005,11 @@ function stopSessionPoller() {
 
 async function pollSessionFile() {
   if (!autoSaveFolderHandle) return;
-  const IGNORE_OWN_WRITE_MS = 5000; // ignore changes within 5s of our own save
-  // Don't react to our own saves
-  if (Date.now() - _lastOwnWriteAt < IGNORE_OWN_WRITE_MS) return;
+  // Don't poll if we don't have a valid session yet — shiftStart null means
+  // sessionFilename() would generate a wrong name and trigger a false "file gone".
+  if (!shiftStart) return;
+  const DEBOUNCE_MS = 3000; // skip if we wrote the file ourselves within the last 3s
+  if (_lastOwnWriteAt > 0 && Date.now() - _lastOwnWriteAt < DEBOUNCE_MS) return;
 
   try {
     let text = null;
@@ -7006,18 +7017,15 @@ async function pollSessionFile() {
     if (window.electronAPI && autoSaveFolderHandle === '__electron__') {
       const mtime = await window.electronAPI.fileMtime(electronShiftPath(sessionFilename()));
       if (mtime === null) { showSessionEndedOverlay(); return; } // file gone
-      // Only read the file content when mtime is newer than our last write
-      if (mtime > _lastOwnWriteAt + IGNORE_OWN_WRITE_MS) {
-        text = await window.electronAPI.readFile(electronShiftPath(sessionFilename()));
-      }
+      // Always read content — mtime optimization was causing status:"ended" to be missed
+      // when PC1 ended the shift shortly after PC2's last auto-save
+      text = await window.electronAPI.readFile(electronShiftPath(sessionFilename()));
     } else if (autoSaveFolderHandle && autoSaveFolderHandle !== '__electron__') {
       try {
         const dir  = await getShiftMonthFolder(autoSaveFolderHandle);
         const fh   = await dir.getFileHandle(sessionFilename());
         const file = await fh.getFile();
-        if (file.lastModified > _lastOwnWriteAt + IGNORE_OWN_WRITE_MS) {
-          text = await file.text();
-        }
+        text = await file.text(); // always read — don't skip based on lastModified
       } catch {
         showSessionEndedOverlay(); return; // file gone
       }
@@ -7051,6 +7059,10 @@ function sessionEndedStartNew() {
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('mainArea')?.removeAttribute('inert');
   document.getElementById('sidebar')?.removeAttribute('inert');
+  // Ensure sessionResumeModal is closed — if the poller fired while it was still
+  // open (shiftStart was null), showSessionEndedOverlay() would have run without
+  // dismissing it, leaving it open and covering #newShiftModal (z-index 1200 > 1100).
+  document.getElementById('sessionResumeModal')?.classList.remove('open');
   const overlay = document.getElementById('sessionEndedOverlay');
   if (overlay) overlay.style.display = 'none';
   openModal('newShiftModal');
