@@ -7168,11 +7168,17 @@ function sessionEndedClose() {
   }
 }
 
-// Patch autoSaveTick to record our own write timestamp so the poller can
-// ignore changes we made ourselves.
+// Patch autoSaveTick to record our own write timestamps so the poller can:
+// (a) ignore/debounce self-changes (_lastOwnWriteAt), and
+// (b) detect when the *other* PC saves something newer (_lastKnownFileSavedAt).
+// Both are set to the same instant — the actual savedAt written into the file
+// is new Date().toISOString() which rounds to the same second, so the 5s
+// buffer in the poller guard makes them equivalent for comparison purposes.
 const _origAutoSaveTick = autoSaveTick;
 autoSaveTick = async function() {
-  _lastOwnWriteAt = Date.now();
+  const now = Date.now();
+  _lastOwnWriteAt       = now;
+  _lastKnownFileSavedAt = now; // baseline: "we last wrote at this time"
   await _origAutoSaveTick();
 };
 
