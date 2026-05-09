@@ -26,6 +26,7 @@ const OVERRIDE_FILES = [
   'hotelcompanion_config.js',
   'hotelcompanion_items.js',
   'hotelcompanion_scripts.js',
+  'hotelcompanion_license.js',
 ];
 
 // ---------------------------------------------------------------------------

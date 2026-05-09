@@ -375,8 +375,162 @@
     /* ── FOCUS STYLES ────────────────────────────────────────── */
     *:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   </style>
+
+  <script src="hotelcompanion_license.js" onerror="void 0"></script>
+
+  <!-- ── LICENSE VERIFICATION ──────────────────────────────────────────────
+       Same verification block as hotelcompanion_suite.html.
+       © 2026 Whizzsfe Web Services — whizzsfe@gmail.com
+  ─────────────────────────────────────────────────────────────────────────── -->
+  <script>
+  (function () {
+    'use strict';
+    const LICENSE_PUBLIC_KEY_B64 =
+      'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2mNOIs7m0AjhMAt2Bwol' +
+      '35pRUEFLap2XdqgFY9DaqAHebj6VjhylAuVpp4n1LGU4W1SOIq8tQcq/2v2rJTVz' +
+      'pQUvNJty20PinguxLpA95eN52yux8acUD631YhfTNnBu26Nkz7IzlABAEGW6U4DED' +
+      'rU1gc1zZwCOiOtgtZzgde4xdhGcQbpqshzEIV6AQ0PI8iP+xcZ2as3s45MSHYdF4o' +
+      '1jADYFpavXndS2veUecxf8uxyyXAGhIsNMKqJ+NucMeQRqE5CbhayBTwLUHPe8Bld' +
+      'av+ievvF6GCM1tSFQF/suwOuv0VBZ8QOmEk/1iqg+frVTqoD2SrxvhqjJ3jBPCwID' +
+      'AQAB';
+
+    const RENEWAL_EMAIL = 'whizzsfe@gmail.com';
+    const WARNING_DAYS  = 14;
+
+    async function verifyLicense() {
+      var lic = window.HOTELCOMPANION_LICENSE;
+      if (!lic || typeof lic !== 'object' || lic.version !== 1)
+        return { state: 'missing', license: null };
+
+      var propertyName = lic.propertyName, licenseeName = lic.licenseeName,
+          issuedAt = lic.issuedAt, expiresAt = lic.expiresAt, signature = lic.signature;
+
+      if (![propertyName, licenseeName, issuedAt, expiresAt, signature]
+          .every(function (v) { return typeof v === 'string' && v.length > 0; }))
+        return { state: 'invalid', license: lic };
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(issuedAt) ||
+          !/^\d{4}-\d{2}-\d{2}$/.test(expiresAt))
+        return { state: 'invalid', license: lic };
+
+      try {
+        var spkiDer = Uint8Array.from(atob(LICENSE_PUBLIC_KEY_B64.replace(/\s/g, '')),
+          function (c) { return c.charCodeAt(0); });
+        var pubKey = await crypto.subtle.importKey(
+          'spki', spkiDer, { name: 'RSA-PSS', hash: 'SHA-256' }, false, ['verify']
+        );
+        var payload    = propertyName + '|' + licenseeName + '|' + issuedAt + '|' + expiresAt;
+        var payloadBuf = new TextEncoder().encode(payload);
+        var sigBuf     = Uint8Array.from(atob(signature), function (c) { return c.charCodeAt(0); });
+        var valid = await crypto.subtle.verify(
+          { name: 'RSA-PSS', saltLength: 32 }, pubKey, sigBuf, payloadBuf
+        );
+        if (!valid) return { state: 'invalid', license: lic };
+      } catch (_) {
+        return { state: 'invalid', license: lic };
+      }
+
+      var today    = new Date(); today.setHours(0, 0, 0, 0);
+      var expiry   = new Date(expiresAt + 'T00:00:00');
+      var daysLeft = Math.floor((expiry - today) / 86400000);
+      if (daysLeft < 0)           return { state: 'expired', license: lic, daysLeft: daysLeft };
+      if (daysLeft <= WARNING_DAYS) return { state: 'warning', license: lic, daysLeft: daysLeft };
+      return { state: 'valid',     license: lic, daysLeft: daysLeft };
+    }
+
+    function _esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderLicenseError(state, lic) {
+      var titles   = { missing: 'No License File Found', invalid: 'License File Invalid', expired: 'License Expired' };
+      var propLine = lic && lic.propertyName
+        ? '<div style="font-size:12px;color:var(--muted,#888880);font-family:\'DM Mono\',monospace;letter-spacing:0.5px;margin-bottom:6px;">' + _esc(lic.propertyName) + '</div>'
+        : '';
+      var expLine = (state === 'expired' && lic && lic.expiresAt)
+        ? '<p style="margin:0 0 10px;">Expired on <strong style="color:var(--red,#E05555);">' + _esc(lic.expiresAt) + '</strong>.</p>'
+        : '';
+      var bodies = {
+        missing: '<p style="margin:0 0 10px;">A valid license file is required to use the Content Editor.</p><p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> to obtain a license for this property.</p>',
+        invalid: '<p style="margin:0 0 10px;">The license file could not be verified — it may have been modified or corrupted.</p><p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> for a replacement.</p>',
+        expired: expLine + '<p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> to renew your license.</p>',
+      };
+      var subj = encodeURIComponent(
+        'Night Companion License ' +
+        (state === 'expired' ? 'Renewal' : state === 'missing' ? 'Request' : 'Issue') +
+        (lic && lic.propertyName ? ' \u2014 ' + lic.propertyName : '')
+      );
+      return '<div style="background:var(--card,#181818);border:1px solid var(--border,#2A2A2A);border-radius:12px;padding:40px 36px;max-width:460px;width:90%;text-align:center;font-family:\'DM Sans\',sans-serif;color:var(--text,#F0EDE8);box-shadow:0 8px 40px rgba(0,0,0,0.6);">' +
+        '<div style="font-size:44px;margin-bottom:12px;">&#128274;</div>' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:26px;color:var(--gold,#D4A843);letter-spacing:2px;margin-bottom:8px;">' + _esc(titles[state]) + '</div>' +
+        propLine +
+        '<div style="color:var(--muted,#888880);font-size:13px;line-height:1.65;margin-bottom:22px;text-align:left;">' + bodies[state] + '</div>' +
+        '<a href="mailto:' + RENEWAL_EMAIL + '?subject=' + subj + '" style="display:inline-block;background:var(--gold,#D4A843);color:#0A0A0A;padding:11px 26px;border-radius:6px;font-weight:700;text-decoration:none;font-size:13px;">Contact Whizzsfe Web Services</a>' +
+        '<div style="margin-top:12px;font-size:11px;color:var(--muted,#888880);font-family:\'DM Mono\',monospace;">' + RENEWAL_EMAIL + '</div>' +
+        '</div>';
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      var gate = document.getElementById('licenseGate');
+      if (!gate) return;
+
+      var result = await verifyLicense();
+
+      if (result.state === 'valid' || result.state === 'warning') {
+        gate.style.opacity    = '0';
+        gate.style.transition = 'opacity 0.25s ease';
+        setTimeout(function () { if (gate.parentNode) gate.parentNode.removeChild(gate); }, 300);
+
+        // 14-day expiry warning banner (prepended to document body in editor).
+        if (result.state === 'warning') {
+          var dl   = result.daysLeft;
+          var days = dl === 0 ? 'today' : dl === 1 ? 'in 1\u00a0day' : 'in ' + dl + '\u00a0days';
+          var subj = encodeURIComponent('Night Companion License Renewal' +
+            (result.license && result.license.propertyName ? ' \u2014 ' + result.license.propertyName : ''));
+          var banner = document.createElement('div');
+          banner.id = 'licenseWarningBanner';
+          banner.setAttribute('role', 'alert');
+          banner.style.cssText = [
+            'background:var(--gold-dim,#8A6B20)', 'color:var(--text,#F0EDE8)',
+            'padding:9px 18px', 'font-size:12.5px', 'font-family:"DM Sans",sans-serif',
+            'display:flex', 'align-items:center', 'justify-content:space-between',
+            'gap:12px', 'border-bottom:1px solid var(--gold,#D4A843)',
+            'position:sticky', 'top:0', 'z-index:200',
+          ].join(';');
+          banner.innerHTML =
+            '<span>\u26a0 <strong>License expires ' + days + '</strong> \u2014 contact ' +
+            '<a href="mailto:' + RENEWAL_EMAIL + '?subject=' + subj + '" ' +
+            'style="color:var(--gold-light,#F0C96A);">' + RENEWAL_EMAIL + '</a> to renew.</span>' +
+            '<button onclick="this.parentElement.remove()" ' +
+            'style="background:none;border:none;color:var(--text,#F0EDE8);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;" ' +
+            'aria-label="Dismiss license warning">\u2715</button>';
+          document.body.insertBefore(banner, document.body.firstChild);
+        }
+      } else {
+        gate.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;">' +
+          renderLicenseError(result.state, result.license) +
+          '</div>';
+      }
+    });
+  })();
+  </script>
 </head>
 <body>
+
+<!-- ── LICENSE GATE ──────────────────────────────────────────────────────────
+     Full-screen cover shown during async RSA-PSS license verification.
+──────────────────────────────────────────────────────────────────────────── -->
+<div id="licenseGate" aria-live="assertive"
+  style="position:fixed;inset:0;background:var(--black,#0A0A0A);z-index:99999;display:flex;align-items:center;justify-content:center;">
+  <div style="text-align:center;color:var(--muted,#888880);">
+    <div style="width:28px;height:28px;border:2px solid var(--border,#2A2A2A);border-top-color:var(--gold,#D4A843);border-radius:50%;margin:0 auto 14px;animation:licenseSpinner 0.75s linear infinite;"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;">VERIFYING LICENSE&#8230;</div>
+  </div>
+</div>
+<style>@keyframes licenseSpinner { to { transform: rotate(360deg); } }</style>
 
 <!-- TOP BAR -->
 <header class="topbar" role="banner">
