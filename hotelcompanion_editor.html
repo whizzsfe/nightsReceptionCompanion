@@ -546,6 +546,7 @@
     <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="panel-pre"     id="tab-pre"     onclick="switchTab('pre')"    >Pre-Audit  <span class="tab-badge" id="badge-pre">0</span></button>
     <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-post"    id="tab-post"    onclick="switchTab('post')"   >Post-Audit <span class="tab-badge" id="badge-post">0</span></button>
     <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-scripts" id="tab-scripts" onclick="switchTab('scripts')">AI Scripts <span class="tab-badge" id="badge-scripts">0</span></button>
+    <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-wiki"    id="tab-wiki"    onclick="switchTab('wiki')"   >Ops Manual <span class="tab-badge" id="badge-wiki">0</span></button>
   </nav>
 </header>
 
@@ -583,6 +584,27 @@
     <button class="btn btn-add" onclick="addScript()" aria-label="Add AI script">＋ Add Script</button>
   </div>
 
+  <!-- OPERATIONS MANUAL (WIKI) TAB -->
+  <div class="tab-panel" id="panel-wiki" role="tabpanel" aria-labelledby="tab-wiki">
+    <div class="section-heading">Operations Manual Pages</div>
+    <div class="section-sub">Knowledge base pages shown in the Ops Manual section of the app. Add, edit, reorder, and categorise pages.</div>
+
+    <!-- Category filter / search -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <input type="text" id="wikiEditorSearch" placeholder="Search pages…" oninput="renderWikiEditorList()"
+        style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;flex:1;min-width:180px;outline:none;"
+        aria-label="Search wiki pages">
+      <select id="wikiEditorCatFilter" onchange="renderWikiEditorList()"
+        style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;cursor:pointer;"
+        aria-label="Filter by category">
+        <option value="">All categories</option>
+      </select>
+    </div>
+
+    <div class="item-list" id="list-wiki"></div>
+    <button class="btn btn-add" onclick="addWikiPage()" aria-label="Add wiki page">＋ Add Page</button>
+  </div>
+
 </main>
 
 <!-- BOTTOM ACTION BAR -->
@@ -604,19 +626,21 @@
     <button class="btn btn-gold" onclick="exportScripts()" id="exportScriptsBtn" aria-label="Export and save AI scripts">
       ↓ Export Scripts (.js)
     </button>
+    <button class="btn btn-gold" onclick="exportWiki()" id="exportWikiBtn" style="display:none;" aria-label="Export and save Operations Manual pages">
+      ↓ Export Ops Manual (.js)
+    </button>
   </div>
 </footer>
 
 <!-- IMPORT FILE INPUT (hidden) -->
-<input type="file" id="importFileInput" accept=".js" style="display:none" aria-hidden="true">
-<input type="file" id="pdfFileInput" accept=".pdf" style="display:none" aria-hidden="true">
+<input type="file" id="importFileInput" accept=".js" style="display:none" aria-hidden="true"><input type="file" id="pdfFileInput" accept=".pdf" style="display:none" aria-hidden="true">
 
 <!-- RESET CONFIRM MODAL -->
 <div class="modal-overlay" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('resetModal')" aria-label="Close">×</button>
     <div class="modal-title" id="resetModalTitle">Reset to Defaults?</div>
-    <p style="color:var(--muted);font-size:14px;line-height:1.6;">This will discard all your changes to <strong style="color:var(--text)">both</strong> the checklist items and AI scripts, and reload the built-in defaults. Any unsaved customisation will be lost.</p>
+    <p style="color:var(--muted);font-size:14px;line-height:1.6;">This will discard all your changes to the checklist items, AI scripts, and Operations Manual pages, and reload the built-in defaults. Any unsaved customisation will be lost.</p>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('resetModal')">Cancel</button>
       <button class="btn btn-danger" onclick="doReset()">Yes, Reset Everything</button>
@@ -654,9 +678,11 @@
 let preAuditItems  = [];
 let postAuditItems = [];
 let scriptItems    = [];
+let wikiItems      = [];
 let activeTab      = 'pre';
 let isDirty        = false;
 let pdfDrafts      = [];
+let _autosaveTimer = null;
 
 // ═══════════════════════════════════════════════════════════════
 // DEFAULT DATA — mirrors hotelcompanion_items.example.js exactly
@@ -1058,14 +1084,16 @@ function onDragEnd() { this.style.opacity = ''; document.querySelectorAll('.item
 
 function switchTab(tab) {
   activeTab = tab;
-  ['pre','post','scripts'].forEach(t => {
+  ['pre','post','scripts','wiki'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === tab);
     document.getElementById('tab-' + t).setAttribute('aria-selected', t === tab);
     document.getElementById('panel-' + t).classList.toggle('active', t === tab);
   });
-  document.getElementById('exportItemsBtn').style.display   = tab === 'scripts' ? 'none' : '';
-  document.getElementById('exportScriptsBtn').style.display = tab !== 'scripts' ? 'none' : '';
-  document.getElementById('pdfImportBtn').style.display     = tab !== 'scripts' ? 'none' : '';
+  document.getElementById('exportItemsBtn').style.display   = (tab === 'scripts' || tab === 'wiki') ? 'none' : '';
+  document.getElementById('exportScriptsBtn').style.display = (tab !== 'scripts') ? 'none' : '';
+  document.getElementById('exportWikiBtn').style.display    = (tab === 'wiki') ? '' : 'none';
+  document.getElementById('pdfImportBtn').style.display     = (tab !== 'scripts') ? 'none' : '';
+  if (tab === 'wiki') renderWikiEditorList();
 }
 
 function updateBadge(tab, count) {
@@ -1074,11 +1102,34 @@ function updateBadge(tab, count) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// DIRTY STATE
+// DIRTY STATE & AUTOSAVE
 // ═══════════════════════════════════════════════════════════════
 
-function markDirty() { isDirty = true; }
+function markDirty() { isDirty = true; scheduleAutosave(); }
 function markClean() { isDirty = false; }
+
+// Autosave — Electron only. Debounces 2 s after the last change, then writes
+// all three content files silently to EXE_DIR via the fs:write IPC channel.
+function scheduleAutosave() {
+  if (!window.electronAPI) return;
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer = setTimeout(doAutosave, 2000);
+}
+
+async function doAutosave() {
+  if (!window.electronAPI) return;
+  try {
+    await Promise.all([
+      window.electronAPI.writeFile('hotelcompanion_items.js',   serialiseItems()),
+      window.electronAPI.writeFile('hotelcompanion_scripts.js', serialiseScripts()),
+      window.electronAPI.writeFile('hotelcompanion_wiki.js',    serialiseWiki()),
+    ]);
+    markClean();
+    showLastSaved('Auto-saved');
+  } catch (err) {
+    console.warn('[autosave] Failed to write override files:', err);
+  }
+}
 
 window.addEventListener('beforeunload', e => {
   if (isDirty) { e.preventDefault(); e.returnValue = ''; }
@@ -1180,9 +1231,10 @@ function processImportText(text, filename) {
   // Detect which file type we're importing
   const isItems   = /window\.HOTELCOMPANION_ITEMS\s*=/.test(text);
   const isScripts = /window\.HOTELCOMPANION_SCRIPTS\s*=/.test(text);
+  const isWiki    = /window\.HOTELCOMPANION_WIKI\s*=/.test(text);
 
-  if (!isItems && !isScripts) {
-    showToast('Unrecognised file — expected hotelcompanion_items.js or hotelcompanion_scripts.js', 'error');
+  if (!isItems && !isScripts && !isWiki) {
+    showToast('Unrecognised file — expected hotelcompanion_items.js, hotelcompanion_scripts.js, or hotelcompanion_wiki.js', 'error');
     return;
   }
 
@@ -1208,6 +1260,19 @@ function processImportText(text, filename) {
     renderScripts();
     markDirty();
     showToast('Scripts loaded from ' + filename, 'success');
+  }
+
+  if (isWiki) {
+    const data = parseJsAssignment(text, 'HOTELCOMPANION_WIKI');
+    if (!data) { showToast('Could not parse ' + filename + ' — check file format', 'error'); return; }
+    const err = validateWikiData(data);
+    if (err) { showToast('Import failed: ' + err, 'error'); return; }
+    wikiItems = data.pages;
+    renderWikiEditorList();
+    updateBadge('wiki', wikiItems.length);
+    markDirty();
+    showToast('Ops Manual loaded from ' + filename + ' (' + wikiItems.length + ' pages)', 'success');
+    switchTab('wiki');
   }
 }
 
@@ -1276,9 +1341,11 @@ function doReset() {
   preAuditItems  = getDefaultPreAudit();
   postAuditItems = getDefaultPostAudit();
   scriptItems    = getDefaultScripts();
+  wikiItems      = getDefaultWikiPages();
   renderItems('pre');
   renderItems('post');
   renderScripts();
+  renderWikiEditorList();
   closeModal('resetModal');
   markDirty();
   showToast('Reset to defaults', 'success');
@@ -1714,12 +1781,314 @@ document.addEventListener('DOMContentLoaded', () => {
   preAuditItems  = getDefaultPreAudit();
   postAuditItems = getDefaultPostAudit();
   scriptItems    = getDefaultScripts();
+  wikiItems      = getDefaultWikiPages();
   renderItems('pre');
   renderItems('post');
   renderScripts();
   // Show correct export buttons for initial tab
   switchTab('pre');
 });
+
+// ═══════════════════════════════════════════════════════════════
+// WIKI (OPERATIONS MANUAL) EDITOR
+// ═══════════════════════════════════════════════════════════════
+
+function getDefaultWikiPages() {
+  // Mirrors hotelcompanion_wiki.example.js — pulled in at runtime if present
+  if (window.HOTELCOMPANION_WIKI && Array.isArray(window.HOTELCOMPANION_WIKI.pages)) {
+    return JSON.parse(JSON.stringify(window.HOTELCOMPANION_WIKI.pages));
+  }
+  return []; // Editor starts empty when no example file loaded alongside
+}
+
+function validateWikiData(data) {
+  if (!data || typeof data !== 'object') return 'Not a valid object';
+  if (data.version !== 1) return 'version must be 1';
+  if (!Array.isArray(data.pages)) return 'pages must be an array';
+  for (const [i, p] of data.pages.entries()) {
+    if (typeof p.id !== 'string' || !p.id) return `Page ${i+1}: id must be a non-empty string`;
+    if (typeof p.title !== 'string') return `Page ${i+1}: title must be a string`;
+    if (typeof p.category !== 'string') return `Page ${i+1}: category must be a string`;
+    if (typeof p.categoryOrder !== 'number') return `Page ${i+1}: categoryOrder must be a number`;
+    if (typeof p.pageOrder !== 'number') return `Page ${i+1}: pageOrder must be a number`;
+    if (typeof p.content !== 'string') return `Page ${i+1}: content must be a string`;
+    if (typeof p.lastModified !== 'string') return `Page ${i+1}: lastModified must be a string`;
+  }
+  return null;
+}
+
+function wikiSortedEditorItems(items) {
+  return [...items].sort((a, b) => {
+    if (a.categoryOrder !== b.categoryOrder) return a.categoryOrder - b.categoryOrder;
+    if (a.category < b.category) return -1;
+    if (a.category > b.category) return 1;
+    return a.pageOrder - b.pageOrder;
+  });
+}
+
+function wikiEditorCategories() {
+  const seen = new Map();
+  wikiSortedEditorItems(wikiItems).forEach(p => {
+    if (!seen.has(p.category)) seen.set(p.category, p.categoryOrder);
+  });
+  return [...seen.entries()].sort((a, b) => a[1] - b[1]).map(([c]) => c);
+}
+
+function renderWikiEditorList() {
+  const list = document.getElementById('list-wiki');
+  if (!list) return;
+  const query = (document.getElementById('wikiEditorSearch')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('wikiEditorCatFilter')?.value || '';
+
+  // Refresh category filter dropdown
+  const catSel = document.getElementById('wikiEditorCatFilter');
+  if (catSel) {
+    const currentCat = catSel.value;
+    catSel.innerHTML = '<option value="">All categories</option>';
+    wikiEditorCategories().forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      if (c === currentCat) o.selected = true;
+      catSel.appendChild(o);
+    });
+  }
+
+  const sorted = wikiSortedEditorItems(wikiItems).filter(p => {
+    if (catFilter && p.category !== catFilter) return false;
+    if (query && !p.title.toLowerCase().includes(query) && !p.category.toLowerCase().includes(query)) return false;
+    return true;
+  });
+
+  list.innerHTML = '';
+  if (sorted.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px 0;">No pages match your search. <a href="#" onclick="document.getElementById(\'wikiEditorSearch\').value=\'\';document.getElementById(\'wikiEditorCatFilter\').value=\'\';renderWikiEditorList();return false;" style="color:var(--gold);">Clear filters</a></div>';
+  }
+
+  sorted.forEach((page, idx) => {
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.dataset.wikiId = page.id;
+    div.innerHTML = `
+      <span class="drag-handle" aria-hidden="true" title="Drag to reorder within category">↕</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
+        <input type="text" class="item-input wiki-title-input" value="${escHtml(page.title)}" placeholder="Page title"
+          onchange="wikiEditorUpdateTitle('${page.id}',this.value)" aria-label="Page title">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select class="wiki-cat-select" onchange="wikiEditorUpdateCategory('${page.id}',this.value)"
+            style="background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 8px;outline:none;"
+            aria-label="Category">
+            ${wikiEditorCategories().map(c => `<option value="${escHtml(c)}"${c===page.category?' selected':''}>${escHtml(c)}</option>`).join('')}
+            <option value="__new__">+ New category…</option>
+          </select>
+          <input type="text" class="wiki-newcat-input" placeholder="New category name" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 8px;outline:none;width:160px;"
+            onchange="wikiEditorConfirmNewCat('${page.id}',this)"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();wikiEditorConfirmNewCat('${page.id}',this);}"
+            aria-label="New category name">
+          <span style="color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;">Order: </span>
+          <input type="number" value="${page.pageOrder}" min="0" step="1"
+            style="width:52px;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:5px 6px;outline:none;"
+            onchange="wikiEditorUpdatePageOrder('${page.id}',this.value)" aria-label="Page order within category">
+          <button class="btn" style="padding:4px 8px;font-size:12px;" onclick="wikiEditorEditContent('${page.id}')" aria-label="Edit content">✎ Edit Content</button>
+        </div>
+      </div>
+      <button class="item-delete" onclick="wikiEditorDelete('${page.id}')" aria-label="Delete page" title="Delete this page">🗑</button>
+    `;
+    list.appendChild(div);
+  });
+
+  updateBadge('wiki', wikiItems.length);
+}
+
+function wikiEditorUpdateTitle(id, val) {
+  const p = wikiItems.find(x => x.id === id);
+  if (p) { p.title = val.trim(); p.lastModified = new Date().toISOString(); markDirty(); }
+}
+
+function wikiEditorUpdateCategory(id, val) {
+  const p = wikiItems.find(x => x.id === id);
+  if (!p) return;
+  if (val === '__new__') {
+    // Show the new category input for this row
+    const row = document.querySelector('[data-wiki-id="' + id + '"]');
+    if (row) {
+      const input = row.querySelector('.wiki-newcat-input');
+      if (input) { input.style.display = ''; input.focus(); }
+    }
+    return;
+  }
+  p.category = val;
+  // Look up the actual categoryOrder from an existing page in that category
+  // (do NOT use indexOf on sorted list — that gives positional rank, not stored order)
+  const existingInCat = wikiItems.find(x => x.category === val && x.id !== id);
+  p.categoryOrder = existingInCat ? existingInCat.categoryOrder : wikiEditorCategories().length;
+  p.lastModified = new Date().toISOString();
+  markDirty();
+  renderWikiEditorList();
+}
+
+function wikiEditorConfirmNewCat(id, input) {
+  const val = input.value.trim();
+  if (!val) { input.style.display = 'none'; renderWikiEditorList(); return; }
+  const p = wikiItems.find(x => x.id === id);
+  if (!p) return;
+  p.category = val;
+  // New category gets the next available order
+  const maxOrder = Math.max(-1, ...wikiEditorCategories().map(c => {
+    const pg = wikiItems.find(x => x.category === c);
+    return pg ? pg.categoryOrder : -1;
+  }));
+  p.categoryOrder = maxOrder + 1;
+  p.lastModified = new Date().toISOString();
+  markDirty();
+  renderWikiEditorList();
+}
+
+function wikiEditorUpdatePageOrder(id, val) {
+  const p = wikiItems.find(x => x.id === id);
+  if (p) { p.pageOrder = parseInt(val, 10) || 0; p.lastModified = new Date().toISOString(); markDirty(); }
+}
+
+function wikiEditorDelete(id) {
+  const p = wikiItems.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm('Delete page "' + p.title + '"? This cannot be undone.')) return;
+  wikiItems = wikiItems.filter(x => x.id !== id);
+  renderWikiEditorList();
+  markDirty();
+  showToast('Page deleted', 'success');
+}
+
+function wikiEditorEditContent(id) {
+  const p = wikiItems.find(x => x.id === id);
+  if (!p) return;
+  // Open a full-screen edit modal
+  let modal = document.getElementById('wikiContentModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'wikiContentModal';
+    modal.className = 'modal-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.innerHTML = `
+      <div class="modal-box" style="max-width:760px;width:95%;">
+        <button class="modal-close" onclick="closeModal('wikiContentModal')" aria-label="Close">×</button>
+        <div class="modal-title" id="wikiContentModalTitle">Edit Page Content</div>
+        <p style="color:var(--muted);font-size:12px;margin:0 0 8px;">
+          <strong style="color:var(--text);">Markup:</strong>
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;">**bold**</code>
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;">*italic*</code>
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;"># H3</code>
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;">## H4</code>
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;">- bullet</code>
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;">---</code> divider &nbsp;
+          <code style="font-family:'DM Mono',monospace;background:var(--card);padding:1px 5px;border-radius:3px;">![Caption](wiki_images/photo.jpg)</code> image
+        </p>
+        <textarea id="wikiContentTextarea"
+          style="width:100%;min-height:420px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:14px;box-sizing:border-box;resize:vertical;outline:none;line-height:1.6;"
+          aria-label="Page content"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button class="btn" onclick="closeModal('wikiContentModal')">Cancel</button>
+          <button class="btn btn-gold" onclick="wikiContentSave()">Save Content</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal('wikiContentModal'); });
+  }
+  modal.dataset.wikiId = id;
+  document.getElementById('wikiContentModalTitle').textContent = 'Edit: ' + p.title;
+  document.getElementById('wikiContentTextarea').value = p.content;
+  openModal('wikiContentModal');
+}
+
+function wikiContentSave() {
+  const modal = document.getElementById('wikiContentModal');
+  if (!modal) return;
+  const id = modal.dataset.wikiId;
+  const p = wikiItems.find(x => x.id === id);
+  if (p) {
+    p.content = document.getElementById('wikiContentTextarea').value;
+    p.lastModified = new Date().toISOString();
+    markDirty();
+    showToast('Content saved', 'success');
+  }
+  closeModal('wikiContentModal');
+}
+
+function addWikiPage() {
+  const now = new Date().toISOString();
+  const ts = Date.now().toString(16).slice(-6);
+  const categories = wikiEditorCategories();
+  const defaultCat = categories.length > 0 ? categories[0] : 'General';
+  const catOrder = categories.length > 0 ? wikiItems.find(p => p.category === defaultCat)?.categoryOrder || 0 : 0;
+  const pagesInCat = wikiItems.filter(p => p.category === defaultCat);
+  const maxPageOrder = pagesInCat.length > 0 ? Math.max(...pagesInCat.map(p => p.pageOrder)) + 1 : 0;
+  const newPage = {
+    id: 'wiki_new_' + ts,
+    title: 'New Page',
+    category: defaultCat,
+    categoryOrder: catOrder,
+    pageOrder: maxPageOrder,
+    content: '',
+    lastModified: now
+  };
+  wikiItems.push(newPage);
+  renderWikiEditorList();
+  markDirty();
+  showToast('Page added', 'success');
+  // Scroll to bottom and open content editor
+  document.getElementById('list-wiki').lastElementChild?.scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => wikiEditorEditContent(newPage.id), 300);
+}
+
+function serialiseWiki() {
+  const lines = wikiItems.map(p => {
+    return '    ' + JSON.stringify(p);
+  }).join(',\n');
+  return [
+    '// hotelcompanion_wiki.js',
+    '// Generated by hotelcompanion_editor.html on ' + new Date().toLocaleString('en-GB'),
+    '// Place this file in the same folder as hotelcompanion_suite.html and reload the app.',
+    '',
+    'window.HOTELCOMPANION_WIKI = {',
+    '  version: 1,',
+    '  pages: [',
+    lines,
+    '  ]',
+    '};',
+    ''
+  ].join('\n');
+}
+
+function exportWiki() {
+  if (wikiItems.length === 0) {
+    showToast('No pages to export — add at least one page first', 'error');
+    return;
+  }
+  downloadFile(serialiseWiki(), 'hotelcompanion_wiki.js');
+  showLastSaved('Ops Manual');
+  markClean();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ELECTRON RE-INIT HOOK
+// Called by the Electron main process after override JS files have been
+// injected (did-finish-load), so the editor picks up live property data
+// that was not yet available at DOMContentLoaded time.
+// ═══════════════════════════════════════════════════════════════
+window.__editorRefreshFromGlobals = function () {
+  preAuditItems  = getDefaultPreAudit();
+  postAuditItems = getDefaultPostAudit();
+  scriptItems    = getDefaultScripts();
+  wikiItems      = getDefaultWikiPages();
+  renderItems('pre');
+  renderItems('post');
+  renderScripts();
+  renderWikiEditorList();
+  // Re-apply the active tab so export buttons stay correct
+  switchTab(activeTab);
+  markClean();
+};
 </script>
 </body>
 </html>

@@ -15,6 +15,7 @@
   <script src="hotelcompanion_config.js" onerror="console.info('hotelcompanion_config.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_items.js" onerror="console.info('hotelcompanion_items.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_scripts.js" onerror="console.info('hotelcompanion_scripts.js not found — using Smart Defaults.')"></script>
+  <script src="hotelcompanion_wiki.js" onerror="console.info('hotelcompanion_wiki.js not found — using built-in Operations Manual.')"></script>
   <script src="hotelcompanion_license.js" onerror="void 0"></script>
   <!-- Sign generator: all 4 page variants declared statically. JS only sets data-sign-page on <body>. -->
   <style id="signPrintPageStyle">
@@ -1961,6 +1962,22 @@
       body:has(#section-signs.active) .print-copyright {
         display: none !important;
       }
+
+      /* Operations Manual (wiki) print — single page, clean */
+      @page wiki-page { size: A4 portrait; margin: 15mm; }
+      #section-manual { page: wiki-page; color: #000; }
+      .wiki-layout { display: block !important; height: auto !important; overflow: visible !important; margin: 0 !important; }
+      .wiki-nav, .wiki-search-wrap, .wiki-toolbar, .wiki-edit-actions, .wiki-edit-hint, .wiki-edit-header { display: none !important; }
+      .wiki-content-wrap { padding: 0 !important; overflow: visible !important; }
+      .wiki-page-header { border-bottom-color: #ccc !important; }
+      .wiki-page-title { color: #000 !important; font-size: 24px !important; }
+      .wiki-cat-badge { border-color: #999 !important; color: #333 !important; background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .wiki-modified { color: #555 !important; }
+      .wiki-body h3 { color: #000 !important; font-size: 16px !important; margin: 14px 0 6px !important; }
+      .wiki-body h4 { color: #000 !important; }
+      .wiki-body p, .wiki-list li { color: #000 !important; }
+      .wiki-hr { border-top-color: #ccc !important; }
+      .wiki-code { background: #f5f5f5 !important; color: #333 !important; border-color: #ccc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
 
     /* --- RESPONSIVE (<=768px) --- */
@@ -2020,6 +2037,67 @@
       display: none;
     }
     .sidebar-backdrop.visible { display: block; }
+
+    /* ---- OPERATIONS MANUAL (WIKI) ---- */
+    .wiki-layout { display: flex; height: calc(100vh - 116px); overflow: hidden; margin: 0 -24px; }
+    .wiki-nav { width: 240px; min-width: 200px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 8px 0 20px; display: flex; flex-direction: column; }
+    .wiki-search-wrap { padding: 10px 12px 6px; }
+    .wiki-search { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 12px; outline: none; box-sizing: border-box; }
+    .wiki-search:focus { border-color: var(--gold); }
+    .wiki-nav-tree { flex: 1; overflow-y: auto; }
+    .wiki-nav-group { margin-bottom: 2px; }
+    .wiki-nav-cat { width: 100%; background: none; border: none; color: var(--gold); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px 4px; text-align: left; cursor: pointer; }
+    .wiki-nav-cat:hover { color: var(--gold-light); }
+    .wiki-nav-pages { padding-bottom: 4px; }
+    .wiki-nav-page { padding: 7px 14px 7px 20px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: color 0.12s, background 0.12s, border-color 0.12s; }
+    .wiki-nav-page:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .wiki-nav-page--active { color: var(--gold) !important; background: rgba(212,168,67,0.08) !important; border-left-color: var(--gold) !important; font-weight: 600; }
+    .wiki-nav-empty { color: var(--muted); font-size: 12px; padding: 14px 14px; font-style: italic; }
+    .wiki-content-wrap { flex: 1; overflow-y: auto; padding: 24px 28px 40px; }
+    .wiki-page-header { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .wiki-page-title { font-family: 'Bebas Neue', cursive; font-size: 30px; letter-spacing: 0.05em; color: var(--text); margin: 0 0 8px; }
+    .wiki-page-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .wiki-cat-badge { background: rgba(212,168,67,0.15); border: 1px solid rgba(212,168,67,0.3); color: var(--gold); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+    .wiki-modified { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .wiki-print-btn { font-size: 12px; padding: 4px 10px; margin-left: auto; }
+    .wiki-body h3 { font-family: 'Bebas Neue', cursive; font-size: 20px; letter-spacing: 0.04em; color: var(--gold); margin: 20px 0 8px; }
+    .wiki-body h4 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .wiki-body p { color: var(--text); font-size: 14px; line-height: 1.65; margin: 0 0 6px; }
+    .wiki-body .wiki-para-gap { height: 8px; }
+    .wiki-body .wiki-hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .wiki-list { margin: 4px 0 8px 18px; padding: 0; }
+    .wiki-list li { color: var(--text); font-size: 14px; line-height: 1.6; margin-bottom: 4px; }
+    .wiki-code { background: var(--card2); border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 12px; padding: 1px 5px; color: var(--gold-light); }
+    .wiki-body-empty { color: var(--muted); font-style: italic; font-size: 14px; margin-top: 20px; }
+    .wiki-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; text-align: center; }
+    .wiki-empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .wiki-empty-title { font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--text); margin-bottom: 8px; }
+    .wiki-empty-desc { color: var(--muted); font-size: 14px; max-width: 340px; }
+    .wiki-edit-header { margin-bottom: 14px; }
+    .wiki-edit-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .wiki-edit-label { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; min-width: 70px; }
+    .wiki-edit-input { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 9px 12px; flex: 1; outline: none; }
+    .wiki-edit-input:focus { border-color: var(--gold); }
+    .wiki-edit-select { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 9px 12px; flex: 1; outline: none; cursor: pointer; }
+    .wiki-edit-select:focus { border-color: var(--gold); }
+    .wiki-toolbar { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .wiki-toolbar-btn { background: var(--card2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 6px 12px; cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+    .wiki-toolbar-btn:hover { background: rgba(212,168,67,0.12); border-color: var(--gold-dim); color: var(--gold); }
+    .wiki-figure { margin: 16px 0; text-align: center; }
+    .wiki-img { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); display: block; margin: 0 auto; }
+    .wiki-img-inline { max-width: 100%; height: auto; border-radius: 4px; vertical-align: middle; max-height: 200px; }
+    .wiki-figcaption { color: var(--muted); font-size: 12px; margin-top: 6px; font-family: 'DM Mono', monospace; }
+    .wiki-figure.wiki-img-broken::after { content: '🖼 Image not found — place the file in a wiki_images/ folder alongside the app'; display: block; color: var(--muted); font-size: 12px; font-style: italic; padding: 10px 14px; background: var(--card2); border-radius: 6px; border: 1px dashed var(--border); margin-top: 4px; }
+    .wiki-edit-textarea { width: 100%; min-height: 380px; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 14px; box-sizing: border-box; resize: vertical; line-height: 1.6; outline: none; }
+    .wiki-edit-textarea:focus { border-color: var(--gold); }
+    .wiki-edit-actions { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+    .wiki-edit-hint { margin-top: 16px; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .wiki-edit-hint code { background: var(--card); padding: 1px 5px; border-radius: 3px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold-light); }
+    .badge-warn { background: rgba(224,85,85,0.15); border: 1px solid rgba(224,85,85,0.4); color: var(--red); font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 6px; }
+    @media (max-width: 768px) {
+      .wiki-layout { flex-direction: column; height: auto; }
+      .wiki-nav { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
+    }
 
     /* ---- GAMES SECTION ---- */
     .game-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -2356,6 +2434,13 @@
     </div>
     <div class="nav-item" data-section="history" onclick="showSection('history',this)" role="button" tabindex="0" aria-label="Shift History">
       <span class="nav-icon">📂</span> Shift History
+    </div>
+
+    <!-- Knowledge Divider -->
+    <div class="tools-divider"></div>
+    <div class="nav-section-label">Knowledge</div>
+    <div class="nav-item" data-section="manual" onclick="showSection('manual',this)" role="button" tabindex="0" aria-label="Operations Manual">
+      <span class="nav-icon">📖</span> Operations Manual
     </div>
 
     <!-- Tools Divider -->
@@ -3317,6 +3402,120 @@
       </div>
     </div>
 
+
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: OPERATIONS MANUAL (WIKI)
+----------------------------------------------------------- -->
+<section class="section" id="section-manual" aria-label="Operations Manual">
+  <div class="flex-between mb-12 no-print" style="align-items:flex-start">
+    <div>
+      <div class="section-heading">Operations Manual</div>
+      <div class="section-sub">Procedures, golden rules, emergency protocols, and troubleshooting. Edit pages in-app or via the Content Editor.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+      <span id="wikiDirtyBadge" class="badge-warn" style="display:none" aria-live="polite">&#9888; Unsaved changes</span>
+      <button class="btn btn-ghost" id="wikiEditBtn" onclick="wikiStartEdit()" aria-label="Edit current page" disabled>&#9998; Edit Page</button>
+      <button class="btn btn-ghost" onclick="wikiAddPageModal()" aria-label="Add a new wiki page">&#43; Add Page</button>
+      <button class="btn btn-gold" onclick="wikiExport()" aria-label="Export and save wiki as hotelcompanion_wiki.js">&#128190; Export Wiki</button>
+    </div>
+  </div>
+
+  <!-- Wiki Layout -->
+  <div class="wiki-layout">
+
+    <!-- Left Sub-Nav -->
+    <aside class="wiki-nav" aria-label="Manual navigation">
+      <div class="wiki-search-wrap">
+        <input type="search" id="wikiSearchInput" class="wiki-search" placeholder="Search manual…" oninput="wikiSearch(this.value)" aria-label="Search the operations manual">
+      </div>
+      <div id="wikiNavTree" class="wiki-nav-tree"></div>
+    </aside>
+
+    <!-- Content Area -->
+    <div class="wiki-content-wrap">
+
+      <!-- VIEW MODE -->
+      <div id="wikiViewMode">
+        <div class="wiki-page-header" id="wikiPageHeader" style="display:none">
+          <h2 class="wiki-page-title" id="wikiPageTitle"></h2>
+          <div class="wiki-page-meta">
+            <span id="wikiPageCategory" class="wiki-cat-badge"></span>
+            <span id="wikiPageModified" class="wiki-modified"></span>
+            <button class="btn btn-ghost wiki-print-btn no-print" onclick="wikiPrintPage()" aria-label="Print this page">&#128424;&#65039; Print</button>
+          </div>
+        </div>
+        <div id="wikiPageBody" class="wiki-body"></div>
+        <div id="wikiEmptyState" class="wiki-empty-state">
+          <div class="wiki-empty-icon">&#128214;</div>
+          <div class="wiki-empty-title">Operations Manual</div>
+          <div class="wiki-empty-desc">Select a page from the left to read, or click <strong>+ Add Page</strong> to create new content.</div>
+        </div>
+      </div>
+
+      <!-- EDIT MODE -->
+      <div id="wikiEditMode" style="display:none">
+        <div class="wiki-edit-header">
+          <div class="wiki-edit-row">
+            <label class="wiki-edit-label" for="wikiEditTitle">Page Title</label>
+            <input type="text" id="wikiEditTitle" class="wiki-edit-input" placeholder="Enter page title…" maxlength="120" aria-label="Page title">
+          </div>
+          <div class="wiki-edit-row">
+            <label class="wiki-edit-label" for="wikiEditCategory">Category</label>
+            <div style="display:flex;gap:8px;flex:1">
+              <select id="wikiEditCategory" class="wiki-edit-select" aria-label="Select page category" onchange="wikiCategoryChange(this)">
+              </select>
+              <input type="text" id="wikiEditNewCat" class="wiki-edit-input" placeholder="New category name…" style="display:none;max-width:220px" aria-label="New category name">
+            </div>
+          </div>
+        </div>
+        <div class="wiki-toolbar no-print" role="toolbar" aria-label="Formatting toolbar">
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('bold')" title="Bold — wraps selection in **text**" aria-label="Bold"><strong>B</strong></button>
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('italic')" title="Italic — wraps selection in *text*" aria-label="Italic"><em>I</em></button>
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('bullet')" title="Bullet — adds - prefix to line" aria-label="Bullet list">&#8226;</button>
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('heading')" title="Heading — adds # prefix to line" aria-label="Heading">H</button>
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('subheading')" title="Subheading — adds ## prefix" aria-label="Subheading">H&#8322;</button>
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('divider')" title="Horizontal divider — inserts ---" aria-label="Divider">&#8212;</button>
+          <button class="wiki-toolbar-btn" onclick="wikiFormat('image')" title="Image — ![Caption](wiki_images/photo.jpg)" aria-label="Insert image">&#128444;</button>
+        </div>
+        <textarea id="wikiEditTextarea" class="wiki-edit-textarea" placeholder="Write page content here…&#10;&#10;Use **text** for bold, *text* for italic, # Heading for a heading, - item for a bullet point, --- for a divider." aria-label="Page content"></textarea>
+        <div class="wiki-edit-actions no-print">
+          <button class="btn btn-gold" onclick="wikiSaveEdit()" aria-label="Save page edits">&#10003; Save Page</button>
+          <button class="btn btn-ghost" onclick="wikiCancelEdit()" aria-label="Cancel editing">Cancel</button>
+          <button class="btn" style="margin-left:auto;color:var(--red);border-color:var(--red);background:transparent" onclick="wikiDeletePage()" aria-label="Delete this page">&#128465; Delete Page</button>
+        </div>
+        <div class="wiki-edit-hint">
+          <strong>Formatting guide:</strong> <code>**bold**</code> &nbsp;|&nbsp; <code>*italic*</code> &nbsp;|&nbsp; <code># Heading</code> &nbsp;|&nbsp; <code>## Sub-heading</code> &nbsp;|&nbsp; <code>- Bullet point</code> &nbsp;|&nbsp; <code>---</code> divider &nbsp;|&nbsp; <code>![Caption](wiki_images/photo.jpg)</code> image.
+          Place image files in a <code>wiki_images/</code> subfolder alongside the app. Changes are held in memory until you click <strong>Export Wiki</strong>.
+        </div>
+      </div>
+
+    </div><!-- /.wiki-content-wrap -->
+  </div><!-- /.wiki-layout -->
+
+  <!-- Add Page Modal -->
+  <div id="wikiAddModal" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Add new wiki page">
+    <div class="modal-box" style="max-width:420px">
+      <h3 class="modal-title">Add New Page</h3>
+      <div style="margin-bottom:14px">
+        <label class="wiki-edit-label" for="wikiNewTitle" style="display:block;margin-bottom:6px">Page Title</label>
+        <input type="text" id="wikiNewTitle" class="wiki-edit-input" placeholder="e.g. Rebate Procedure" maxlength="120" aria-label="New page title">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="wiki-edit-label" for="wikiNewCategory" style="display:block;margin-bottom:6px">Category</label>
+        <select id="wikiNewCategory" class="wiki-edit-select" aria-label="New page category" onchange="wikiNewCategoryChange(this)"></select>
+      </div>
+      <div style="margin-bottom:20px" id="wikiNewCatWrap" style="display:none">
+        <label class="wiki-edit-label" for="wikiNewCatName" style="display:block;margin-bottom:6px">New Category Name</label>
+        <input type="text" id="wikiNewCatName" class="wiki-edit-input" placeholder="Category name…" maxlength="60" aria-label="New category name">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-gold" onclick="wikiConfirmAddPage()" aria-label="Create page">Create Page</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('wikiAddModal').style.display='none'" aria-label="Cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
 
 </section>
 
@@ -4373,6 +4572,7 @@ const sectionTitles = {
   signs:      'SIGN GENERATOR',
   board:      'DAILY INFO BOARD',
   rota:       'NIGHT ROTA & CONTACTS',
+  manual:     'OPERATIONS MANUAL',
   games:      'GAMES & PUZZLES',
   help:       'HELP & GUIDE'
 };
@@ -4422,6 +4622,11 @@ function showSection(id, navEl) {
   // Rota section: lazy-load from OneDrive folder on first visit
   if (id === 'rota') {
     initRotaSection();
+  }
+
+  // Operations Manual (wiki): lazy-init on first visit
+  if (id === 'manual') {
+    initWikiSection();
   }
 
   closeSidebar();
@@ -4911,6 +5116,566 @@ document.addEventListener('DOMContentLoaded', () => {
   if (custItem) { custItem.removeAttribute('onclick'); custItem.addEventListener('click', openBrandModal); }
   loadTheme();
 });
+
+// -------------------------------------------------------------
+// CHUNK 7b — OPERATIONS MANUAL (WIKI)
+// -------------------------------------------------------------
+
+// ── Default wiki pages (fallback if no hotelcompanion_wiki.js) ──────────────
+// Mirror of hotelcompanion_wiki.example.js — keep in sync when adding defaults.
+const DEFAULT_WIKI_PAGES = (function() {
+  // Minimal built-in set so the section is useful immediately.
+  // Full default content ships in hotelcompanion_wiki.example.js.
+  return [
+    { id:'wiki_ref_001',   title:'Golden Rules',                    category:'Reference',             categoryOrder:0, pageOrder:0, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# The Eight Non-Negotiables\n\nThese rules exist to protect the hotel, the guests, and you. They are not suggestions.\n\n---\n\n**Rule 1 — Never run audit with unresolved PM balances**\nPM balances that are not zero will block the audit.\n\n**Rule 2 — Never check in arrivals just to clear the screen**\nChecking in a guest without securing payment means the hotel carries the debt.\n\n**Rule 3 — Always verify backup before city ledger checkout**\nChecking out without matching backup means billing without proof.\n\n**Rule 4 — RevPar MUST be completed before midnight**\nAfter midnight the date rolls forward and the previous day\'s data cannot be corrected.\n\n**Rule 5 — If unsure about a ledger, leave as Open Folio**\nAn Open Folio is always safer than a wrong checkout.\n\n**Rule 6 — Always communicate issues to the day team**\nAnything unresolved must be handed over.\n\n**Rule 7 — Guest safety always comes before admin work**\nNo report, no audit, no checklist item is more important than safety.\n\n**Rule 8 — D156 must always be run before Hotel Flash and Early Bird**\nD156 contains the source data for both subsequent reports.' },
+    { id:'wiki_ref_002',   title:'Glossary',                        category:'Reference',             categoryOrder:0, pageOrder:1, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Key Terms\n\n**D100** — Financial report showing all payment transactions for the shift. Matched against FreedomPay.\n\n**D156** — Financial reconciliation export. Must be run before Hotel Flash and Early Bird.\n\n**PM Account** — Pseudo-room account used for internal postings. Must be at 0.00 or extended before audit.\n\n**Opera** — The hotel Property Management System. Must run in IE Mode in Microsoft Edge.\n\n**RevPar** — Revenue Per Available Room. Must be updated before midnight each night.\n\n**Open Folio** — A guest account not fully settled at checkout. Tracked and emailed daily.\n\n**Business Date** — The current date in Opera. Night Audit advances this to the next day.\n\n**FreedomPay** — PDQ/card terminal payment portal. Used to get batch total matched against D100.\n\nFor the full 44-term glossary, import hotelcompanion_wiki.example.js via the Content Editor.' },
+    { id:'wiki_em_001',    title:'Fire Alarm',                      category:'Emergency & Safety',    categoryOrder:1, pageOrder:0, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Fire Alarm 🔥\n\n**CRITICAL — Call 999 if unsure. Do not assume false alarm.**\n\n---\n\n- Follow fire evacuation. Assist guests to nearest exit.\n- **Do not use lifts.** Use stairwells only.\n- Assembly point: hotel car park / designated assembly point.\n- Do not re-enter until all-clear from fire service.\n\n## Escalation\n\nEvacuate → Call 999 → Duty Manager → GM if required.' },
+    { id:'wiki_em_002',    title:'Medical Emergency',               category:'Emergency & Safety',    categoryOrder:1, pageOrder:1, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Guest Medical Emergency 🏥\n\n**CRITICAL — Call 999 immediately.**\n\n---\n\n- Call **999** — give hotel address, nature of emergency, your name.\n- Check whiteboard for on-duty First Aider.\n- Defibrillator (AED) — check staff area for location.\n- Stay with the guest until paramedics arrive if safe to do so.\n\n## Escalation\n\nCall 999 → First Aider → Duty Manager → Log in Night Log.' },
+    { id:'wiki_em_003',    title:'Noise Complaint',                 category:'Emergency & Safety',    categoryOrder:1, pageOrder:2, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Noise Complaint 🔊\n\n- **Step 1** — Call the room and politely ask them to keep it down.\n- **Step 2** — If unresolved, visit in person. Stay calm and professional.\n- **Step 3** — Warn them a second complaint may result in a police call.\n- **Step 4** — Call 999 for large parties if required.\n\n**Always log noise complaints** in the Night Log — time, room, action taken.' },
+    { id:'wiki_em_004',    title:'Intoxicated / Aggressive Guest',  category:'Emergency & Safety',    categoryOrder:1, pageOrder:3, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Intoxicated or Aggressive Guest 🚫\n\n**Your safety comes first — do not confront alone.**\n\n- Stay calm. Do not argue or challenge.\n- Offer water and suggest they return to their room.\n- Keep a physical barrier between you and the guest.\n- If threats are made — **call 999 immediately.**\n- Contact Duty Manager once contained.' },
+    { id:'wiki_em_005',    title:'Guest Lockout',                   category:'Emergency & Safety',    categoryOrder:1, pageOrder:4, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Guest Lockout 🔑\n\n**ALWAYS verify identity before issuing a key.**\n\n- Confirm name and room number.\n- Check Opera — guest must be registered to that room for tonight.\n- Ask for ID if any doubt (passport, driving licence, booking confirmation).\n- Encode a new key at the front desk.\n- Log time and room in the Night Log.' },
+    { id:'wiki_em_006',    title:'Power Outage',                    category:'Emergency & Safety',    categoryOrder:1, pageOrder:5, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Power Outage ⚡\n\n**CRITICAL — Switch to manual procedures immediately.**\n\n- Emergency lighting will activate. Check partial vs full outage.\n- Use torch from front desk drawer.\n- Patrol corridors and reassure guests.\n- Switch to Downtime Report procedures.\n- Contact Facilities/Engineering and Duty Manager.' },
+    { id:'wiki_em_007',    title:'Police Attendance',               category:'Emergency & Safety',    categoryOrder:1, pageOrder:6, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Police Attendance 🚓\n\n**Be cooperative and professional. Do not obstruct.**\n\n- **Do not disclose guest information** without a warrant or management direction.\n- Note time, badge numbers if provided, nature of visit.\n- Contact Duty Manager as soon as safe to do so.\n- Log the incident in the Night Log.' },
+    { id:'wiki_em_008',    title:'Opera System Crash',              category:'Emergency & Safety',    categoryOrder:1, pageOrder:7, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Opera System Crash 💻\n\n**First action: use the Downtime Report — this is why it is printed at shift start.**\n\n- Check IE Mode is enabled in Microsoft Edge (resolves most issues).\n- Try a full browser restart.\n- For check-ins: use blank reg cards and record room numbers manually.\n- Contact IT support if fully unresponsive.\n- Notify Duty Manager.' },
+    { id:'wiki_em_009',    title:'Key Contacts',                    category:'Emergency & Safety',    categoryOrder:1, pageOrder:8, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Key Contacts\n\n## Emergency\n\n- **Emergency services:** 999\n- **Police non-urgent:** 101\n\n## Hotel\n\n- **Hotel main:** +44 (0) 1342 830930\n\n## External\n\n- **Titan Airways (Hotac):** hotac@titan-airways.co.uk\n\n## On-Call Management\n\n- Check on-call rota by the front desk whiteboard.\n\n---\n\n*Update this page if contact details change.*' },
+    { id:'wiki_ts_001',    title:'Opera: IE Mode Fix',              category:'Troubleshooting',       categoryOrder:2, pageOrder:0, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Opera Won\'t Load — IE Mode Fix 🌐\n\n**Most common issue. Opera requires IE Compatibility Mode in Microsoft Edge.**\n\n- Open Opera in **Microsoft Edge** (not Chrome or Firefox).\n- Three-dot menu → Settings → Default Browser → Internet Explorer compatibility.\n- Or press F12 → Emulation tab → Document Mode → IE11.\n- Reload Opera — it should now work normally.\n\n---\n\nIf IE Mode is on and Opera still won\'t load — try a full computer restart before audit.' },
+    { id:'wiki_ts_002',    title:'System Running Slowly',           category:'Troubleshooting',       categoryOrder:2, pageOrder:1, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Computer Running Slowly 💾\n\n- Close every program and browser tab not in active use.\n- Common culprits: multiple Excel files, email client, and Opera open simultaneously.\n- If still slow — restart **before** the audit runs.\n- After restarting, open Opera first and re-enable IE Mode.\n\n**Restart timing:** Do this at least 20–30 minutes before the scheduled audit.' },
+    { id:'wiki_ts_003',    title:'Audit Won\'t Run — Outstanding Balance', category:'Troubleshooting', categoryOrder:2, pageOrder:2, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Audit Won\'t Run — PM Balance ⚙\n\n- Run **D130 report** filtered to Checked Out only.\n- Find the reservation with outstanding balance that is not an Open Folio.\n- **Reinstate** the reservation.\n- Check it out as an **Open Folio.**\n- Retry Night Audit.\n\n**If you cannot find the block:** check every PM in the list shows 0.00.' },
+    { id:'wiki_ts_004',    title:'Flight Cancellation Bookings',    category:'Troubleshooting',       categoryOrder:2, pageOrder:3, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Flight Cancellation Bookings ✈\n\n- Check available rooms **first** — sell max 50% of inventory.\n- Create a PM account via Add-On from the last flight cancellation booking.\n- Rates: Weekdays £118 room + £15 breakfast; Weekends £125 + £15.\n- Notify management for additional Housekeeping and F&B.\n- **EasyJet cancellations:** add BUP10 to R118 Detailed.\n- **Titan:** email hotac@titan-airways.co.uk for card details.' },
+    { id:'wiki_ts_005',    title:'Guest Not Checked In After 12:30 AM', category:'Troubleshooting',  categoryOrder:2, pageOrder:4, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Guest Not Checked In After 12:30 AM 🚪\n\n- **Option 1** — Pre-auth card and check them in. Keep reg card and keys at desk.\n- **Option 2** — Take deposit by phone if possible.\n- **Option 3** — Run as **No Show** during audit. Notify management. If Titans, email hotac@titan-airways.co.uk.\n\n**Never check in without securing payment.** Golden Rule violation.' },
+    { id:'wiki_pre_001',   title:'Handover from Evening Team',      category:'Pre-Audit Procedures', categoryOrder:3, pageOrder:0, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Shift Handover ↬\n\n**A thorough handover sets up your entire shift.**\n\n## Seven Handover Points\n\n- **1. Remaining Arrivals** — How many guests still to arrive?\n- **2. Any Problems** — Complaints, incidents, follow-ups.\n- **3. Special Expectations** — VIPs, group bookings, anything unusual.\n- **4. Ongoing Functions** — Events or parties still active.\n- **5. Wake-Up Calls** — Check Opera for any requested.\n- **6. Breakfast Bags** — Early departures needing bags prepared?\n- **7. Off/On-Site Parties** — Racecourse or hotel events still active.' },
+    { id:'wiki_pre_002',   title:'Floor Walks',                     category:'Pre-Audit Procedures', categoryOrder:3, pageOrder:1, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Floor Walks ⟳\n\n**Three walks per shift. The primary security measure.**\n\n- **11:30 PM** — All floors and public areas. Collect trays/plates. Check all exterior doors and balconies secured. Turn off lights in non-public areas.\n- **1:30 AM** — Floor check, all clear.\n- **3:30 AM** — Full floor, door checks, Spa area check.\n- **4:00 AM** — Turn off pizza oven. Open hotel yard gates (keys in box by door, numbers 67–70).\n\n---\n\n- **Tuesday:** Puddleduck pool signs at 9:15 AM.\n- **Wednesday:** Puddleduck pool signs at 11:30 AM.\n- Fire alarm signs in lifts AND glass door to pool.' },
+    { id:'wiki_pre_003',   title:'Rebates',                         category:'Pre-Audit Procedures', categoryOrder:3, pageOrder:2, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Processing Rebates $\n\nNavigation: Cashiering → Billing → untick Stay Overs → Room: **9** → Search\n\n## BRS Golf (Room 9030)\n\n- Double-click → drag all lines window 1 to window 2 → note PDQ figure → Check-Out.\n\n## 9067 — Elite BF Vouchers\n\n- Double-click → amount in window 2, CL on top → Checkout.\n\n## All Other PMs with Dockets\n\n- Double-click → window 2 → Postings → Rebate → select code → post amount → verify zero → Checkout.\n\n---\n\n**If PM does not start with * — do NOT checkout. Extend it instead.** See Extend PM Accounts.' },
+    { id:'wiki_pre_004',   title:'Extend PM Accounts',              category:'Pre-Audit Procedures', categoryOrder:3, pageOrder:3, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Extend PM Accounts ⟳\n\nNavigation: Cashiering → Billing → untick Stay Overs → Room: **9** → Search\n\n- Find PMs that do **NOT** start with *.\n- Double-click → Options → Reservation → extend nights or change departure date.\n- OK → OK on fixed charge warning.\n- Account disappears from list when done correctly.\n\n---\n\nExtending ensures the PM carries forward to the next business date without causing an audit failure.' },
+    { id:'wiki_pre_005',   title:'Registration Cards',              category:'Pre-Audit Procedures', categoryOrder:3, pageOrder:4, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Registration Cards 📋\n\n- Collect from drawers — 3 drawers each side of desk, one per floor.\n- Staple room-charge dockets to their reg cards.\n- **Pile 1** — Due-outs (single night / checking out today).\n- **Pile 2** — Stayovers (remaining at least one more night).\n- File Pile 2 stayovers back into the correct floor drawer. Pile 1 into back section.' },
+    { id:'wiki_pre_006',   title:'RevPar — BEFORE MIDNIGHT',        category:'Pre-Audit Procedures', categoryOrder:3, pageOrder:5, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# RevPar ◈ — MUST Be Done Before Midnight\n\nNavigation: P Drive → Nights → 11. RevPar\n\n- Open the current RevPar spreadsheet.\n- Sign in to **Island**.\n- Locate MINT/MRDW and download **MBV-16** report.\n- Paste MBV-16 data into the RevPar spreadsheet.\n- Update Opera in-house guest count using **Market code BMR.**\n\n---\n\n**Missing the midnight cutoff cannot be corrected.** Do this as early as possible.' },
+    { id:'wiki_aud_001',   title:'Arrivals Not Checked In',         category:'Audit Procedures',     categoryOrder:4, pageOrder:0, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Arrivals Not Checked In 🚶\n\n**Golden Rule: do NOT check in arrivals just to clear the screen.**\n\n- Open Arrivals screen in Opera.\n- **Marriott app mobile check-ins** — proceed normally.\n- All others — move room number to **comment field** to prevent auto-pickup.\n- Attempt to contact guest or pre-authorise card.\n- If unreachable — see Troubleshooting → Guest Not Checked In After 12:30 AM.' },
+    { id:'wiki_aud_002',   title:'Close Cashier',                   category:'Audit Procedures',     categoryOrder:4, pageOrder:1, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Close Cashier 🔒\n\nNavigation: Cashiering → Cashier Shift Functions → **Cashier Shift Close**\n\n- **All staff except the audit runner** close their cashier first.\n- Only enter cash amount if you physically took cash.\n- Audit runner closes **last** — immediately before running End of Day.\n\n---\n\nThe audit cannot run with any open cashier sessions.' },
+    { id:'wiki_aud_003',   title:'Check Out PM Accounts',           category:'Audit Procedures',     categoryOrder:4, pageOrder:2, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Check Out PM Accounts ✓\n\n**Every PM must show exactly 0.00 before audit — no exceptions.**\n\n- Verify all PMs show 0.00.\n- If any PM is not at zero — rebate or extend first.\n- **9000 series ** rooms** will self-recreate after checkout — this is normal.' },
+    { id:'wiki_aud_004',   title:'D100 Report',                     category:'Audit Procedures',     categoryOrder:4, pageOrder:3, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# D100 Report ◻\n\n## Transaction Codes to Include\n\n- Cash: 90000 | Visa: 90701 | MC: 90702 | Amex: 90703 | Diners: 90704 | Maestro: 90706\n- All FD-PDQ codes\n- Ecomm Visa: 94701 | Ecomm MC: 94702 | Ecomm Amex: 94703\n\n## Steps\n\n- Run D100 with all codes above.\n- Open FreedomPay Portal → Batch → Batching → audit date → get total.\n- Staple FreedomPay printout to D100.\n- **Sign the D100.**' },
+    { id:'wiki_aud_005',   title:'Night Audit / End of Day',        category:'Audit Procedures',     categoryOrder:4, pageOrder:4, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Night Audit — End of Day ⚙\n\n## Pre-Audit Confirmation\n\n- ✓ All cashiers closed (except yours)\n- ✓ All PMs at 0.00\n- ✓ D100 printed and signed\n- ✓ Arrivals handled\n\n## Steps\n\n- Close your cashier: Cashiering → Cashier Shift Functions → Cashier Shift Close.\n- Opera → **End of Day → Night Audit** → follow prompts.\n- If Adobe Acrobat error: reprint missing reports via End of Day Reports. Do not panic.\n- Reprint **Downtime Report** immediately after audit completes.' },
+    { id:'wiki_post_001',  title:'D156 Report — FIRST Post-Audit',  category:'Post-Audit Procedures',categoryOrder:5, pageOrder:0, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# D156 Report ▣ — Always First\n\n**Must be run before Hotel Flash and Early Bird.**\n\nNavigation: Misc → Reports → D156 → Delimited Data → File → Open\n\n- Copy from line 2 to end of PACKAGE line.\n- Paste into Recs spreadsheet on P Drive (Ops → 14. Hotel → Financial Reporting → Recs).\n- Fill column A using Ctrl+D.' },
+    { id:'wiki_post_002',  title:'Hotel Flash',                     category:'Post-Audit Procedures',categoryOrder:5, pageOrder:1, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Hotel Flash ⚡\n\nNavigation: P Drive → Ops → 14. Hotel → Financial Reporting → Weekly Hotel Forecast → This Month\n\n- Open Hotel Golf Leisure Flash file → Update → Continue.\n- Use **E106 report** (DAY column) to fill:\n  - **Rooms Sold** — Rooms Occupied minus Comp and House Use\n  - **Comp / House** — Complimentary Room + House Use Rooms\n  - **Sleepers** — Total In-House Persons\n  - **OOO Rooms** — Out Of Order Rooms' },
+    { id:'wiki_post_003',  title:'Early Bird',                      category:'Post-Audit Procedures',categoryOrder:5, pageOrder:2, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Early Bird ☀\n\nNavigation: P Drive → Ops → Front Office → 11. Early Bird → Current Year → Current Month\n\n## Part 1 — Tomorrow\'s File\n\n- Copy newest file, rename for tomorrow, update date and expected revenue (Shift+F3), save.\n\n## Part 2 — Today\'s Actuals\n\n- Open today\'s file → Update → fill actual revenue from F116 (ROOM REVENUE) → fill F&B covers.\n\n## Part 3 — Tomorrow\'s Expected\n\n- Rooms, persons, ARR from Shift+F3. F116: Room Sold minus House Use and Comp.' },
+    { id:'wiki_post_004',  title:'One Yield',                       category:'Post-Audit Procedures',categoryOrder:5, pageOrder:3, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# One Yield ↑\n\n**Email to Michelle Boden, CC Front Desk Manager and AM.**\n\nNavigation: P Drive → Ops → Front Office → 4. One Yield\n\n**Key Rule:** Total Hotel Rooms ALWAYS minus Complimentary Rooms.\n\n- Open One Yield Actual Upload Tool → Generate F100.\n- Fill market group columns: Cols 2/3 Group | 4/5 Contract | 6/7 Transient ± INT | 8/9 Overall minus Comp.\n- Email Michelle Boden — attach F100 and saved One Yield file.' },
+    { id:'wiki_post_005',  title:'STR Report',                      category:'Post-Audit Procedures',categoryOrder:5, pageOrder:4, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# STR Report ⊞\n\n- Go to **www.str.com**\n- Username: marriott.nights | Password: Nteam0825**\n- Click the date → fill Total / Transient / Group / Contract (same as One Yield).\n- Add F&B and total revenue from F116.' },
+    { id:'wiki_post_006',  title:'Processing Deposits',             category:'Post-Audit Procedures',categoryOrder:5, pageOrder:5, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Processing Deposits 💳\n\n- Reservations → Update Reservation → clear Arrival From → Advanced → today\'s date in Created On → Search.\n- Find rate codes starting with **35**** or **38**** — these must be prepaid.\n- Options → Deposit → Payment → OK → cashier → DEP → Tab → OK → input total stay → Post → Close.\n- If successful: Res. Type to 7, drag card window 1 to window 6, set to 5 and 0.00, window 1 to CA, comment \'pp\'.' },
+    { id:'wiki_post_007',  title:'Open Folios & Open PMs',          category:'Post-Audit Procedures',categoryOrder:5, pageOrder:6, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Open Folios & Open PMs 📁\n\nNavigation: P Drive → Front Office → 8. Open Folios → Open PMS — Master List New.xlsm\n\n- Delete all data rows in DATA_FROM_b130 and DATA FROM A126 (keep headers).\n- Run b130 (delimited, stay date, PSEU) → paste PSEU lines into DATA_FROM_b130.\n- Run a126 (delimited) → paste below ** PMs into DATA FROM A126.\n- OUTPUT sheet → Refresh → Save.\n- Cashiering → Billing → Advanced → Open Folio only → update master file → save.\n- Email: Subject "Open Folio and Open PM update".' },
+    { id:'wiki_post_008',  title:'Breakfast Reports',               category:'Post-Audit Procedures',categoryOrder:5, pageOrder:7, lastModified:'2026-05-16T00:00:00.000Z',
+      content:'# Breakfast Reports ☕\n\n- **R118** — 2 copies\n- **R118 Detailed** — codes BUP15, BUP7.5, ASSOC, BUP10 (add BUP10 for EasyJet cancellations)\n- **D999** — for F&B team\n- **A891** — Platinum and Platinum Premier only\n- **A150** — tick Groups\n- **B202** — last 4 days\n- **Daily Times** — 1 copy\n\nLeave printed reports in the designated location for the morning team.' }
+  ];
+})();
+
+// ── Wiki state ────────────────────────────────────────────────
+let wikiData           = [];   // live working copy (array of page objects)
+let wikiCurrentPageId  = null; // ID of page currently displayed
+let wikiDirty          = false; // true when in-memory changes not yet exported
+let wikiInitialised    = false;
+
+// Load from external file (window.HOTELCOMPANION_WIKI) or fall back to built-ins
+function loadWikiData() {
+  const ext = window.HOTELCOMPANION_WIKI;
+  if (ext && ext.version === 1 && Array.isArray(ext.pages) && ext.pages.length > 0) {
+    // Deep-clone to avoid mutating the global
+    wikiData = JSON.parse(JSON.stringify(ext.pages));
+    console.info('[Wiki] Loaded ' + wikiData.length + ' pages from hotelcompanion_wiki.js');
+  } else {
+    wikiData = JSON.parse(JSON.stringify(DEFAULT_WIKI_PAGES));
+    console.info('[Wiki] hotelcompanion_wiki.js absent or invalid — using built-in default pages.');
+  }
+}
+
+// ── Initialise section (called lazily on first nav) ──────────
+function initWikiSection() {
+  if (wikiInitialised) { renderWikiNav(); return; }
+  loadWikiData();
+  wikiInitialised = true;
+  renderWikiNav();
+  // Show first page by default
+  if (wikiData.length > 0) {
+    const first = wikiSortedPages()[0];
+    if (first) wikiShowPage(first.id);
+  }
+}
+
+// ── Sorted helpers ─────────────────────────────────────────────
+function wikiSortedPages(pages) {
+  const src = pages || wikiData;
+  return [...src].sort((a, b) => {
+    if (a.categoryOrder !== b.categoryOrder) return a.categoryOrder - b.categoryOrder;
+    if (a.category !== b.category) return a.category.localeCompare(b.category);
+    return a.pageOrder - b.pageOrder;
+  });
+}
+
+function wikiCategories() {
+  // Returns ordered array of unique category names
+  const seen = new Map();
+  wikiSortedPages().forEach(p => {
+    if (!seen.has(p.category)) seen.set(p.category, p.categoryOrder);
+  });
+  return [...seen.entries()].sort((a,b) => a[1] - b[1]).map(e => e[0]);
+}
+
+// ── Render sub-nav tree ─────────────────────────────────────────
+function renderWikiNav(filteredPages) {
+  const tree = document.getElementById('wikiNavTree');
+  if (!tree) return;
+  const pages   = filteredPages || wikiSortedPages();
+  const cats    = filteredPages
+    ? [...new Map(pages.map(p => [p.category, p.categoryOrder])).entries()].sort((a,b)=>a[1]-b[1]).map(e=>e[0])
+    : wikiCategories();
+
+  if (pages.length === 0) {
+    tree.innerHTML = '<div class="wiki-nav-empty">No pages match your search.</div>';
+    return;
+  }
+
+  let html = '';
+  cats.forEach(cat => {
+    const catPages = pages.filter(p => p.category === cat);
+    if (!catPages.length) return;
+    const catId = 'wikiCat_' + cat.replace(/\W+/g,'_');
+    html += `<div class="wiki-nav-group">
+      <button class="wiki-nav-cat" onclick="wikiToggleCat('${catId}')" aria-expanded="true" aria-controls="${catId}">${cat}</button>
+      <div class="wiki-nav-pages" id="${catId}">`;
+    catPages.forEach(p => {
+      const active = p.id === wikiCurrentPageId ? ' wiki-nav-page--active' : '';
+      html += `<div class="wiki-nav-page${active}" role="button" tabindex="0"
+        onclick="wikiShowPage('${p.id}')"
+        onkeydown="if(event.key==='Enter'||event.key===' ')wikiShowPage('${p.id}')"
+        data-wiki-pageid="${p.id}"
+        aria-current="${p.id === wikiCurrentPageId ? 'page' : 'false'}">${escHtml(p.title)}</div>`;
+    });
+    html += `</div></div>`;
+  });
+  tree.innerHTML = html;
+}
+
+function wikiToggleCat(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const btn = el.previousElementSibling;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : '';
+  if (btn) btn.setAttribute('aria-expanded', String(!open));
+}
+
+// ── Show a page ─────────────────────────────────────────────────
+function wikiShowPage(pageId) {
+  // If currently in edit mode — switch back to view first
+  if (document.getElementById('wikiEditMode').style.display !== 'none') {
+    wikiCancelEdit();
+  }
+  const page = wikiData.find(p => p.id === pageId);
+  if (!page) return;
+  wikiCurrentPageId = pageId;
+
+  // Update nav highlight
+  document.querySelectorAll('[data-wiki-pageid]').forEach(el => {
+    const active = el.dataset.wikiPageid === pageId;
+    el.classList.toggle('wiki-nav-page--active', active);
+    el.setAttribute('aria-current', active ? 'page' : 'false');
+  });
+
+  // Render content
+  document.getElementById('wikiEmptyState').style.display  = 'none';
+  document.getElementById('wikiPageHeader').style.display  = '';
+  document.getElementById('wikiPageTitle').textContent     = page.title;
+  document.getElementById('wikiPageCategory').textContent  = page.category;
+  const mod = page.lastModified ? new Date(page.lastModified).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '';
+  document.getElementById('wikiPageModified').textContent  = mod ? 'Last edited ' + mod : '';
+  document.getElementById('wikiPageBody').innerHTML        = wikiRenderMarkdown(page.content || '');
+
+  // Enable edit button
+  const editBtn = document.getElementById('wikiEditBtn');
+  if (editBtn) editBtn.disabled = false;
+}
+
+// ── Markdown renderer ────────────────────────────────────────────
+function wikiRenderMarkdown(text) {
+  if (!text) return '<p class="wiki-body-empty">This page has no content yet. Click ✎ Edit Page to add content.</p>';
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+
+  lines.forEach(raw => {
+    const line = raw;
+    if (/^###\s/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<h4>' + wikiInline(line.replace(/^###\s/, '')) + '</h4>';
+    } else if (/^##\s/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<h4>' + wikiInline(line.replace(/^##\s/, '')) + '</h4>';
+    } else if (/^#\s/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<h3>' + wikiInline(line.replace(/^#\s/, '')) + '</h3>';
+    } else if (/^---+\s*$/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<hr class="wiki-hr">';
+    } else if (/^!\[([^\]]*)\]\(([^)]+)\)$/.test(line.trim())) {
+      if (inList) { html += '</ul>'; inList = false; }
+      const imgM = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      const imgAlt = imgM[1].replace(/["'<>&]/g, c => ({'"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+      const imgSrc = imgM[2].replace(/["'<>]/g, '');
+      html += `<figure class="wiki-figure"><img class="wiki-img" src="${imgSrc}" alt="${imgAlt}" loading="lazy" onerror="this.parentElement.classList.add('wiki-img-broken')"><figcaption class="wiki-figcaption">${imgAlt || imgSrc}</figcaption></figure>`;
+    } else if (/^-\s/.test(line)) {
+      if (!inList) { html += '<ul class="wiki-list">'; inList = true; }
+      html += '<li>' + wikiInline(line.replace(/^-\s/, '')) + '</li>';
+    } else if (/^\s*$/.test(line)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      // blank line — paragraph break handled by CSS margin
+      html += '<div class="wiki-para-gap"></div>';
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<p>' + wikiInline(line) + '</p>';
+    }
+  });
+  if (inList) html += '</ul>';
+  return html;
+}
+
+function wikiInline(text) {
+  // Extract inline images before HTML escaping (src would get mangled)
+  const imgTokens = [];
+  let s = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+    const safeAlt = alt.replace(/["'<>&]/g, c => ({'"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const safeSrc = src.replace(/["'<>]/g, '');
+    const tok = `\x01IMG${imgTokens.length}\x01`;
+    imgTokens.push(`<img class="wiki-img wiki-img-inline" src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.style.display='none'">`);
+    return tok;
+  });
+  // Escape HTML
+  s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // **bold**
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // *italic*
+  s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // `code`
+  s = s.replace(/`(.+?)`/g, '<code class="wiki-code">$1</code>');
+  // Restore image tokens
+  imgTokens.forEach((img, i) => { s = s.replace(`\x01IMG${i}\x01`, img); });
+  return s;
+}
+
+// ── Search ───────────────────────────────────────────────────────
+function wikiSearch(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) { renderWikiNav(); return; }
+  const matches = wikiData.filter(p =>
+    p.title.toLowerCase().includes(q) ||
+    (p.content || '').toLowerCase().includes(q) ||
+    p.category.toLowerCase().includes(q)
+  );
+  renderWikiNav(wikiSortedPages(matches));
+}
+
+// ── Edit mode ────────────────────────────────────────────────────
+function wikiStartEdit() {
+  const page = wikiData.find(p => p.id === wikiCurrentPageId);
+  if (!page) return;
+  document.getElementById('wikiViewMode').style.display = 'none';
+  document.getElementById('wikiEditMode').style.display = '';
+  document.getElementById('wikiEditTitle').value        = page.title;
+  document.getElementById('wikiEditTextarea').value     = page.content || '';
+  wikiPopulateCategorySelect('wikiEditCategory', page.category);
+  document.getElementById('wikiEditTitle').focus();
+}
+
+function wikiCancelEdit() {
+  document.getElementById('wikiEditMode').style.display = 'none';
+  document.getElementById('wikiViewMode').style.display = '';
+}
+
+function wikiSaveEdit() {
+  const page = wikiData.find(p => p.id === wikiCurrentPageId);
+  if (!page) return;
+  const title    = document.getElementById('wikiEditTitle').value.trim();
+  const catSel   = document.getElementById('wikiEditCategory').value;
+  const newCat   = document.getElementById('wikiEditNewCat').value.trim();
+  const category = catSel === '__new__' ? (newCat || 'Uncategorised') : catSel;
+  const content  = document.getElementById('wikiEditTextarea').value;
+
+  if (!title) { showToast('Page title cannot be empty.', 'warn'); return; }
+
+  page.title        = title;
+  page.category     = category;
+  page.content      = content;
+  page.lastModified = new Date().toISOString();
+
+  // Update categoryOrder for new category
+  if (catSel === '__new__') {
+    const maxOrder = Math.max(-1, ...wikiData.map(p => p.categoryOrder));
+    wikiData.forEach(p => { if (p.id === page.id) p.categoryOrder = maxOrder + 1; });
+  }
+
+  wikiDirty = true;
+  document.getElementById('wikiDirtyBadge').style.display = '';
+  wikiCancelEdit();
+  renderWikiNav();
+  wikiShowPage(page.id);
+  showToast('Page saved. Click Export Wiki to persist permanently.', 'success');
+}
+
+function wikiDeletePage() {
+  const page = wikiData.find(p => p.id === wikiCurrentPageId);
+  if (!page) return;
+  if (!confirm('Delete "' + page.title + '"? This cannot be undone until you export the wiki.')) return;
+  wikiData = wikiData.filter(p => p.id !== wikiCurrentPageId);
+  wikiCurrentPageId = null;
+  wikiDirty = true;
+  document.getElementById('wikiDirtyBadge').style.display = '';
+  wikiCancelEdit();
+  renderWikiNav();
+  // Show first available page
+  const first = wikiSortedPages()[0];
+  if (first) wikiShowPage(first.id);
+  else {
+    document.getElementById('wikiPageHeader').style.display = 'none';
+    document.getElementById('wikiPageBody').innerHTML = '';
+    document.getElementById('wikiEmptyState').style.display = '';
+    const editBtn = document.getElementById('wikiEditBtn');
+    if (editBtn) editBtn.disabled = true;
+  }
+}
+
+// ── Add Page ─────────────────────────────────────────────────────
+function wikiAddPageModal() {
+  const modal = document.getElementById('wikiAddModal');
+  document.getElementById('wikiNewTitle').value = '';
+  document.getElementById('wikiNewCatName').value = '';
+  const catWrap = document.getElementById('wikiNewCatWrap');
+  if (catWrap) catWrap.style.display = 'none';
+  wikiPopulateCategorySelect('wikiNewCategory', null);
+  modal.style.display = 'flex';
+  document.getElementById('wikiNewTitle').focus();
+}
+
+function wikiNewCategoryChange(sel) {
+  const wrap = document.getElementById('wikiNewCatWrap');
+  if (wrap) wrap.style.display = sel.value === '__new__' ? '' : 'none';
+}
+
+function wikiConfirmAddPage() {
+  const title  = document.getElementById('wikiNewTitle').value.trim();
+  const catSel = document.getElementById('wikiNewCategory').value;
+  const newCat = document.getElementById('wikiNewCatName')?.value.trim();
+  if (!title) { showToast('Please enter a page title.', 'warn'); return; }
+  const category = catSel === '__new__' ? (newCat || 'Uncategorised') : catSel;
+  const catOrder = catSel === '__new__'
+    ? Math.max(-1, ...wikiData.map(p => p.categoryOrder)) + 1
+    : (wikiData.find(p => p.category === category)?.categoryOrder ?? 99);
+  const pageOrder = wikiData.filter(p => p.category === category).length;
+  const newPage = {
+    id:            'wiki_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    title,
+    category,
+    categoryOrder: catOrder,
+    pageOrder,
+    content:       '',
+    lastModified:  new Date().toISOString()
+  };
+  wikiData.push(newPage);
+  wikiDirty = true;
+  document.getElementById('wikiDirtyBadge').style.display = '';
+  document.getElementById('wikiAddModal').style.display = 'none';
+  renderWikiNav();
+  wikiShowPage(newPage.id);
+  // Open edit mode immediately for new page
+  wikiStartEdit();
+}
+
+// ── Category select populate ──────────────────────────────────────
+function wikiPopulateCategorySelect(selectId, selectedCat) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const cats = wikiCategories();
+  sel.innerHTML = cats.map(c =>
+    `<option value="${escHtml(c)}"${c === selectedCat ? ' selected' : ''}>${escHtml(c)}</option>`
+  ).join('') + '<option value="__new__">— New category…</option>';
+
+  // Handle new category input visibility
+  const newCatInput = document.getElementById(selectId === 'wikiEditCategory' ? 'wikiEditNewCat' : 'wikiNewCatName');
+  if (newCatInput) newCatInput.style.display = 'none';
+}
+
+function wikiCategoryChange(sel) {
+  const newInput = document.getElementById('wikiEditNewCat');
+  if (newInput) newInput.style.display = sel.value === '__new__' ? '' : 'none';
+}
+
+// ── Formatting toolbar ────────────────────────────────────────────
+function wikiFormat(action) {
+  const ta = document.getElementById('wikiEditTextarea');
+  if (!ta) return;
+  const start  = ta.selectionStart;
+  const end    = ta.selectionEnd;
+  const sel    = ta.value.slice(start, end);
+  const before = ta.value.slice(0, start);
+  const after  = ta.value.slice(end);
+  let replacement = sel;
+  let cursorOffset = 0;
+
+  switch (action) {
+    case 'bold':
+      replacement = sel ? `**${sel}**` : '**bold text**';
+      cursorOffset = sel ? replacement.length : 2;
+      break;
+    case 'italic':
+      replacement = sel ? `*${sel}*` : '*italic text*';
+      cursorOffset = sel ? replacement.length : 1;
+      break;
+    case 'bullet': {
+      // Apply to each selected line, or insert at start of current line
+      if (sel.includes('\n')) {
+        replacement = sel.split('\n').map(l => (l.startsWith('- ') ? l : '- ' + l)).join('\n');
+      } else {
+        replacement = sel ? '- ' + sel : '- ';
+      }
+      cursorOffset = replacement.length;
+      break;
+    }
+    case 'heading': {
+      const lineStart = before.lastIndexOf('\n') + 1;
+      const lineText  = ta.value.slice(lineStart, end).split('\n')[0];
+      const newLine   = lineText.startsWith('# ') ? lineText : '# ' + lineText;
+      ta.value        = ta.value.slice(0, lineStart) + newLine + ta.value.slice(lineStart + lineText.length);
+      ta.selectionStart = ta.selectionEnd = lineStart + newLine.length;
+      ta.focus();
+      return;
+    }
+    case 'subheading': {
+      const lineStart2 = before.lastIndexOf('\n') + 1;
+      const lineText2  = ta.value.slice(lineStart2, end).split('\n')[0];
+      const newLine2   = lineText2.startsWith('## ') ? lineText2 : '## ' + lineText2;
+      ta.value         = ta.value.slice(0, lineStart2) + newLine2 + ta.value.slice(lineStart2 + lineText2.length);
+      ta.selectionStart = ta.selectionEnd = lineStart2 + newLine2.length;
+      ta.focus();
+      return;
+    }
+    case 'divider':
+      replacement = '\n---\n';
+      cursorOffset = replacement.length;
+      break;
+    case 'image':
+      replacement = '![Caption](wiki_images/filename.jpg)';
+      cursorOffset = 2; // cursor inside alt text
+      break;
+  }
+
+  ta.value = before + replacement + after;
+  ta.selectionStart = start + cursorOffset;
+  ta.selectionEnd   = start + cursorOffset;
+  ta.focus();
+}
+
+// ── Export wiki ──────────────────────────────────────────────────
+function wikiExport() {
+  const sorted = wikiSortedPages();
+  const lines = [
+    '/*',
+    '  hotelcompanion_wiki.js — Operations Manual',
+    '  Generated by Night Receptionist Companion Suite on ' + new Date().toLocaleString('en-GB'),
+    '  Place this file in the same folder as hotelcompanion_suite.html and reload the app.',
+    '*/',
+    '',
+    'window.HOTELCOMPANION_WIKI = {',
+    '  version: 1,',
+    '  pages: ['
+  ];
+
+  sorted.forEach((p, i) => {
+    const comma = i < sorted.length - 1 ? ',' : '';
+    const content = p.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
+    lines.push('    {');
+    lines.push('      id:            ' + JSON.stringify(p.id) + ',');
+    lines.push('      title:         ' + JSON.stringify(p.title) + ',');
+    lines.push('      category:      ' + JSON.stringify(p.category) + ',');
+    lines.push('      categoryOrder: ' + p.categoryOrder + ',');
+    lines.push('      pageOrder:     ' + p.pageOrder + ',');
+    lines.push('      lastModified:  ' + JSON.stringify(p.lastModified || new Date().toISOString()) + ',');
+    lines.push('      content:       `' + content + '`');
+    lines.push('    }' + comma);
+  });
+
+  lines.push('  ]');
+  lines.push('};');
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/javascript' });
+  if (window.showSaveFilePicker) {
+    window.showSaveFilePicker({ suggestedName: 'hotelcompanion_wiki.js', types: [{ accept: { 'text/javascript': ['.js'] } }] })
+      .then(h => h.createWritable())
+      .then(w => { w.write(blob); return w; })
+      .then(w => w.close())
+      .then(() => {
+        wikiDirty = false;
+        document.getElementById('wikiDirtyBadge').style.display = 'none';
+        showToast('hotelcompanion_wiki.js saved. Reload the app to confirm.', 'success');
+      })
+      .catch(e => { if (e.name !== 'AbortError') wikiExportFallback(blob); });
+  } else {
+    wikiExportFallback(blob);
+  }
+}
+
+function wikiExportFallback(blob) {
+  const url = URL.createObjectURL(blob);
+  const a   = Object.assign(document.createElement('a'), { href: url, download: 'hotelcompanion_wiki.js' });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  wikiDirty = false;
+  document.getElementById('wikiDirtyBadge').style.display = 'none';
+  showToast('hotelcompanion_wiki.js downloaded. Place it alongside the app and reload.', 'success');
+}
+
+// ── Print page ────────────────────────────────────────────────────
+function wikiPrintPage() {
+  window.print();
+}
+
+// ── Helper: escape HTML ───────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── showSection hook — lazy-init wiki on first visit ─────────────
+// (Patched into showSection below via the existing section routing)
 
 // -------------------------------------------------------------
 // CHUNK 8 — CHECKLIST, NIGHT AUDIT, NOTES
