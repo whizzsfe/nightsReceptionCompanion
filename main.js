@@ -1,6 +1,6 @@
 'use strict';
 // main.js — Electron main process
-// Night Receptionist Companion Suite v1.0.0
+// Night Receptionist Companion Suite v1.1.0
 // © 2026 Whizzsfe Web Services — whizzsfe.com
 
 const { app, BrowserWindow, ipcMain, dialog, shell, session, Menu, powerMonitor } = require('electron');
@@ -26,6 +26,7 @@ const OVERRIDE_FILES = [
   'hotelcompanion_config.js',
   'hotelcompanion_items.js',
   'hotelcompanion_scripts.js',
+  'hotelcompanion_wiki.js',
   'hotelcompanion_license.js',
 ];
 
@@ -90,20 +91,29 @@ function createWindow(htmlFile) {
   // This replicates the <script src="…"> behaviour from the HTML-only version.
   win.webContents.on('did-finish-load', () => {
     console.log('[main] did-finish-load fired for:', htmlFile);
-    for (const filename of OVERRIDE_FILES) {
-      const filepath = path.join(EXE_DIR, filename);
-      if (fs.existsSync(filepath)) {
-        try {
-          const code = fs.readFileSync(filepath, 'utf8');
-          // executeJavaScript is safe here — we control the source files.
-          win.webContents.executeJavaScript(code).catch(err => {
-            console.warn(`[override] Failed to execute ${filename}:`, err.message);
-          });
-        } catch (err) {
-          console.warn(`[override] Could not read ${filename}:`, err.message);
+    // Inject overrides sequentially so each global is set before the next
+    // script runs, then signal the editor to re-init from the now-populated globals.
+    (async () => {
+      for (const filename of OVERRIDE_FILES) {
+        const filepath = path.join(EXE_DIR, filename);
+        if (fs.existsSync(filepath)) {
+          try {
+            const code = fs.readFileSync(filepath, 'utf8');
+            // executeJavaScript is safe here — we control the source files.
+            await win.webContents.executeJavaScript(code).catch(err => {
+              console.warn(`[override] Failed to execute ${filename}:`, err.message);
+            });
+          } catch (err) {
+            console.warn(`[override] Could not read ${filename}:`, err.message);
+          }
         }
       }
-    }
+      // If this is the editor window, trigger a re-init so it picks up
+      // the override globals that were not yet set at DOMContentLoaded time.
+      await win.webContents.executeJavaScript(
+        'if (typeof window.__editorRefreshFromGlobals === "function") window.__editorRefreshFromGlobals();'
+      ).catch(() => {});
+    })();
 
     // Override window.print() to route through IPC → webContents.print().
     win.webContents.executeJavaScript(`
