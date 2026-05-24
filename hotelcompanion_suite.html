@@ -25,6 +25,7 @@
     @page sign-a3-landscape { size: A3 landscape; margin: 0; }
     /* Default binding - overridden by data-sign-page attribute selectors in print CSS */
     @media print { #signPaper { page: sign-a4-portrait; } }
+    
   </style>
   <style>
 /* ===== Bundled Google Fonts (offline) ===== */
@@ -471,6 +472,10 @@
     .sidebar-copyright a { color: var(--muted); text-decoration: none; }
     .sidebar-copyright a:hover { color: var(--gold); }
     .print-copyright { display: none; }
+    @media print {
+       .print-copyright{display:none;}
+        .d-print-none{display:none;}
+    }
     .toggle-pill {
       width: 40px;
       height: 22px;
@@ -2274,9 +2279,9 @@
         ? '<p style="margin:0 0 10px;">Expired on <strong style="color:var(--red,#E05555);">' + _esc(lic.expiresAt) + '</strong>.</p>'
         : '';
       var bodies = {
-        missing: '<p style="margin:0 0 10px;">A valid license file is required to run this application.</p><p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> to obtain a license for this property.</p>',
-        invalid: '<p style="margin:0 0 10px;">The license file could not be verified — it may have been modified or corrupted.</p><p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> for a replacement.</p>',
-        expired: expLine + '<p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> to renew your license and continue using the app.</p>',
+        missing: '<p style="margin:0 0 10px;" class="d-print-none">A valid license file is required to run this application.</p><p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> to obtain a license for this property.</p>',
+        invalid: '<p style="margin:0 0 10px;" class="d-print-none">The license file could not be verified — it may have been modified or corrupted.</p><p style="margin:0 0 10px;">Please contact <strong>Whizzsfe Web Services</strong> for a replacement.</p>',
+        expired: expLine + '<p style="margin:0 0 10px;" class="d-print-none">Please contact <strong>Whizzsfe Web Services</strong> to renew your license and continue using the app.</p>',
       };
       var subj = encodeURIComponent(
         'Night Companion License ' +
