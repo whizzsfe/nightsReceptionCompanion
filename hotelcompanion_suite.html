@@ -26,6 +26,7 @@
     /* Default binding - overridden by data-sign-page attribute selectors in print CSS */
     @media print { #signPaper { page: sign-a4-portrait; } }
     
+    
   </style>
   <style>
 /* ===== Bundled Google Fonts (offline) ===== */
@@ -474,7 +475,7 @@
     .print-copyright { display: none; }
     @media print {
        .print-copyright{display:none;}
-        .d-print-none{display:none;}
+        .d-print-none{display:none !important;}
     }
     .toggle-pill {
       width: 40px;
@@ -2288,7 +2289,7 @@
         (state === 'expired' ? 'Renewal' : state === 'missing' ? 'Request' : 'Issue') +
         (lic && lic.propertyName ? ' \u2014 ' + lic.propertyName : '')
       );
-      return '<div style="background:var(--card,#181818);border:1px solid var(--border,#2A2A2A);border-radius:12px;padding:40px 36px;max-width:460px;width:90%;text-align:center;font-family:\'DM Sans\',sans-serif;color:var(--text,#F0EDE8);box-shadow:0 8px 40px rgba(0,0,0,0.6);">' +
+      return '<div class= "d-print-none" style="background:var(--card,#181818);border:1px solid var(--border,#2A2A2A);border-radius:12px;padding:40px 36px;max-width:460px;width:90%;text-align:center;font-family:\'DM Sans\',sans-serif;color:var(--text,#F0EDE8);box-shadow:0 8px 40px rgba(0,0,0,0.6);">' +
         '<div style="font-size:44px;margin-bottom:12px;">&#128274;</div>' +
         '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:26px;color:var(--gold,#D4A843);letter-spacing:2px;margin-bottom:8px;">' + _esc(titles[state]) + '</div>' +
         propLine +
@@ -9827,9 +9828,5 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', init);
 
 </script>
-<!-- Print-only copyright footer -->
-<div class="print-copyright">
-  © 2026 Night Receptionist Companion &nbsp;|&nbsp; Base design: YSEKventures (ysekventures.gumroad.com) &nbsp;|&nbsp; Implemented &amp; enhanced: Whizzsfe Web Services (whizzsfe.com)
-</div>
 </body>
 </html>
