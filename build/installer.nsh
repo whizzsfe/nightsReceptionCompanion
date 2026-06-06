@@ -11,6 +11,7 @@
 ;   hotelcompanion_config.js    — property configuration
 ;   hotelcompanion_items.js     — custom checklist items
 ;   hotelcompanion_scripts.js   — custom AI scripts
+;   hotelcompanion_wiki.js      — custom operations manual content
 ;   hotelcompanion_license.js   — property licence file
 ;   hotelcompanion_rota.json    — rota / contacts data
 ;   hotelLogo.jpg               — custom hotel logo
@@ -55,6 +56,7 @@
   !insertmacro _HC_Backup "hotelcompanion_config.js"
   !insertmacro _HC_Backup "hotelcompanion_items.js"
   !insertmacro _HC_Backup "hotelcompanion_scripts.js"
+  !insertmacro _HC_Backup "hotelcompanion_wiki.js"
   !insertmacro _HC_Backup "hotelcompanion_license.js"
   !insertmacro _HC_Backup "hotelcompanion_rota.json"
   !insertmacro _HC_Backup "hotelLogo.jpg"
@@ -84,6 +86,7 @@
     !insertmacro _HC_Restore "hotelcompanion_config.js"
     !insertmacro _HC_Restore "hotelcompanion_items.js"
     !insertmacro _HC_Restore "hotelcompanion_scripts.js"
+    !insertmacro _HC_Restore "hotelcompanion_wiki.js"
     !insertmacro _HC_Restore "hotelcompanion_license.js"
     !insertmacro _HC_Restore "hotelcompanion_rota.json"
     !insertmacro _HC_Restore "hotelLogo.jpg"
