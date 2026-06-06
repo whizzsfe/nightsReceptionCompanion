@@ -1678,6 +1678,10 @@
     .rota-row-label { background: var(--card2) !important; color: var(--text) !important; font-weight: 600; text-align: left !important; min-width: 110px; font-size: 11px !important; }
     .rota-dm-row td { border-top: 2px solid var(--gold-dim); }
     .rota-access-banner { background: rgba(var(--gold-rgb),0.08); border: 1px solid var(--gold-dim); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .rota-autosave-status { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); transition: color 0.3s; white-space: nowrap; }
+    .rota-autosave-status.saving { color: var(--muted); }
+    .rota-autosave-status.saved  { color: var(--green); }
+    .rota-autosave-status.error  { color: var(--red); }
     .rota-dm-badge { font-size: 9px; color: var(--gold-dim); font-family: 'DM Mono', monospace; margin-top: 2px; white-space: nowrap; }
     .rota-cell-input { background: transparent; border: none; color: var(--text); font-size: 12px; width: 100%; min-width: 80px; outline: none; text-align: center; font-family: 'DM Sans', sans-serif; padding: 2px; }
     .rota-cell-input:focus { background: rgba(var(--gold-rgb),0.08); border-radius: 3px; }
@@ -4262,8 +4266,9 @@
       <div class="section-heading">Night Rota &amp; Contacts</div>
       <div class="section-sub">Tonight's team, on-call contacts, and shift planner. Saved to your shared OneDrive folder.</div>
     </div>
-    <div class="rota-actions-top no-print">
-      <button class="btn btn-gold" id="saveRotaBtn" onclick="saveRota()" aria-label="Save rota to OneDrive folder">&#128190; Save to Folder</button>
+    <div class="rota-actions-top no-print" style="align-items:center">
+      <span id="rotaAutoSaveStatus" class="rota-autosave-status" aria-live="polite"></span>
+      <button class="btn btn-ghost" id="saveRotaBtn" onclick="saveRota()" aria-label="Save rota to OneDrive folder">&#128190; Save Now</button>
       <button class="btn btn-ghost" onclick="printRota()" aria-label="Print rota">&#128424;&#65039; Print</button>
     </div>
   </div>
@@ -8684,15 +8689,17 @@ function addContactRow() {
   const list = document.getElementById('rotaOnCallList');
   if (!list) return;
   list.insertAdjacentHTML('beforeend', buildContactRow({ role:'', name:'', mobile:'' }, list.children.length));
+  scheduleRotaAutoSave();
 }
-function removeContactRow(btn) { btn.closest('.rota-contact-row')?.remove(); }
+function removeContactRow(btn) { btn.closest('.rota-contact-row')?.remove(); scheduleRotaAutoSave(); }
 
 function addEmergencyRow() {
   const list = document.getElementById('rotaEmergencyList');
   if (!list) return;
   list.insertAdjacentHTML('beforeend', buildEmergencyRow({ label:'', name:'', number:'' }, list.children.length));
+  scheduleRotaAutoSave();
 }
-function removeEmergencyRow(btn) { btn.closest('.rota-emergency-row')?.remove(); }
+function removeEmergencyRow(btn) { btn.closest('.rota-emergency-row')?.remove(); scheduleRotaAutoSave(); }
 
 // ---- Staff chips ----
 
@@ -8713,6 +8720,7 @@ function addDmChip() {
     rotaData.dmStaff.push(name);
     renderRotaDmChips();
     updateRotaDmDatalist();
+    scheduleRotaAutoSave();
   }
   if (input) input.value = '';
 }
@@ -8720,7 +8728,7 @@ function addDmChip() {
 function removeDmChip(btn) {
   const chip = btn.closest('.staff-chip');
   const name = chip?.dataset.name;
-  if (name) { rotaData.dmStaff = (rotaData.dmStaff||[]).filter(s => s !== name); chip.remove(); updateRotaDmDatalist(); }
+  if (name) { rotaData.dmStaff = (rotaData.dmStaff||[]).filter(s => s !== name); chip.remove(); updateRotaDmDatalist(); scheduleRotaAutoSave(); }
 }
 
 function updateRotaDmDatalist() {
@@ -8744,6 +8752,7 @@ function addStaffChip() {
     rotaData.staff.push(name);
     renderRotaStaffChips();
     updateRotaDatalist();
+    scheduleRotaAutoSave();
   }
   if (input) input.value = '';
 }
@@ -8751,7 +8760,7 @@ function addStaffChip() {
 function removeStaffChip(btn) {
   const chip = btn.closest('.staff-chip');
   const name = chip?.dataset.name;
-  if (name) { rotaData.staff = rotaData.staff.filter(s => s !== name); chip.remove(); updateRotaDatalist(); }
+  if (name) { rotaData.staff = rotaData.staff.filter(s => s !== name); chip.remove(); updateRotaDatalist(); scheduleRotaAutoSave(); }
 }
 
 function updateRotaDatalist() {
@@ -8789,6 +8798,7 @@ function generateRotaGrid() {
   rotaData.rota.nights = nights;
 
   renderRotaGrid();
+  scheduleRotaAutoSave();
 }
 
 function renderRotaGrid() {
@@ -8949,20 +8959,24 @@ function switchRotaTab(tab) {
 // ---- Save + Print ----
 
 async function saveRota() {
+  clearTimeout(rotaAutoSaveTimer);
   collectRotaContacts();
   collectRotaGridValues();
   collectRotaStaff();
+  const status = document.getElementById('rotaAutoSaveStatus');
+  if (status) { status.textContent = 'Saving…'; status.className = 'rota-autosave-status saving'; }
   const ok = await saveRotaToFolder();
   if (ok) {
-    const btn = document.getElementById('saveRotaBtn');
-    if (btn) {
-      const orig = btn.textContent;
-      btn.textContent = '&#10003; Saved!';
-      btn.disabled    = true;
-      setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+    if (status) {
+      status.textContent = '\u2713 Saved';
+      status.className = 'rota-autosave-status saved';
+      setTimeout(() => { status.textContent = ''; status.className = 'rota-autosave-status'; }, 3000);
     }
     renderRotaTonightPanel();
     renderRotaWeekStrip();
+  } else if (status) {
+    status.textContent = 'Save failed';
+    status.className = 'rota-autosave-status error';
   }
 }
 
@@ -8983,6 +8997,8 @@ function applyRotaAccessControl() {
   });
   const saveBtn = document.getElementById('saveRotaBtn');
   if (saveBtn) saveBtn.style.display = isSupervisor ? '' : 'none';
+  const autoSaveStatus = document.getElementById('rotaAutoSaveStatus');
+  if (autoSaveStatus) autoSaveStatus.style.display = isSupervisor ? '' : 'none';
   // Add/remove buttons (contacts, staff, emergency)
   section.querySelectorAll('.btn-ghost:not(.no-print-keep), .btn-gold').forEach(btn => {
     if (btn.id !== 'saveRotaBtn') btn.style.pointerEvents = isSupervisor ? '' : 'none';
@@ -8996,6 +9012,35 @@ function applyRotaAccessControl() {
 }
 
 let rotaLoaded = false;
+let rotaAutoSaveTimer = null;
+
+function scheduleRotaAutoSave() {
+  if (!autoSaveFolderHandle && !window.electronAPI) return;
+  if (staffRole !== 'Night Supervisor') return;
+  const status = document.getElementById('rotaAutoSaveStatus');
+  if (status) { status.textContent = 'Saving…'; status.className = 'rota-autosave-status saving'; }
+  clearTimeout(rotaAutoSaveTimer);
+  rotaAutoSaveTimer = setTimeout(async () => {
+    collectRotaContacts();
+    collectRotaGridValues();
+    collectRotaStaff();
+    const ok = await saveRotaToFolder();
+    const st = document.getElementById('rotaAutoSaveStatus');
+    if (st) {
+      if (ok) {
+        st.textContent = '\u2713 Saved';
+        st.className = 'rota-autosave-status saved';
+        renderRotaTonightPanel();
+        renderRotaWeekStrip();
+        setTimeout(() => { st.textContent = ''; st.className = 'rota-autosave-status'; }, 3000);
+      } else {
+        st.textContent = 'Save failed';
+        st.className = 'rota-autosave-status error';
+      }
+    }
+  }, 1500);
+}
+
 async function initRotaSection() {
   if (rotaLoaded) { renderRotaTonightPanel(); renderRotaWeekStrip(); applyRotaAccessControl(); return; }
   rotaLoaded = true;
@@ -9021,6 +9066,13 @@ async function initRotaSection() {
   if (rotaData.rota.nights.length) renderRotaGrid();
   renderRotaWeekStrip();
   applyRotaAccessControl();
+
+  // Auto-save on any input change within the rota section
+  document.getElementById('section-rota')?.addEventListener('input', e => {
+    if (e.target.closest('.rota-contact-row, .rota-emergency-row, #rotaGridBody, #rotaOnCallList, #rotaEmergencyList')) {
+      scheduleRotaAutoSave();
+    }
+  });
 }
 
 // =============================================================
