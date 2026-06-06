@@ -1,5 +1,7 @@
 # Night Receptionist Companion Suite
 
+![Version](https://img.shields.io/badge/version-1.1.1-D4A843?labelColor=111111) ![License](https://img.shields.io/badge/license-GPL--2.0-4A90D9?labelColor=111111) ![Platform](https://img.shields.io/badge/platform-Windows-0078d4?logo=windows&labelColor=111111) ![Electron](https://img.shields.io/badge/built%20with-Electron-47848f?logo=electron&logoColor=white&labelColor=111111) ![Delivery](https://img.shields.io/badge/delivery-offline%20%2F%20file%3A%2F%2F-4CAF82?labelColor=111111) ![Maintained](https://img.shields.io/badge/maintained-yes-4CAF82?labelColor=111111)
+
 A browser-based toolkit for hotel front-office night staff. Runs entirely from a local file — no server, no internet connection required during a shift.
 
 ---
@@ -122,13 +124,11 @@ The **Persist Data** toggle in the sidebar controls how session data behaves. It
 |---|---|
 | Staff profile (name, role, shift type) | **Always** — regardless of toggle |
 | Shift history | **Always** |
-| Pending handover for the next shift | **Always** |
 | Brand customisation (hotel name, logo, colour) | **Always** |
 | Shift start time | **Always** |
 | Checklist ticks | Only when toggle is **On** |
 | Shift notes & handover notes | Only when toggle is **On** |
 | Night Log entries | Only when toggle is **On** |
-| Night Audit step state | Only when toggle is **On** |
 | Daily Info Board data | Only when toggle is **On** |
 
 **Recommended setting for shared terminals:** Leave the toggle **Off**. Each person who opens the app starts with session data cleared — the right behaviour for a front desk PC used by multiple staff across a 24-hour rota.
