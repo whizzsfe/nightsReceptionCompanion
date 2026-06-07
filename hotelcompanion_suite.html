@@ -5749,12 +5749,14 @@ function getActiveChecklistItems(tab) {
 }
 
 function getDayKey() {
-  const d = new Date().getDay(); // 0=Sun
+  // Use shiftStart (local time, DST-aware) so the day doesn't flip after midnight
+  const d = new Date(shiftStart || Date.now()).getDay(); // 0=Sun
   return ['sun','mon','tue','wed','thu','fri','sat'][d];
 }
 
 function isLastNightOfMonth() {
-  const now = new Date();
+  // Use shiftStart (local time, DST-aware) so end-of-month check doesn't flip after midnight
+  const now = new Date(shiftStart || Date.now());
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   return tomorrow.getDate() === 1;
 }
