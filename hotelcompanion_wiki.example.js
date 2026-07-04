@@ -35,7 +35,7 @@
     };
 */
 
-window.HOTELCOMPANION_WIKI = {
+window.HOTELCOMPANION_WIKI = window.HOTELCOMPANION_WIKI || {
   version: 1,
   pages: [
 
@@ -1470,6 +1470,266 @@ To get information from Opera: Cashiering → Billing → Advanced → tick **Op
 # Email
 
 Within the nights inbox there is a contact list called **Open Folios Contacts.** Send the final file to that list. There should be a template for the email content. Subject: **Open Folio and Open PM update.**`
+    },
+
+    // ─────────────────────────────────────────────
+    // CATEGORY 0 — Reference (additional pages)
+    // ─────────────────────────────────────────────
+
+    {
+      id: 'wiki_ref_004',
+      title: 'Common Mistakes to Avoid',
+      category: 'Reference',
+      categoryOrder: 0,
+      pageOrder: 3,
+      lastModified: '2026-07-05T00:00:00.000Z',
+      content: `# Common Mistakes to Avoid
+
+These are the most common errors made on nights. Knowing them is the fastest way to avoid them.
+
+---
+
+**1 — Forgetting to reprint the Downtime Report after audit**
+The Downtime Report must be reprinted after audit completes. The pre-audit version is out of date. Always reprint it as your first post-audit task.
+
+**2 — Running audit with open cashiers**
+Any open cashier session blocks the audit. Confirm ALL staff cashiers are closed before you close yours and run End of Day.
+
+**3 — Missing RevPar before midnight**
+Once midnight passes, RevPar data for the previous day cannot be entered correctly. Set a reminder alarm for 11:30 PM if needed.
+
+**4 — Filing registration cards incorrectly**
+Reg cards are legal records. Mis-filing them means billing evidence is lost. Follow the Pile 1 / Pile 2 sorting process every night.
+
+**5 — Forgetting to send the Open Folio email**
+Finance and management rely on this email. Add it to your mental checklist as part of the post-audit email sequence.
+
+**6 — Not checking PM balances are zero before audit**
+Non-zero PMs will fail the audit. Always check all PMs show 0.00 before closing your own cashier.
+
+**7 — Running Hotel Flash or Early Bird before D156**
+D156 feeds data into both reports. Always follow the sequence: D156 → Hotel Flash → Early Bird.
+
+**8 — Checking in arrivals without securing payment**
+Once a guest is in their room, payment becomes very difficult to collect. Pre-auth or take a deposit before checking in. If neither is possible, use the No Show protocol.`
+    },
+
+    {
+      id: 'wiki_ref_005',
+      title: 'Marriott Bonvoy Elite Tiers',
+      category: 'Reference',
+      categoryOrder: 0,
+      pageOrder: 4,
+      lastModified: '2026-07-05T00:00:00.000Z',
+      content: `# Marriott Bonvoy Elite Tiers
+
+Always verify benefits per brand and property. Some are subject to availability. When in doubt, consult the morning manager.
+
+---
+
+## Member
+No threshold. Earn points, mobile check-in, member rates.
+
+## Silver Elite — 10 Nights/Year
+- +10% bonus points
+- Priority late checkout *(subject to availability — not guaranteed)*
+
+## Gold Elite — 25 Nights/Year
+- +25% bonus points
+- 2 PM late checkout *(subject to availability)*
+- Enhanced room upgrade *(excludes suites)*
+
+## Platinum Elite — 50 Nights/Year
+- +50% bonus points
+- 4 PM late checkout (**guaranteed**, except at resort properties)
+- Lounge access *(where available)*
+- Suite upgrade *(subject to availability)*
+- **Welcome Choice:** 1,000 bonus points or complimentary breakfast
+
+## Titanium Elite — 75 Nights/Year
+- All Platinum benefits at higher priority
+- +75% bonus points
+- 48-hour room type guarantee *(advance bookings)*
+- Treat as top tier in all operational decisions
+
+## Ambassador Elite — 100 Nights + $20K Spend/Year
+- All Titanium benefits
+- +100% bonus points
+- Dedicated Ambassador personal travel manager
+- **Your24™** — personalised 24-hour check-in/checkout window
+- **Any service issue must be escalated to the Duty Manager immediately — do not improvise**
+
+---
+
+## Quick Reference
+
+- **Member / Silver** — no guaranteed late checkout, no upgrade, no welcome choice
+- **Gold** — 2 PM checkout (availability), enhanced upgrade (no suites)
+- **Platinum** — 4 PM guaranteed, suites, lounge, welcome choice
+- **Titanium** — all Platinum at higher priority, 48-hour type guarantee
+- **Ambassador** — all Titanium + Your24™ + personal Ambassador`
+    },
+
+    // ─────────────────────────────────────────────
+    // CATEGORY 6 — Operations
+    // ─────────────────────────────────────────────
+
+    {
+      id: 'wiki_ops_001',
+      title: 'Check-In Procedure',
+      category: 'Operations',
+      categoryOrder: 6,
+      pageOrder: 0,
+      lastModified: '2026-07-05T00:00:00.000Z',
+      content: `# Check-In Procedure
+
+Standard Opera PMS check-in flow for the night team.
+
+---
+
+## Step-by-Step Opera Check-In
+
+- **Step 1 — Search the reservation.** Use Last Name or Confirmation Number. Always confirm the full name matches the guest's ID.
+- **Step 2 — Verify reservation details.** Before clicking Check In, confirm: room type, rate code, payment method, routing instructions, and membership status.
+- **Step 3 — Click Check In.** Proceed once all details are verified. Opera will prompt for room assignment if not pre-assigned.
+- **Step 4 — Assign the room.** Respect elite upgrade entitlements — Gold and above may be entitled to an enhanced room. Titanium and Ambassador have highest priority for suite upgrades.
+- **Step 5 — Create key cards.** Issue the correct number. Confirm room number with the guest before handing over.
+- **Step 6 — Verify breakfast.** Check whether breakfast is included in the rate or selected as a Bonvoy welcome choice.
+- **Step 7 — Car registration.** Ask and log if the property records vehicle registrations.
+- **Step 8 — Thank the guest by name.** Close with a personalised greeting. Acknowledge their elite tier where applicable.
+
+---
+
+## Questions to Ask at Check-In
+
+- "May I confirm your email address?"
+- "Will you require breakfast during your stay?"
+- "Do you have a vehicle with us tonight?"
+- "Is this your first visit to Lingfield Park?"
+- "Would you prefer points or breakfast this evening?" *(eligible Bonvoy elites only)*
+
+---
+
+## Elite Recognition
+
+- **Acknowledge status** — thank Platinum, Titanium, and Ambassador members for their loyalty.
+- **Deliver welcome choice** — Platinum and above are entitled to a welcome choice. Offer it; do not wait for them to ask.
+- **Late checkout** — Gold and above may request late checkout. At night, advise they can confirm with the morning team. Log the request in Opera traces.
+- **Ambassador guests** — escalate any issue immediately to the Duty Manager — do not improvise.
+
+---
+
+**Opera path:** Front Desk → Arrivals → Search → Verify → Check In → Room Assignment → Key Creation. Always save after each step and confirm the folio is clean before the guest leaves the desk.`
+    },
+
+    {
+      id: 'wiki_ops_002',
+      title: 'No Shows & Night Audit',
+      category: 'Operations',
+      categoryOrder: 6,
+      pageOrder: 1,
+      lastModified: '2026-07-05T00:00:00.000Z',
+      content: `# No Shows & Night Audit
+
+How to identify, confirm, and process no-show charges correctly — before and after Night Audit runs.
+
+---
+
+## Before Running Night Audit
+
+- **Step 1** — Review all reservations due to arrive today. Identify any not checked in with no late arrival note.
+- **Step 2** — Confirm the reservation holds a valid credit card. Do not charge an expired, unactivated, or virtual card without checking.
+- **Step 3** — Check Opera notes and traces for any late arrival communication. If expected before 6 AM — do not mark as no-show yet.
+- **Step 4** — Check Bonvoy status. Ambassador Elite guests require extra care — contact the on-call manager if uncertain.
+
+---
+
+## If Confirmed No Show — in Opera
+
+- **Step 1** — Open the reservation.
+- **Step 2** — Change the reservation status to **No Show.** Opera will prompt to confirm.
+- **Step 3** — Review the rate code to confirm the booking is subject to a no-show charge under the applicable policy.
+- **Step 4** — Save. Do not exit without saving.
+- **Step 5** — Run Night Audit. The system will attempt to post the no-show charge automatically.
+
+---
+
+## After Night Audit
+
+- **Step 1** — If not auto-posted, manually post the no-show transaction code. Verify the amount matches the policy.
+- **Step 2** — Confirm the charge reflects the correct rate.
+- **Step 3** — Confirm routing — guest card, OTA virtual card, or company account as appropriate.
+- **Step 4** — Add a trace note: *"Guest did not arrive. No contact received. Charged as per policy."* Include your name and time.
+
+---
+
+## When NOT to Charge No Show
+
+- **Booking.com** — virtual cards have an activation date. Verify before posting. If not yet active, flag for the revenue team.
+- **Expedia Collect** — Expedia charges the guest directly. Do not charge independently.
+- **Corporate/Company** — refer to the revenue or reservations team. The company account must be invoiced correctly.
+- **Golfbreaks / YourGolf** — prepaid third-party packages. Do not charge; leave a trace and escalate.
+- **House Use / Management** — never charge for no-shows on internal reservations.
+
+---
+
+**Financial risk:** Incorrect no-show posting creates disputes and chargebacks. When in doubt, do not charge — leave a trace and escalate to the morning manager.`
+    },
+
+    {
+      id: 'wiki_ops_003',
+      title: 'Routing & Billing Guide',
+      category: 'Operations',
+      categoryOrder: 6,
+      pageOrder: 2,
+      lastModified: '2026-07-05T00:00:00.000Z',
+      content: `# Routing & Billing Guide
+
+How to verify and manage billing routing for OTA bookings, corporate accounts, golf packages, and Merlin reservations.
+
+---
+
+## Booking.com
+
+- Room and tax charges route to the **virtual card only.**
+- Always verify the **virtual card activation date** before charging. An unactivated card will decline.
+- Extras (restaurant, spa, incidentals) route to the **guest's own card** unless the booking specifies otherwise.
+- **Never charge extras to the Booking.com virtual card** — it will be declined or create a dispute.
+
+---
+
+## Expedia
+
+- **Expedia Collect** — Expedia charges the guest and pays the hotel. Do not charge room on arrival.
+- **Hotel Collect** — Hotel charges the guest directly. Room and tax go to the guest's card.
+- Check routing instructions in the Opera reservation. Do not assume — read them.
+- Extras always route to the guest unless specifically noted.
+
+---
+
+## Corporate / Company Accounts
+
+- Verify the company holds an active City Ledger account. If on hold, route to a guest card and flag for the morning team.
+- Confirm the company account code matches the reservation routing — do not manually enter without confirming.
+- Standard split: **Room & Tax → Company Account** | **Extras → Guest Card**
+- If routing is incorrect, Night Audit balance will fail. Resolve or escalate before running audit.
+
+---
+
+## Golfbreaks & YourGolf
+
+- Typically **fully prepaid** — do not charge the guest's card for room and tax unless Opera routing explicitly directs you to.
+- Verify package inclusions: dinner, breakfast, golf, and whether extras go to the guest.
+- Read every reservation note before making any charge.
+- Some charges go to a master account held by the tour operator — confirm whether a master folio exists.
+
+---
+
+## Merlin Bookings
+
+- Verify the internal Merlin reservation code is correctly recorded in Opera.
+- Determine whether the reservation routes to a house account or has a separate billing instruction.
+- **If billing instructions are missing or unclear — do not apply standard routing.** Leave a trace note and escalate to the morning team or duty manager.`
     },
 
   ]

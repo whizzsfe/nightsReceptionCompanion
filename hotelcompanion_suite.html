@@ -15,7 +15,8 @@
   <script src="hotelcompanion_config.js" onerror="console.info('hotelcompanion_config.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_items.js" onerror="console.info('hotelcompanion_items.js not found — using built-in defaults.')"></script>
   <script src="hotelcompanion_scripts.js" onerror="console.info('hotelcompanion_scripts.js not found — using Smart Defaults.')"></script>
-  <script src="hotelcompanion_wiki.js" onerror="console.info('hotelcompanion_wiki.js not found — using built-in Operations Manual.')"></script>
+  <script src="hotelcompanion_wiki.js" onerror="void 0"></script>
+  <script src="hotelcompanion_wiki.example.js" onerror="void 0"></script>
   <script src="hotelcompanion_license.js" onerror="void 0"></script>
   <!-- Sign generator: all 4 page variants declared statically. JS only sets data-sign-page on <body>. -->
   <style id="signPrintPageStyle">
@@ -2109,6 +2110,44 @@
       .wiki-nav { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
     }
 
+    /* ---- GOLDEN RULES QUICK-REFERENCE ---- */
+    .rule-ref-card { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+    .rule-ref-card:last-child { border-bottom:none; }
+    .rule-ref-num { width:34px; height:34px; min-width:34px; border-radius:8px; background:rgba(212,168,67,0.1); border:1px solid var(--gold-dim); color:var(--gold); font-family:'DM Mono',monospace; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .rule-ref-title { font-size:14px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .rule-ref-reason { font-size:13px; color:var(--muted); line-height:1.6; }
+    .mistake-ref-card { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+    .mistake-ref-card:last-child { border-bottom:none; }
+    .mistake-ref-dot { width:8px; height:8px; min-width:8px; border-radius:50%; background:var(--red); margin-top:6px; flex-shrink:0; }
+    .mistake-ref-title { font-size:13px; font-weight:600; color:var(--red); margin-bottom:3px; }
+    .mistake-ref-fix { font-size:12px; color:var(--muted); line-height:1.6; }
+
+    /* ---- GLOSSARY QUICK-REFERENCE ---- */
+    .gloss-search-bar { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; gap:10px; align-items:center; margin-bottom:18px; }
+    .gloss-search-input { flex:1; background:none; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); }
+    .gloss-search-input::placeholder { color:var(--muted); }
+    .gloss-group { margin-bottom:10px; }
+    .gloss-letter { font-family:'DM Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.1em; color:var(--gold); text-transform:uppercase; padding:6px 16px 4px; background:var(--card); border:1px solid var(--border); border-radius:6px 6px 0 0; border-bottom:none; }
+    .gloss-row { display:flex; gap:16px; padding:9px 16px; border:1px solid var(--border); border-top:none; background:var(--card); align-items:flex-start; }
+    .gloss-row:last-child { border-radius:0 0 6px 6px; }
+    .gloss-term { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:var(--gold); min-width:160px; flex-shrink:0; padding-top:2px; }
+    .gloss-def { font-size:13px; color:var(--text); line-height:1.55; }
+    .gloss-empty { color:var(--muted); font-size:14px; padding:32px 0; text-align:center; }
+
+    /* ---- EMERGENCY GUIDE QUICK-REFERENCE ---- */
+    .em-ref-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }
+    @media(max-width:760px){ .em-ref-grid { grid-template-columns:1fr; } }
+    .em-ref-card { background:var(--card); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .em-ref-card--critical { border-color:var(--red); }
+    .em-ref-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--card2); border-bottom:1px solid var(--border); }
+    .em-ref-card--critical .em-ref-header { background:rgba(224,85,85,0.1); border-color:rgba(224,85,85,0.3); }
+    .em-ref-title { font-size:14px; font-weight:600; color:var(--text); }
+    .em-ref-badge { font-family:'DM Mono',monospace; font-size:9px; font-weight:700; letter-spacing:0.08em; color:var(--red); background:rgba(224,85,85,0.15); border:1px solid rgba(224,85,85,0.3); padding:2px 7px; border-radius:4px; }
+    .em-ref-body { padding:14px 16px; font-size:13px; }
+    .em-ref-body .wiki-body { font-size:13px; }
+    .em-contacts-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 20px; }
+    .card-label-sm { font-family:'DM Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+
     /* ---- GAMES SECTION ---- */
     .game-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
     .game-tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
@@ -2451,6 +2490,15 @@
     <div class="nav-section-label">Knowledge</div>
     <div class="nav-item" data-section="manual" onclick="showSection('manual',this)" role="button" tabindex="0" aria-label="Operations Manual">
       <span class="nav-icon">📖</span> Operations Manual
+    </div>
+    <div class="nav-item" data-section="rules" onclick="showSection('rules',this)" role="button" tabindex="0" aria-label="Golden Rules" style="display:none">
+      <span class="nav-icon">⚑</span> Golden Rules
+    </div>
+    <div class="nav-item" data-section="glossary" onclick="showSection('glossary',this)" role="button" tabindex="0" aria-label="Glossary" style="display:none">
+      <span class="nav-icon">📚</span> Glossary
+    </div>
+    <div class="nav-item" data-section="emergency" onclick="showSection('emergency',this)" role="button" tabindex="0" aria-label="Emergency Guide" style="display:none">
+      <span class="nav-icon">🚨</span> Emergency Guide
     </div>
 
     <!-- Tools Divider -->
@@ -3927,6 +3975,71 @@
 </section>
 
 <!-- -----------------------------------------------------------
+     SECTION: GOLDEN RULES
+----------------------------------------------------------- -->
+<section class="section" id="section-rules" aria-label="Golden Rules">
+  <div class="flex-between mb-12 no-print" style="align-items:flex-start">
+    <div>
+      <div class="section-heading">Golden Rules</div>
+      <div class="section-sub">The non-negotiables of the night audit role. When in doubt, return here.</div>
+    </div>
+    <button class="btn btn-ghost btn-sm no-print" onclick="showSection('manual',null);setTimeout(()=>wikiShowPage('wiki_ref_001'),80)" aria-label="View in Operations Manual">View in Manual →</button>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-header">
+      <span class="card-title">&#9873; The Eight Non-Negotiables</span>
+    </div>
+    <div style="padding:4px 16px 8px" id="rulesContent"><div class="section-empty">Loading…</div></div>
+  </div>
+  <div id="mistakesSection" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">&#9888; Common Mistakes — and How to Avoid Them</span>
+        <button class="btn btn-ghost btn-sm no-print" onclick="showSection('manual',null);setTimeout(()=>wikiShowPage('wiki_ref_004'),80)" aria-label="View in Operations Manual">View in Manual →</button>
+      </div>
+      <div style="padding:4px 16px 8px" id="mistakesContent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: GLOSSARY
+----------------------------------------------------------- -->
+<section class="section" id="section-glossary" aria-label="Glossary">
+  <div class="flex-between mb-12 no-print" style="align-items:flex-start">
+    <div>
+      <div class="section-heading">Glossary</div>
+      <div class="section-sub">Opera terms, Marriott abbreviations, and hotel language explained.</div>
+    </div>
+    <button class="btn btn-ghost btn-sm no-print" onclick="showSection('manual',null);setTimeout(()=>wikiShowPage('wiki_ref_003'),80)" aria-label="View in Operations Manual">View in Manual →</button>
+  </div>
+  <div class="gloss-search-bar">
+    <span style="color:var(--muted);font-size:15px">&#128269;</span>
+    <input type="search" class="gloss-search-input" id="glossarySearchInput" placeholder="Search terms and definitions…" oninput="glossaryFilter(this.value)" aria-label="Search glossary">
+  </div>
+  <div id="glossaryList"><div class="gloss-empty">Loading…</div></div>
+</section>
+
+<!-- -----------------------------------------------------------
+     SECTION: EMERGENCY GUIDE
+----------------------------------------------------------- -->
+<section class="section" id="section-emergency" aria-label="Emergency Guide">
+  <div class="flex-between mb-12 no-print" style="align-items:flex-start">
+    <div>
+      <div class="section-heading">Emergency Guide</div>
+      <div class="section-sub">Immediate actions, escalation flows, and key contacts for every scenario.</div>
+    </div>
+    <button class="btn btn-ghost btn-sm no-print" onclick="showSection('manual',null);setTimeout(()=>{const p=wikiData.find(x=>x.category==='Emergency &amp; Safety');if(p)wikiShowPage(p.id);},80)" aria-label="View in Operations Manual">View in Manual →</button>
+  </div>
+  <div class="notice notice-red mb-12 no-print" style="border-radius:8px;padding:10px 14px">
+    <span style="font-size:16px">&#9888;</span>
+    <div style="font-size:13px"><strong>In any emergency — guest safety comes first.</strong> No report, no audit, and no checklist item is more important than human safety.</div>
+  </div>
+  <div class="em-ref-grid" id="emergencyGrid"></div>
+  <div id="emergencyContacts"></div>
+</section>
+
+<!-- -----------------------------------------------------------
      HELP & GUIDE SECTION
 ----------------------------------------------------------- -->
 <section class="section" id="section-help" aria-label="Help and Guide">
@@ -4584,6 +4697,9 @@ const sectionTitles = {
   board:      'DAILY INFO BOARD',
   rota:       'NIGHT ROTA & CONTACTS',
   manual:     'OPERATIONS MANUAL',
+  rules:      'GOLDEN RULES',
+  glossary:   'GLOSSARY',
+  emergency:  'EMERGENCY GUIDE',
   games:      'GAMES & PUZZLES',
   help:       'HELP & GUIDE'
 };
@@ -4639,6 +4755,11 @@ function showSection(id, navEl) {
   if (id === 'manual') {
     initWikiSection();
   }
+
+  // Quick-reference sections: ensure wiki data loaded, then render
+  if (id === 'rules')     { ensureWikiLoaded(); renderRulesSection(); }
+  if (id === 'glossary')  { ensureWikiLoaded(); renderGlossarySection(); }
+  if (id === 'emergency') { ensureWikiLoaded(); renderEmergencySection(); }
 
   closeSidebar();
   updateDashboardStats();
@@ -5228,6 +5349,28 @@ function loadWikiData() {
     wikiData = JSON.parse(JSON.stringify(DEFAULT_WIKI_PAGES));
     console.info('[Wiki] hotelcompanion_wiki.js absent or invalid — using built-in default pages.');
   }
+  updateKnowledgeNavVisibility();
+}
+
+// ── Ensure wiki data is loaded (lightweight check for quick-ref sections) ────
+function ensureWikiLoaded() {
+  if (!wikiInitialised) {
+    loadWikiData();
+    wikiInitialised = true;
+  }
+}
+
+// ── Show/hide quick-reference sidebar items based on wiki content ─────────────
+function updateKnowledgeNavVisibility() {
+  const hasRules     = wikiData.some(p => p.title === 'Golden Rules');
+  const hasGlossary  = wikiData.some(p => p.title === 'Glossary');
+  const hasEmergency = wikiData.some(p => p.category === 'Emergency & Safety');
+  const rulesNav = document.querySelector('.nav-item[data-section="rules"]');
+  const glossNav = document.querySelector('.nav-item[data-section="glossary"]');
+  const emNav    = document.querySelector('.nav-item[data-section="emergency"]');
+  if (rulesNav)  rulesNav.style.display  = hasRules     ? '' : 'none';
+  if (glossNav)  glossNav.style.display  = hasGlossary  ? '' : 'none';
+  if (emNav)     emNav.style.display     = hasEmergency ? '' : 'none';
 }
 
 // ── Initialise section (called lazily on first nav) ──────────
@@ -5240,6 +5383,159 @@ function initWikiSection() {
   if (wikiData.length > 0) {
     const first = wikiSortedPages()[0];
     if (first) wikiShowPage(first.id);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUICK-REFERENCE SECTIONS: Golden Rules, Glossary, Emergency Guide
+// All data-driven from wikiData. Sections hidden when data absent.
+// ═══════════════════════════════════════════════════════════════
+
+// ── Golden Rules ────────────────────────────────────────────────
+function renderRulesSection() {
+  const rulesPage    = wikiData.find(p => p.title === 'Golden Rules');
+  const mistakesPage = wikiData.find(p => p.title === 'Common Mistakes to Avoid');
+  const rulesEl      = document.getElementById('rulesContent');
+  if (rulesEl && rulesPage) {
+    rulesEl.innerHTML = buildRuleCards(rulesPage.content);
+  }
+  const mistakesSection = document.getElementById('mistakesSection');
+  const mistakesEl      = document.getElementById('mistakesContent');
+  if (mistakesSection && mistakesEl) {
+    if (mistakesPage) {
+      mistakesEl.innerHTML = buildMistakeCards(mistakesPage.content);
+      mistakesSection.style.display = '';
+    } else {
+      mistakesSection.style.display = 'none';
+    }
+  }
+}
+
+function buildRuleCards(content) {
+  const rules = [];
+  let current = null;
+  content.split('\n').forEach(line => {
+    const m = line.match(/^\*\*Rule (\d+) — (.+)\*\*$/);
+    if (m) {
+      if (current) rules.push(current);
+      current = { num: m[1], title: m[2], reason: '' };
+    } else if (current && line.trim() && !line.startsWith('#') && line.trim() !== '---') {
+      current.reason += (current.reason ? ' ' : '') + line.trim();
+    }
+  });
+  if (current) rules.push(current);
+  return rules.map(r =>
+    `<div class="rule-ref-card">
+      <div class="rule-ref-num">${String(r.num).padStart(2,'0')}</div>
+      <div><div class="rule-ref-title">${escHtml(r.title)}</div><div class="rule-ref-reason">${escHtml(r.reason)}</div></div>
+    </div>`).join('');
+}
+
+function buildMistakeCards(content) {
+  const items = [];
+  let current = null;
+  content.split('\n').forEach(line => {
+    const m = line.match(/^\*\*(\d+) — (.+)\*\*$/);
+    if (m) {
+      if (current) items.push(current);
+      current = { num: m[1], title: m[2], fix: '' };
+    } else if (current && line.trim() && !line.startsWith('#') && line.trim() !== '---') {
+      current.fix += (current.fix ? ' ' : '') + line.trim();
+    }
+  });
+  if (current) items.push(current);
+  return items.map(item =>
+    `<div class="mistake-ref-card">
+      <div class="mistake-ref-dot"></div>
+      <div><div class="mistake-ref-title">${escHtml(item.title)}</div><div class="mistake-ref-fix">${escHtml(item.fix)}</div></div>
+    </div>`).join('');
+}
+
+// ── Glossary ─────────────────────────────────────────────────────
+let _glossaryTerms = [];
+
+function renderGlossarySection() {
+  const page = wikiData.find(p => p.title === 'Glossary');
+  if (!page) { document.getElementById('glossaryList').innerHTML = '<div class="gloss-empty">Glossary not available.</div>'; return; }
+  _glossaryTerms = parseGlossaryTerms(page.content);
+  const inp = document.getElementById('glossarySearchInput');
+  if (inp) inp.value = '';
+  renderGlossaryList(_glossaryTerms);
+}
+
+function parseGlossaryTerms(content) {
+  const terms = [];
+  let current = null;
+  content.split('\n').forEach(line => {
+    const m = line.match(/^\*\*(.+?)\*\*\s*$/);
+    if (m) {
+      if (current) terms.push(current);
+      current = { term: m[1], def: '' };
+    } else if (current && line.trim() && !line.startsWith('#') && line.trim() !== '---') {
+      current.def += (current.def ? ' ' : '') + line.trim();
+    }
+  });
+  if (current) terms.push(current);
+  return terms.sort((a, b) => a.term.localeCompare(b.term));
+}
+
+function renderGlossaryList(terms) {
+  const container = document.getElementById('glossaryList');
+  if (!container) return;
+  if (!terms.length) { container.innerHTML = '<div class="gloss-empty">No terms match your search.</div>'; return; }
+  const groups = {};
+  terms.forEach(t => {
+    const l = t.term[0].toUpperCase();
+    if (!groups[l]) groups[l] = [];
+    groups[l].push(t);
+  });
+  container.innerHTML = Object.keys(groups).sort().map(letter =>
+    `<div class="gloss-group">
+      <div class="gloss-letter">${letter}</div>
+      ${groups[letter].map(t =>
+        `<div class="gloss-row">
+          <div class="gloss-term">${escHtml(t.term)}</div>
+          <div class="gloss-def">${escHtml(t.def)}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function glossaryFilter(val) {
+  const q = val.trim().toLowerCase();
+  if (!q) { renderGlossaryList(_glossaryTerms); return; }
+  renderGlossaryList(_glossaryTerms.filter(t =>
+    t.term.toLowerCase().includes(q) || t.def.toLowerCase().includes(q)));
+}
+
+// ── Emergency Guide ───────────────────────────────────────────────
+function renderEmergencySection() {
+  const pages = wikiData
+    .filter(p => p.category === 'Emergency & Safety')
+    .sort((a, b) => a.pageOrder - b.pageOrder);
+
+  const grid     = document.getElementById('emergencyGrid');
+  const contacts = document.getElementById('emergencyContacts');
+  if (!grid) return;
+
+  const contactsPage  = pages.find(p => p.title === 'Key Contacts');
+  const cards         = pages.filter(p => p.title !== 'Key Contacts');
+
+  grid.innerHTML = cards.map(p => {
+    const isCrit = p.content.includes('CRITICAL');
+    return `<div class="em-ref-card${isCrit ? ' em-ref-card--critical' : ''}">
+      <div class="em-ref-header">
+        <span class="em-ref-title">${escHtml(p.title)}</span>
+        ${isCrit ? '<span class="em-ref-badge">CRITICAL</span>' : ''}
+      </div>
+      <div class="em-ref-body wiki-body">${wikiRenderMarkdown(p.content)}</div>
+    </div>`;
+  }).join('');
+
+  if (contacts && contactsPage) {
+    contacts.innerHTML = `<div class="em-contacts-card">
+      <div class="card-label-sm">&#128222; Key Contacts</div>
+      <div class="wiki-body">${wikiRenderMarkdown(contactsPage.content)}</div>
+    </div>`;
   }
 }
 
