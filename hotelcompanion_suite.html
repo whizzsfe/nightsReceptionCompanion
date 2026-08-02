@@ -962,6 +962,40 @@
     }
 
     /* --- CHECKLIST --- */
+    #checklistMetaRow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+    }
+    .checklist-meta-item { display: flex; align-items: center; gap: 5px; }
+    .checklist-meta-label { color: var(--muted); white-space: nowrap; }
+    .checklist-meta-value { color: var(--text); font-weight: 500; }
+    #checklistPrintLogo { display: none; }
+    #checklistStaff2 {
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      width: 140px;
+      padding: 0 0 1px 0;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    #checklistStaff2:focus { border-bottom-color: var(--gold); }
+    #checklistStaff2::placeholder { color: var(--muted); font-style: italic; }
+    #checklistPrintBothTabs { display: none; }
+    .checklist-print-title { display: none; }
+
     .checklist-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
     .tab-btn {
       padding: 8px 18px;
@@ -1989,6 +2023,110 @@
       .wiki-body p, .wiki-list li { color: #000 !important; }
       .wiki-hr { border-top-color: #ccc !important; }
       .wiki-code { background: #f5f5f5 !important; color: #333 !important; border-color: #ccc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      /* ---- Shift Checklist print ---- */
+      @page checklist-page { size: A4 portrait; margin: 12mm; }
+      #section-checklist { page: checklist-page; }
+      #section-checklist .flex-between { display: none !important; }
+      /* Hide single-tab live view; show both-tabs print container */
+      #checklistItems { display: none !important; }
+      #checklistPrintBothTabs { display: block !important; }
+      .checklist-print-title {
+        font-family: 'Bebas Neue', 'Arial Narrow', sans-serif;
+        font-size: 26px;
+        letter-spacing: 0.06em;
+        color: #000;
+        margin: 0 0 8px;
+        display: block !important;
+      }
+      /* Meta row — becomes the page header */
+      #checklistMetaRow {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        align-items: center;
+        background: none !important;
+        border: none !important;
+        border-bottom: 2px solid #ccc !important;
+        padding: 0 0 8px 0 !important;
+        margin-bottom: 10px !important;
+        font-size: 11px !important;
+      }
+      #checklistPrintLogo { display: inline-block !important; max-height: 38px; max-width: 90px; object-fit: contain; margin-right: 10px; }
+      .checklist-meta-label { color: #555 !important; }
+      .checklist-meta-value { color: #000 !important; font-weight: 600; }
+      /* "Tab:" label not needed when both tabs print */
+      #checklistMetaRow .checklist-meta-item:last-child { display: none !important; }
+      #checklistStaff2 {
+        border: none !important;
+        border-bottom: 1px solid #bbb !important;
+        background: none !important;
+        color: #000 !important;
+        font-size: 11px !important;
+        width: auto !important;
+        min-width: 80px;
+        padding: 0 !important;
+        font-family: inherit !important;
+      }
+      #checklistStaff2::placeholder { color: transparent !important; }
+      /* Progress bar */
+      #section-checklist .progress-wrap {
+        background: #e0e0e0 !important;
+        height: 5px !important;
+        margin-bottom: 3px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      #section-checklist .progress-fill { background: #555 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      #section-checklist .progress-label { color: #666 !important; font-size: 11px !important; margin-bottom: 8px !important; }
+      /* Section headings between Pre/Post-Audit blocks */
+      .checklist-print-section-heading {
+        font-family: 'Bebas Neue', 'Arial Narrow', sans-serif;
+        font-size: 17px;
+        letter-spacing: 0.06em;
+        color: #000;
+        margin: 14px 0 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #ccc;
+        break-after: avoid;
+      }
+      /* Check items */
+      .check-item {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+        margin-bottom: 3px !important;
+        padding: 8px 10px !important;
+      }
+      .check-item.done { background: #f5f5f5 !important; }
+      .check-item.done .check-label { text-decoration: line-through; color: #888 !important; }
+      .check-box {
+        border: 1.5px solid #444 !important;
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 12px !important;
+        flex-shrink: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .check-item.done .check-box { background: #ddd !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .check-label { color: #000 !important; font-size: 13px !important; }
+      .check-notes { color: #555 !important; font-size: 11px !important; }
+      .check-time { color: #666 !important; font-size: 10px !important; }
+      .badge-gold {
+        background: #fff3cd !important;
+        color: #555 !important;
+        border: 1px solid #ccc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .badge-muted {
+        background: #f0f0f0 !important;
+        color: #666 !important;
+        border: 1px solid #ddd !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
     }
 
     /* --- RESPONSIVE (<=768px) --- */
@@ -3038,10 +3176,32 @@
       <div class="section-heading">Shift Checklist</div>
       <div class="section-sub">Work through your tasks. Required items are highlighted.</div>
     </div>
+    <button class="btn btn-gold btn-sm no-print" onclick="printChecklist()" aria-label="Print or save checklist as PDF">&#128424;&#65039; Print / Save as PDF</button>
+  </div>
+
+  <!-- Checklist Meta Row — visible on screen + becomes print header -->
+  <div id="checklistMetaRow" aria-label="Checklist info">
+    <img id="checklistPrintLogo" src="hotelLogo.jpg" alt="Hotel logo" onerror="this.style.display='none'">
+    <span class="checklist-meta-item">
+      <span class="checklist-meta-label">Date:</span>
+      <span class="checklist-meta-value" id="checklistMetaDate"></span>
+    </span>
+    <span class="checklist-meta-item">
+      <span class="checklist-meta-label">Staff:</span>
+      <span class="checklist-meta-value" id="checklistMetaStaff"></span>
+    </span>
+    <span class="checklist-meta-item">
+      <span class="checklist-meta-label">2nd&nbsp;Staff:</span>
+      <input type="text" id="checklistStaff2" placeholder="Enter name…" maxlength="60" aria-label="Second staff member name" oninput="saveOnChange()">
+    </span>
+    <span class="checklist-meta-item no-print">
+      <span class="checklist-meta-label">Tab:</span>
+      <span class="checklist-meta-value" id="checklistMetaTab">Pre-Audit</span>
+    </span>
   </div>
 
   <!-- Tab Buttons -->
-  <div class="checklist-tabs" role="tablist" aria-label="Checklist tabs">
+  <div class="checklist-tabs no-print" role="tablist" aria-label="Checklist tabs">
     <button class="tab-btn active" id="tabPreAudit" onclick="switchChecklistTab('preAudit')" role="tab" aria-selected="true" aria-controls="checklistItems">Pre-Audit</button>
     <button class="tab-btn" id="tabPostAudit" onclick="switchChecklistTab('postAudit')" role="tab" aria-selected="false" aria-controls="checklistItems">Post-Audit</button>
   </div>
@@ -3055,6 +3215,9 @@
   <div class="mt-12" id="checklistItems" role="tabpanel">
     <!-- Items injected by JS -->
   </div>
+
+  <!-- Print-only: both tabs rendered here before printing -->
+  <div id="checklistPrintBothTabs" aria-hidden="true"></div>
 </section>
 
 <!-- -----------------------------------------------------------
@@ -6069,8 +6232,19 @@ const DAY_RESTRICTION_LABELS = {
   fri:'Fri only', sat:'Sat only', sun:'Sun only', last_night_of_month:'Last night of month'
 };
 
+function _updateChecklistMetaRow() {
+  const dateStr = new Date(shiftStart || Date.now()).toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  const metaDate  = document.getElementById('checklistMetaDate');
+  const metaStaff = document.getElementById('checklistMetaStaff');
+  const metaTab   = document.getElementById('checklistMetaTab');
+  if (metaDate)  metaDate.textContent  = dateStr;
+  if (metaStaff) metaStaff.textContent = (staffName || '\u2014') + (staffRole ? ' \u00b7 ' + staffRole : '');
+  if (metaTab)   metaTab.textContent   = checklistTab === 'preAudit' ? 'Pre-Audit' : 'Post-Audit';
+}
+
 function renderChecklist(tab) {
   checklistTab = tab;
+  _updateChecklistMetaRow();
   const container = document.getElementById('checklistItems');
   if (!container) return;
   container.innerHTML = '';
@@ -6140,6 +6314,8 @@ function switchChecklistTab(tab) {
   document.getElementById('tabPostAudit')?.classList.toggle('active', tab === 'postAudit');
   document.getElementById('tabPreAudit')?.setAttribute('aria-selected', tab === 'preAudit');
   document.getElementById('tabPostAudit')?.setAttribute('aria-selected', tab === 'postAudit');
+  const metaTab = document.getElementById('checklistMetaTab');
+  if (metaTab) metaTab.textContent = tab === 'preAudit' ? 'Pre-Audit' : 'Post-Audit';
   renderChecklist(tab);
 }
 
@@ -6154,6 +6330,55 @@ function printHandover() {
   const staffEl = document.getElementById('handoverPrintStaff');
   if (dateEl)  dateEl.textContent  = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
   if (staffEl) staffEl.textContent = (staffName || '—') + (staffRole ? ' · ' + staffRole : '');
+  triggerPrint();
+}
+
+function printChecklist() {
+  // Populate meta row text fields
+  const dateStr = new Date(shiftStart || Date.now()).toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  const metaDate  = document.getElementById('checklistMetaDate');
+  const metaStaff = document.getElementById('checklistMetaStaff');
+  const printLogo = document.getElementById('checklistPrintLogo');
+  if (metaDate)  metaDate.textContent  = dateStr;
+  if (metaStaff) metaStaff.textContent = (staffName || '—') + (staffRole ? ' \u00b7 ' + staffRole : '');
+  if (printLogo) {
+    printLogo.src = brandLogo || 'hotelLogo.jpg';
+    printLogo.onerror = () => { printLogo.style.display = 'none'; };
+    printLogo.style.display = '';
+  }
+
+  // Build both-tabs container
+  const container = document.getElementById('checklistPrintBothTabs');
+  if (container) {
+    const buildSection = (tab, heading) => {
+      const items = getActiveChecklistItems(tab).filter(item => itemAppliestoday(item));
+      if (!items.length) return '';
+      let html = `<div class="checklist-print-section-heading">${escapeHtml(heading)}</div>`;
+      items.forEach(item => {
+        const checked      = checkState[item.id];
+        const isRestricted = item.dayRestriction && item.dayRestriction !== 'every';
+        const timeStr      = checked ? new Date(checked).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) : '';
+        html += `<div class="check-item${checked ? ' done' : ''}${item.required ? ' required-item' : ''}">
+          <div class="check-box${checked ? ' checked' : ''}" aria-hidden="true">${checked ? '&#10003;' : ''}</div>
+          <div class="check-item-main">
+            <div class="check-label">${escapeHtml(item.label)}</div>
+            ${timeStr ? `<span class="check-time">&#10003; ${timeStr}</span>` : ''}
+            ${item.notes ? `<div class="check-notes">${escapeHtml(item.notes)}</div>` : ''}
+            <div class="check-badges">
+              ${item.required ? '<span class="badge badge-gold">Required</span>' : ''}
+              ${isRestricted ? `<span class="badge badge-muted">${escapeHtml(DAY_RESTRICTION_LABELS[item.dayRestriction] || item.dayRestriction)}</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+      });
+      return html;
+    };
+    container.innerHTML =
+      '<div class="checklist-print-title">Night Shift Checklist</div>' +
+      buildSection('preAudit', 'Pre-Audit') +
+      buildSection('postAudit', 'Post-Audit');
+  }
+
   triggerPrint();
 }
 
@@ -7788,6 +8013,8 @@ async function confirmEndShift() {
   if (handoverEl) handoverEl.value = '';
   const staff2El = document.getElementById('handoverStaff2');
   if (staff2El) staff2El.value = '';
+  const cl2El = document.getElementById('checklistStaff2');
+  if (cl2El) cl2El.value = '';
   ['breakfastBags','handoverTaxis','wakeUpCalls'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
@@ -7965,6 +8192,7 @@ function buildSessionSnapshot() {
     floorWalkState: { ...floorWalkState },
     boardData:      collectBoardData(),
     lastCheckInTime: lastCheckInTime || null,
+    checklistStaff2: document.getElementById('checklistStaff2')?.value || '',
   };
 }
 
@@ -8613,6 +8841,7 @@ function restoreSessionSnapshot(data) {
   setVal('breakfastBags', data.breakfastBags);
   setVal('handoverTaxis', data.handoverTaxis);
   setVal('wakeUpCalls',   data.wakeUpCalls);
+  setVal('checklistStaff2', data.checklistStaff2);
 
   if (data.boardData) {
     try {
